@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/auth');
+const { sendPasswordResetOtpEmail } = require('../utils/emailService');
 
 /**
  * POST /api/auth/login
@@ -108,6 +109,93 @@ router.put('/change-password', verifyToken, async (req, res) => {
     res.json({ success: true, message: 'Password updated successfully.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error updating password.' });
+  }
+});
+
+/**
+ * POST /api/auth/request-reset-otp
+ * Admin or student requests 6-digit OTP code sent to their email
+ */
+router.post('/request-reset-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide your registered email address.' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found with this email address.' });
+    }
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordOtp = otp;
+    user.resetPasswordOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes validity
+    await user.save();
+
+    // Dispatch OTP email
+    await sendPasswordResetOtpEmail({
+      name: user.name,
+      email: user.email,
+      otp,
+    });
+
+    res.json({
+      success: true,
+      message: `A 6-digit verification code has been dispatched to ${user.email}. It is valid for 10 minutes.`,
+    });
+  } catch (err) {
+    console.error('Request OTP Error:', err);
+    res.status(500).json({ success: false, message: 'Error generating verification code.' });
+  }
+});
+
+/**
+ * POST /api/auth/verify-reset-otp
+ * Verifies OTP and updates password
+ */
+router.post('/verify-reset-otp', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email, 6-digit OTP code, and new password.',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordOtp: otp.trim(),
+      resetPasswordOtpExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification code. Please request a new code.',
+      });
+    }
+
+    user.password = newPassword;
+    user.plainPasswordForAdmin = newPassword;
+    user.resetPasswordOtp = '';
+    user.resetPasswordOtpExpires = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Your password has been changed successfully! You can now log in with your new password.',
+    });
+  } catch (err) {
+    console.error('Verify OTP Error:', err);
+    res.status(500).json({ success: false, message: 'Error resetting password.' });
   }
 });
 

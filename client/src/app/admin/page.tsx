@@ -34,7 +34,23 @@ export default function AdminPortalPage() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
 
   // Active view
-  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'courses' | 'settings'>('overview');
+  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'settings' | 'security'>('overview');
+
+  // Admin Team & Password Verification States
+  const [adminsList, setAdminsList] = useState<any[]>([]);
+  const [newAdminName, setNewAdminName] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminPhone, setNewAdminPhone] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+
+  // Password Reset with Email OTP States
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpNewPassword, setOtpNewPassword] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
 
   // Selected course in hub
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -93,10 +109,11 @@ export default function AdminPortalPage() {
 
   const loadAdminData = async () => {
     setLoading(true);
-    const [overviewRes, enrollRes, settingsRes] = await Promise.all([
+    const [overviewRes, enrollRes, settingsRes, adminsRes] = await Promise.all([
       apiRequest('/admin/overview'),
       apiRequest('/admin/enrollments'),
       apiRequest('/admin/settings'),
+      apiRequest('/admin/admins'),
     ]);
 
     if (overviewRes.success && overviewRes.data) {
@@ -114,6 +131,10 @@ export default function AdminPortalPage() {
 
     if (settingsRes.success && settingsRes.data?.settings) {
       setSiteSettings(settingsRes.data.settings);
+    }
+
+    if (adminsRes.success && adminsRes.data?.admins) {
+      setAdminsList(adminsRes.data.admins);
     }
 
     setLoading(false);
@@ -360,6 +381,107 @@ export default function AdminPortalPage() {
     }
   };
 
+  // 11. Request Email OTP for Password Reset
+  const handleRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpEmail.trim()) {
+      showAlert('Please enter your administrator email address.', 'error');
+      return;
+    }
+
+    setOtpSending(true);
+    const res = await apiRequest('/auth/request-reset-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email: otpEmail.trim() }),
+    });
+    setOtpSending(false);
+
+    if (res.success) {
+      setOtpSent(true);
+      showAlert(res.message || 'Verification code sent to your email.');
+    } else {
+      showAlert(res.message || 'Error requesting verification code.', 'error');
+    }
+  };
+
+  // 12. Verify OTP and Change Password
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim() || !otpNewPassword) {
+      showAlert('Please provide both the 6-digit verification code and your new password.', 'error');
+      return;
+    }
+
+    setOtpVerifying(true);
+    const res = await apiRequest('/auth/verify-reset-otp', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: otpEmail.trim(),
+        otp: otpCode.trim(),
+        newPassword: otpNewPassword,
+      }),
+    });
+    setOtpVerifying(false);
+
+    if (res.success) {
+      showAlert('Password updated successfully! Please keep your new password safe.');
+      setOtpCode('');
+      setOtpNewPassword('');
+      setOtpSent(false);
+      loadAdminData();
+    } else {
+      showAlert(res.message || 'Invalid or expired code.', 'error');
+    }
+  };
+
+  // 13. Add New Administrator
+  const handleAddNewAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdminName || !newAdminEmail || !newAdminPhone || !newAdminPassword) {
+      showAlert('Please fill in all administrator details.', 'error');
+      return;
+    }
+
+    setCreatingAdmin(true);
+    const res = await apiRequest('/admin/admins', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: newAdminName,
+        email: newAdminEmail,
+        phone: newAdminPhone,
+        password: newAdminPassword,
+      }),
+    });
+    setCreatingAdmin(false);
+
+    if (res.success) {
+      showAlert(res.message || 'New administrator created successfully!');
+      setNewAdminName('');
+      setNewAdminEmail('');
+      setNewAdminPhone('');
+      setNewAdminPassword('');
+      loadAdminData();
+    } else {
+      showAlert(res.message || 'Error adding administrator.', 'error');
+    }
+  };
+
+  // 14. Delete Administrator
+  const handleDeleteAdmin = async (adminId: string, adminName: string) => {
+    if (!confirm(`Are you sure you want to remove administrator "${adminName}"?`)) return;
+
+    const res = await apiRequest(`/admin/admins/${adminId}`, {
+      method: 'DELETE',
+    });
+
+    if (res.success) {
+      showAlert('Administrator removed.');
+      loadAdminData();
+    } else {
+      showAlert(res.message || 'Error removing administrator.', 'error');
+    }
+  };
+
   const handleLogout = () => {
     removeAuthToken();
     router.push('/login');
@@ -478,6 +600,17 @@ export default function AdminPortalPage() {
             }`}
           >
             ⚙️ Payment &amp; Site Settings
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('security')}
+            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
+              activeMainTab === 'security'
+                ? 'bg-[#3a7bb8] text-white shadow-md'
+                : 'text-[#bccadb] hover:bg-[#101c2e]'
+            }`}
+          >
+            🔐 Security &amp; Admin Team
           </button>
         </div>
 
@@ -1330,6 +1463,234 @@ export default function AdminPortalPage() {
               </button>
             </div>
           </form>
+        )}
+
+        {/* ========================================================
+            TAB 4: SECURITY & ADMIN TEAM MANAGEMENT
+        ======================================================== */}
+        {activeMainTab === 'security' && (
+          <div className="space-y-8">
+            {/* PART 1: PASSWORD CHANGE VIA EMAIL VERIFICATION */}
+            <div className="bg-[#101c2e] border-2 border-[#3a7bb8] rounded-2xl p-6 shadow-xl space-y-6">
+              <div>
+                <span className="text-xs text-[#ffb531] font-bold uppercase tracking-wider block">
+                  Security Authentication
+                </span>
+                <h2 className="text-lg font-bold text-white mt-1">
+                  Change Administrator Password via Email Verification (OTP)
+                </h2>
+                <p className="text-xs text-[#bccadb]">
+                  To change your password, request a secure 6-digit one-time verification code to your registered email address.
+                </p>
+              </div>
+
+              {!otpSent ? (
+                <form onSubmit={handleRequestOtp} className="max-w-lg space-y-3 text-xs bg-[#08111d] p-5 rounded-xl border border-[#2e4666]">
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Your Registered Administrator Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
+                      placeholder="admin@careerpath.com"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={otpSending}
+                      className="px-5 py-2.5 bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-bold text-xs rounded-lg shadow-md transition disabled:opacity-50"
+                    >
+                      {otpSending ? 'Sending Code...' : 'Send 6-Digit Verification Code (OTP)'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="max-w-lg space-y-4 text-xs bg-[#08111d] p-5 rounded-xl border border-[#ffb531]">
+                  <div className="p-3 bg-[#101c2e] border border-emerald-500 rounded-lg text-emerald-300">
+                    ✅ A 6-digit verification code has been dispatched to <strong>{otpEmail}</strong> (valid for 10 minutes).
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Enter 6-Digit Verification Code (OTP) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="e.g. 482915"
+                      className="w-full bg-[#101c2e] border border-[#ffb531] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-[#ffb531] text-center font-bold outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Enter New Secure Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={otpNewPassword}
+                      onChange={(e) => setOtpNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                    <span className="text-[11px] text-[#7fb8ea]">Minimum 6 characters long</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={otpVerifying}
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-md transition disabled:opacity-50"
+                    >
+                      {otpVerifying ? 'Verifying & Updating...' : 'Verify Code & Update Password'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      className="text-xs text-[#bccadb] hover:underline"
+                    >
+                      Resend Code / Change Email
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* PART 2: MANAGE ADMINISTRATOR TEAM (ADD NEW ADMIN) */}
+            <div className="bg-[#101c2e] border border-[#2e4666] rounded-2xl p-6 shadow-xl space-y-6">
+              <div>
+                <span className="text-xs text-[#7fb8ea] font-bold uppercase tracking-wider block">
+                  Team Access Control
+                </span>
+                <h2 className="text-lg font-bold text-white mt-1">
+                  Administrator Team ({adminsList.length})
+                </h2>
+                <p className="text-xs text-[#bccadb]">
+                  Authorized administrators with full portal permissions (managing courses, approving enrollments, and viewing credentials).
+                </p>
+              </div>
+
+              {/* Add New Admin Form */}
+              <form onSubmit={handleAddNewAdmin} className="bg-[#08111d] border border-[#2e4666] p-5 rounded-xl space-y-3 text-xs">
+                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <PlusCircle className="w-4 h-4 text-[#ffb531]" />
+                  Add New Administrator (নতুন অ্যাডমিন যুক্ত করুন)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newAdminName}
+                      onChange={(e) => setNewAdminName(e.target.value)}
+                      placeholder="e.g. Engr. Shafiqul Islam"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">Login Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="admin2@careerpath.com"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">Phone Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={newAdminPhone}
+                      onChange={(e) => setNewAdminPhone(e.target.value)}
+                      placeholder="017XXXXXXXX"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">Admin Password *</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={newAdminPassword}
+                      onChange={(e) => setNewAdminPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-[#101c2e] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={creatingAdmin}
+                    className="px-5 py-2.5 bg-[#3a7bb8] hover:bg-[#3a7bb8]/80 text-white font-bold text-xs rounded-lg shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    {creatingAdmin ? 'Adding Admin...' : 'Register New Administrator'}
+                  </button>
+                </div>
+              </form>
+
+              {/* List of Admins */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border border-[#2e4666] rounded-xl overflow-hidden">
+                  <thead className="bg-[#0b1624] text-[#7fb8ea] font-semibold border-b border-[#2e4666]">
+                    <tr>
+                      <th className="p-3">Administrator Name</th>
+                      <th className="p-3">Login Email</th>
+                      <th className="p-3">Phone</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Registered Date</th>
+                      <th className="p-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1a2c42] bg-[#08111d]">
+                    {adminsList.map((adm) => (
+                      <tr key={adm._id} className="hover:bg-[#101c2e]">
+                        <td className="p-3 font-bold text-white">{adm.name}</td>
+                        <td className="p-3 font-mono text-[#7fb8ea]">{adm.email}</td>
+                        <td className="p-3 font-mono text-[#bccadb]">{adm.phone}</td>
+                        <td className="p-3">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            {adm.status?.toUpperCase() || 'ACTIVE'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-[#bccadb]">
+                          {new Date(adm.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-3 text-right">
+                          <button
+                            onClick={() => handleDeleteAdmin(adm._id, adm.name)}
+                            className="px-2.5 py-1 text-[11px] bg-red-950/70 hover:bg-red-900 border border-red-500 text-red-300 rounded transition"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         )}
       </main>
 

@@ -629,4 +629,110 @@ router.post('/trigger-cleanup', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/admin/admins
+ * List all registered administrators
+ */
+router.get('/admins', async (req, res) => {
+  try {
+    const admins = await User.find({ role: 'admin' })
+      .select('name email phone status plainPasswordForAdmin createdAt')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, admins });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error retrieving administrator list.' });
+  }
+});
+
+/**
+ * POST /api/admin/admins
+ * Create / Add a new administrator
+ */
+router.post('/admins', async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide full name, email, phone number, and password for the new admin.',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters.',
+      });
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email address already exists.',
+      });
+    }
+
+    const newAdmin = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password, // hashed by User model pre-save hook
+      plainPasswordForAdmin: password,
+      role: 'admin',
+      status: 'active',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `New administrator "${newAdmin.name}" (${newAdmin.email}) added successfully.`,
+      admin: {
+        id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        phone: newAdmin.phone,
+        status: newAdmin.status,
+        createdAt: newAdmin.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error('Add Admin Error:', err);
+    res.status(500).json({ success: false, message: 'Error adding administrator.' });
+  }
+});
+
+/**
+ * DELETE /api/admin/admins/:id
+ * Remove an administrator
+ */
+router.delete('/admins/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Prevent removing yourself
+    if (req.user._id.toString() === id) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot delete your own administrator account.',
+      });
+    }
+
+    // Ensure at least one admin remains
+    const totalAdmins = await User.countDocuments({ role: 'admin' });
+    if (totalAdmins <= 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete the only administrator on the system.',
+      });
+    }
+
+    await User.findByIdAndDelete(id);
+    res.json({ success: true, message: 'Administrator removed successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error removing administrator.' });
+  }
+});
+
 module.exports = router;

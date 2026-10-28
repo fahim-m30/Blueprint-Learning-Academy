@@ -46,6 +46,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  resetPasswordOtp: {
+    type: String,
+    default: '',
+  },
+  resetPasswordOtpExpires: {
+    type: Date,
+  },
   enrolledCourses: [
     {
       course: {

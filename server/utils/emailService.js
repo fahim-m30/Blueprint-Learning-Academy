@@ -222,7 +222,86 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
   }
 };
 
+/**
+ * Send Password Reset OTP Email
+ */
+const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
+  const transporter = createTransporter();
+
+  const htmlContent = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Password Verification Code - Blueprint Learning Academy</title>
+    <style>
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
+      .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1.5px solid #ffb531; border-radius: 14px; overflow: hidden; }
+      .header { background: #0b1624; border-bottom: 2px solid #ffb531; padding: 20px; text-align: center; }
+      .header h1 { margin: 0; color: #f3f7fc; font-size: 22px; }
+      .header span { color: #ffb531; }
+      .content { padding: 30px; line-height: 1.6; }
+      .otp-box { background: #08111d; border: 2px dashed #ffb531; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0; }
+      .otp-code { font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #ffb531; margin: 5px 0; }
+      .footer { background: #0b1624; padding: 16px; text-align: center; color: #bccadb; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Blueprint Learning <span>Academy</span></h1>
+        <p style="color: #7fb8ea; margin: 4px 0 0 0; font-size: 13px;">Security & Password Verification</p>
+      </div>
+      <div class="content">
+        <h2 style="color: #f3f7fc; margin-top: 0;">Password Reset Request</h2>
+        <p>Hello <strong>${name}</strong>,</p>
+        <p>A request was received to reset/change the password for your administrator account.</p>
+        <p>Please use the 6-digit verification code below to authorize this password change:</p>
+
+        <div class="otp-box">
+          <span style="color: #bccadb; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Your One-Time Verification Code (OTP)</span>
+          <div class="otp-code">${otp}</div>
+          <span style="color: #7fb8ea; font-size: 11px;">Valid for 10 minutes only</span>
+        </div>
+
+        <p style="color: #bccadb; font-size: 13px;">
+          ⚠️ If you did not make this request, please ignore this email or review your account security immediately. Never share this code with anyone.
+        </p>
+      </div>
+      <div class="footer">
+        © ${new Date().getFullYear()} Blueprint Learning Academy Security Portal.
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  if (transporter) {
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
+        to: email,
+        subject: `Your Verification Code: ${otp} - Blueprint Learning Academy`,
+        html: htmlContent,
+      });
+      return { success: true };
+    } catch (err) {
+      console.error('SMTP Mail Sending Error:', err.message);
+      return { success: false, error: err.message };
+    }
+  } else {
+    console.log('\n==========================================================');
+    console.log(`🔐 [ADMIN PASSWORD RESET OTP DISPATCHED (LOGGED)]:`);
+    console.log(`To: ${email} (${name})`);
+    console.log(`OTP Code: ${otp}`);
+    console.log(`Validity: 10 minutes`);
+    console.log('==========================================================\n');
+    return { success: true, simulated: true };
+  }
+};
+
 module.exports = {
   sendEnrollmentApprovedEmail,
   sendAccountBlockedEmail,
+  sendPasswordResetOtpEmail,
 };

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, setAuthToken, setCurrentUser } from '@/lib/api';
-import { Lock, Mail, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldAlert, KeyRound, CheckCircle, X } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Forgot password OTP modal
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetOtp, setResetOtp] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [modalFeedback, setModalFeedback] = useState<{ text: string; isError: boolean } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +62,56 @@ export default function LoginPage() {
       setPassword('student123');
     }
     setErrorMsg('');
+  };
+
+  const handleForgotRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      setModalFeedback({ text: 'Please enter your registered email.', isError: true });
+      return;
+    }
+    setOtpLoading(true);
+    setModalFeedback(null);
+    const res = await apiRequest('/auth/request-reset-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email: resetEmail.trim() }),
+    });
+    setOtpLoading(false);
+    if (res.success) {
+      setOtpSent(true);
+      setModalFeedback({ text: res.message || 'Verification code sent to your email.', isError: false });
+    } else {
+      setModalFeedback({ text: res.message || 'Error sending code.', isError: true });
+    }
+  };
+
+  const handleForgotVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetOtp.trim() || !newPass) {
+      setModalFeedback({ text: 'Please provide both the 6-digit code and your new password.', isError: true });
+      return;
+    }
+    setOtpLoading(true);
+    setModalFeedback(null);
+    const res = await apiRequest('/auth/verify-reset-otp', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: resetEmail.trim(),
+        otp: resetOtp.trim(),
+        newPassword: newPass,
+      }),
+    });
+    setOtpLoading(false);
+    if (res.success) {
+      setModalFeedback({ text: 'Password reset successful! Please log in with your new password.', isError: false });
+      setTimeout(() => {
+        setShowForgotModal(false);
+        setPassword(newPass);
+        setEmail(resetEmail);
+      }, 1500);
+    } else {
+      setModalFeedback({ text: res.message || 'Invalid or expired code.', isError: true });
+    }
   };
 
   return (
@@ -121,6 +180,19 @@ export default function LoginPage() {
                   className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#728296] outline-none transition"
                 />
               </div>
+              <div className="flex justify-end mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotModal(true);
+                    setModalFeedback(null);
+                    setOtpSent(false);
+                  }}
+                  className="text-xs text-[#7fb8ea] hover:text-[#ffb531] transition font-medium"
+                >
+                  Forgot Password? (Reset via Email OTP)
+                </button>
+              </div>
             </div>
 
             <div className="pt-2">
@@ -167,6 +239,119 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+
+      {/* FORGOT PASSWORD MODAL WITH EMAIL OTP VERIFICATION */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101c2e] border-2 border-[#3a7bb8] rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2e4666]">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-[#ffb531]" />
+                <h3 className="text-base font-bold text-white">Reset Password via Email OTP</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="p-1 rounded-lg text-[#bccadb] hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {modalFeedback && (
+              <div
+                className={`p-3 rounded-xl border text-xs ${
+                  modalFeedback.isError
+                    ? 'bg-red-950/70 border-red-500 text-red-200'
+                    : 'bg-emerald-950/70 border-emerald-500 text-emerald-200'
+                }`}
+              >
+                {modalFeedback.text}
+              </div>
+            )}
+
+            {!otpSent ? (
+              <form onSubmit={handleForgotRequestOtp} className="space-y-3 text-xs">
+                <p className="text-[#bccadb]">
+                  Enter your registered administrator or student email address. We will send you a 6-digit one-time verification code.
+                </p>
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Registered Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="admin@careerpath.com"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="px-3.5 py-2 rounded-lg border border-[#2e4666] text-[#bccadb]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={otpLoading}
+                    className="px-4 py-2 rounded-lg bg-[#ffb531] text-[#1a1100] font-bold shadow disabled:opacity-50"
+                  >
+                    {otpLoading ? 'Sending...' : 'Send Verification Code (OTP)'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleForgotVerifyOtp} className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                    6-Digit Verification Code (OTP) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value)}
+                    placeholder="e.g. 482915"
+                    className="w-full bg-[#08111d] border border-[#ffb531] rounded-lg px-3 py-2 text-center font-mono text-base font-bold text-[#ffb531] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">New Password *</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={newPass}
+                    onChange={(e) => setNewPass(e.target.value)}
+                    placeholder="Enter at least 6 characters"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+                <div className="pt-2 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setOtpSent(false)}
+                    className="text-[11px] text-[#7fb8ea] hover:underline"
+                  >
+                    Change Email
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={otpLoading}
+                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow disabled:opacity-50"
+                  >
+                    {otpLoading ? 'Verifying...' : 'Set New Password'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
