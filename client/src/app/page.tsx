@@ -282,8 +282,24 @@ export default function HomePage() {
           </div>
 
           {/* Grid of Courses */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-[#101c2e] border border-[#2e4666] rounded-2xl p-6 animate-pulse space-y-4">
+                  <div className="flex justify-between">
+                    <div className="h-4 bg-[#1a2c42] rounded w-1/3"></div>
+                    <div className="h-4 bg-[#1a2c42] rounded w-1/4"></div>
+                  </div>
+                  <div className="h-6 bg-[#1a2c42] rounded w-3/4"></div>
+                  <div className="h-12 bg-[#1a2c42] rounded"></div>
+                  <div className="h-8 bg-[#1a2c42] rounded mt-4"></div>
+                  <div className="h-10 bg-[#1a2c42] rounded-xl mt-4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
               <div
                 key={course._id}
                 className="bg-[#101c2e] border border-[#2e4666] hover:border-[#ffb531] rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 group hover:shadow-xl hover:shadow-[#ffb531]/5"
@@ -366,6 +382,7 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        )}
         </div>
       </section>
 

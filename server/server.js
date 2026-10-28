@@ -65,6 +65,19 @@ mongoose
 
     app.listen(PORT, () => {
       console.log(`🚀 Career Path Academy Server running on http://localhost:${PORT}`);
+
+      // Keep-Alive Ping Service to prevent Render Free Tier from sleeping
+      const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://blueprint-learning-academy.onrender.com';
+      setInterval(async () => {
+        try {
+          const res = await fetch(`${backendUrl}/api/health`);
+          if (res.ok) {
+            console.log(`⚡ Keep-Alive ping sent to ${backendUrl} at ${new Date().toLocaleTimeString()} - Server Active!`);
+          }
+        } catch (pingErr) {
+          console.warn('⚠️ Keep-alive ping failed:', pingErr.message);
+        }
+      }, 10 * 60 * 1000); // Trigger every 10 minutes (Render sleeps after 15 min inactivity)
     });
   })
   .catch((err) => {
