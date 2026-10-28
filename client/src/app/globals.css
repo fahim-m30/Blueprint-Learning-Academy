@@ -3,13 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --bg: #060a11;
-  --panel: #101c2e;
-  --line: #2e4666;
-  --amber: #ffb531;
-  --blue: #7fb8ea;
-  --text: #f3f7fc;
-  --mute: #bccadb;
+  --bg: #080d1a;
+  --panel: #0f182c;
+  --panel-hover: #15223e;
+  --line: #1c2b48;
+  --line-active: #38bdf8;
+  --amber: #f59e0b;
+  --amber-light: #fbbf24;
+  --cyan: #38bdf8;
+  --blue: #2563eb;
+  --text: #f8fafc;
+  --mute: #94a3b8;
 }
 
 html {
@@ -20,26 +24,28 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  background-image: linear-gradient(rgba(91, 155, 213, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91, 155, 213, 0.05) 1px, transparent 1px);
-  background-size: 36px 36px;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.12) 0%, transparent 60%),
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
   min-height: 100vh;
 }
 
-/* Custom scrollbars */
+/* Custom modern scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #08111d;
+  background: #080d1a;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2e4666;
-  border-radius: 4px;
+  background: #1e293b;
+  border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a7bb8;
+  background: #38bdf8;
 }
 
 /* Animation for horizontal scrolling courses */
@@ -51,7 +57,7 @@ body {
 .animate-infinite-scroll {
   display: flex;
   width: max-content;
-  animation: scrollRow 40s linear infinite;
+  animation: scrollRow 45s linear infinite;
 }
 .animate-infinite-scroll:hover {
   animation-play-state: paused;
