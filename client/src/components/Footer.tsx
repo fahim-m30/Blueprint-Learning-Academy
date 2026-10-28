@@ -12,7 +12,7 @@ export default function Footer({ settings }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const phone = settings?.contactPhone || '01313893838';
   const whatsapp = settings?.whatsappNumber || '8801313893838';
-  const email = settings?.contactEmail || 'info@concretepathacademy.com';
+  const email = settings?.contactEmail || 'info@blueprintlearningacademy.com';
 
   return (
     <footer className="border-t border-[#2e4666] bg-[#070b12] text-[#bccadb] py-12 px-4 sm:px-6 lg:px-8 mt-24">
@@ -22,7 +22,11 @@ export default function Footer({ settings }: FooterProps) {
           <div className="flex items-center gap-2 mb-4">
             <span className="text-2xl">🏗️</span>
             <span className="text-xl font-extrabold text-white">
-              Blueprint <span className="text-[#ffb531]">Learning Academy</span>
+              {settings?.siteName || (
+                <>
+                  Blueprint <span className="text-[#ffb531]">Learning Academy</span>
+                </>
+              )}
             </span>
           </div>
           <p className="text-sm leading-relaxed max-w-md text-[#bccadb]/80 mb-4">
@@ -73,7 +77,7 @@ export default function Footer({ settings }: FooterProps) {
       </div>
 
       <div className="max-w-7xl mx-auto border-t border-[#1a2c42] mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#728296] gap-4">
-        <p>© {currentYear} Blueprint Learning Academy. All rights reserved.</p>
+        <p>© {currentYear} {settings?.siteName || 'Blueprint Learning Academy'}. All rights reserved.</p>
         <p>Built with Next.js, Express & MongoDB for Civil Engineers in Bangladesh.</p>
       </div>
     </footer>

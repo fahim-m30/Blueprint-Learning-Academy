@@ -1147,97 +1147,186 @@ export default function AdminPortalPage() {
             TAB 3: SITE SETTINGS & PAYMENT NUMBERS
         ======================================================== */}
         {activeMainTab === 'settings' && siteSettings && (
-          <form onSubmit={handleSaveSettings} className="bg-[#101c2e] border border-[#2e4666] rounded-2xl p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-white">Payment &amp; Homepage Configuration</h2>
-              <p className="text-xs text-[#bccadb]">
-                Any changes made here will reflect immediately on the homepage, payment screen, and footers.
-              </p>
+          <form onSubmit={handleSaveSettings} className="bg-[#101c2e] border border-[#2e4666] rounded-2xl p-6 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2e4666] pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-white">Website Information &amp; Payment Gateway Settings</h2>
+                <p className="text-xs text-[#bccadb]">
+                  Any changes made here will immediately update on the homepage, payment screen, student portal, and footers.
+                </p>
+              </div>
+              <button
+                type="submit"
+                className="px-6 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-lg transition shrink-0"
+              >
+                <Save className="w-4 h-4" /> Save All Settings
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">bKash Number *</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.bkashNumber}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
-              </div>
+            {/* SECTION 1: CONTACT, PHONE, WHATSAPP, EMAIL */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-[#1a2c42] pb-2">
+                📞 Official Contact &amp; Support Helpline (Homepage &amp; Footer)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                    Contact Helpline Phone * (ফোন নম্বর)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={siteSettings.contactPhone}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
+                    placeholder="013XXXXXXXX"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                  <span className="text-[10px] text-[#7fb8ea]">Appears in header, footer &amp; direct calling</span>
+                </div>
 
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">Nagad Number *</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.nagadNumber}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                    WhatsApp Number (with country code e.g. 880) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={siteSettings.whatsappNumber}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
+                    placeholder="88013XXXXXXXX"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                  <span className="text-[10px] text-emerald-400">Used for direct WhatsApp chat button links</span>
+                </div>
 
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">Rocket Number</label>
-                <input
-                  type="text"
-                  value={siteSettings.rocketNumber}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                    Official Support Email * (ইমেইল ঠিকানা)
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={siteSettings.contactEmail}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
+                    placeholder="info@blueprintlearningacademy.com"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                  <span className="text-[10px] text-[#7fb8ea]">Displayed in contact links &amp; email notifications</span>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">Contact Helpline Phone *</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.contactPhone}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
+            {/* SECTION 2: BKASH & NAGAD PAYMENT GATEWAY */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-[#7fb8ea] flex items-center gap-2 border-b border-[#1a2c42] pb-2">
+                💳 bKash, Nagad &amp; Rocket Payment Numbers (Student Enrollment)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">bKash Number *</label>
+                  <input
+                    type="text"
+                    required
+                    value={siteSettings.bkashNumber}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
+                    placeholder="013XXXXXXXX"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.bkashType || 'Personal (Send Money)'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, bkashType: e.target.value })}
+                    placeholder="Type e.g. Personal (Send Money)"
+                    className="w-full mt-1.5 bg-[#08111d] border border-[#1a2c42] rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Nagad Number *</label>
+                  <input
+                    type="text"
+                    required
+                    value={siteSettings.nagadNumber}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
+                    placeholder="013XXXXXXXX"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.nagadType || 'Personal (Send Money)'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, nagadType: e.target.value })}
+                    placeholder="Type e.g. Personal (Send Money)"
+                    className="w-full mt-1.5 bg-[#08111d] border border-[#1a2c42] rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Rocket Number</label>
+                  <input
+                    type="text"
+                    value={siteSettings.rocketNumber}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
+                    placeholder="013XXXXXXXX-X"
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">WhatsApp Number (with 880) *</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.whatsappNumber}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
-              </div>
+            {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-[#1a2c42] pb-2">
+                🌐 Academy Branding &amp; Content Customization
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Academy / Website Name</label>
+                  <input
+                    type="text"
+                    value={siteSettings.siteName || 'Blueprint Learning Academy'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[#bccadb] mb-1 font-semibold">Support Email *</label>
-                <input
-                  type="email"
-                  required
-                  value={siteSettings.contactEmail}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Bengali Tagline</label>
+                  <input
+                    type="text"
+                    value={siteSettings.heroBengaliNote || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroBengaliNote: e.target.value })}
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
 
-              <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-[#bccadb] mb-1 font-semibold">Hero Title Headline</label>
-                <input
-                  type="text"
-                  value={siteSettings.heroTitle}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                />
+                <div className="sm:col-span-2">
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Main Headline Title</label>
+                  <input
+                    type="text"
+                    value={siteSettings.heroTitle}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Subtitle Description</label>
+                  <textarea
+                    rows={2}
+                    value={siteSettings.heroSubtitle || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
+                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  ></textarea>
+                </div>
               </div>
             </div>
 
             <div className="flex justify-end pt-4 border-t border-[#2e4666]">
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-bold text-xs flex items-center gap-2 shadow-lg transition"
+                className="px-8 py-3 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-xl transition"
               >
-                <Save className="w-4 h-4" /> Save Settings
+                <Save className="w-4 h-4" /> Save All Changes
               </button>
             </div>
           </form>
