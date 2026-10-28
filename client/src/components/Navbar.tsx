@@ -64,24 +64,27 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20 sm:h-24 py-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <img
-              src="/logo.png"
-              alt="Blueprint Learning Academy"
-              className="w-11 h-11 object-contain rounded-full ring-2 ring-[#ffb531]/50 group-hover:ring-[#ffb531] transition shadow-md bg-white p-0.5"
-            />
+          <Link href="/" className="flex items-center gap-3.5 sm:gap-4 group">
+            <div className="relative shrink-0">
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ffb531] to-[#3a7bb8] opacity-50 blur-sm group-hover:opacity-100 transition duration-300"></div>
+              <img
+                src="/logo.png"
+                alt="Blueprint Learning Academy"
+                className="relative w-14 h-14 sm:w-16 sm:h-16 object-contain rounded-full ring-2 ring-[#ffb531] shadow-xl shadow-[#ffb531]/20 bg-white p-1 transition duration-300 group-hover:scale-105"
+              />
+            </div>
             <div>
-              <span className="text-xl font-extrabold tracking-tight text-white">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white block leading-tight">
                 {settings?.siteName || (
                   <>
                     Blueprint <span className="text-[#ffb531]">Learning Academy</span>
                   </>
                 )}
               </span>
-              <span className="block text-[10px] tracking-wider uppercase text-[#7fb8ea] -mt-1 font-semibold">
-                {settings?.tagline || 'Civil Engineering Hub'}
+              <span className="block text-[11px] sm:text-xs tracking-widest uppercase text-[#7fb8ea] font-extrabold mt-0.5">
+                {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>
           </Link>

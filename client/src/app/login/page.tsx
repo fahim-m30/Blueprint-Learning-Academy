@@ -121,15 +121,23 @@ export default function LoginPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-3 mb-2">
-            <img
-              src="/logo.png"
-              alt="Blueprint Learning Academy"
-              className="w-12 h-12 object-contain rounded-full ring-2 ring-[#ffb531]/60 bg-white p-0.5 shadow-lg"
-            />
-            <span className="text-2xl font-extrabold text-white">
-              Blueprint <span className="text-[#ffb531]">Learning Academy</span>
-            </span>
+          <Link href="/" className="inline-flex flex-col items-center gap-3 mb-4 group">
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ffb531] to-[#3a7bb8] opacity-50 blur-sm group-hover:opacity-100 transition"></div>
+              <img
+                src="/logo.png"
+                alt="Blueprint Learning Academy"
+                className="relative w-20 h-20 object-contain rounded-full ring-2 ring-[#ffb531] bg-white p-1 shadow-2xl shadow-[#ffb531]/25 group-hover:scale-105 transition"
+              />
+            </div>
+            <div className="text-center">
+              <span className="text-2xl sm:text-3xl font-black text-white block">
+                Blueprint <span className="text-[#ffb531]">Learning Academy</span>
+              </span>
+              <span className="block text-xs uppercase tracking-widest text-[#7fb8ea] font-bold mt-1">
+                Real Estate Career Courses for Civil Engineers
+              </span>
+            </div>
           </Link>
           <h2 className="text-xl font-bold tracking-tight text-white mt-2">
             Sign in to Your Learning Portal

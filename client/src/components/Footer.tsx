@@ -19,19 +19,27 @@ export default function Footer({ settings }: FooterProps) {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
-            <img
-              src="/logo.png"
-              alt="Blueprint Learning Academy"
-              className="w-12 h-12 object-contain rounded-full ring-2 ring-[#ffb531]/60 bg-white p-0.5 shadow-md"
-            />
-            <span className="text-xl font-extrabold text-white">
-              {settings?.siteName || (
-                <>
-                  Blueprint <span className="text-[#ffb531]">Learning Academy</span>
-                </>
-              )}
-            </span>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative shrink-0">
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ffb531] to-[#3a7bb8] opacity-50 blur-sm"></div>
+              <img
+                src="/logo.png"
+                alt="Blueprint Learning Academy"
+                className="relative w-16 h-16 object-contain rounded-full ring-2 ring-[#ffb531] bg-white p-1 shadow-xl shadow-[#ffb531]/20"
+              />
+            </div>
+            <div>
+              <span className="text-2xl sm:text-3xl font-black text-white block leading-tight">
+                {settings?.siteName || (
+                  <>
+                    Blueprint <span className="text-[#ffb531]">Learning Academy</span>
+                  </>
+                )}
+              </span>
+              <span className="block text-xs uppercase tracking-widest text-[#7fb8ea] font-bold mt-0.5">
+                {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
+              </span>
+            </div>
           </div>
           <p className="text-sm leading-relaxed max-w-md text-[#bccadb]/80 mb-4">
             Building practical engineering capabilities for Bangladesh’s construction & real estate industry.
