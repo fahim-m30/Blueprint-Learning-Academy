@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #060a11;
+  --panel: #101c2e;
+  --line: #2e4666;
+  --amber: #ffb531;
+  --blue: #7fb8ea;
+  --text: #f3f7fc;
+  --mute: #bccadb;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  background-image: linear-gradient(rgba(91, 155, 213, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 155, 213, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  min-height: 100vh;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #08111d;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e4666;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a7bb8;
+}
+
+/* Animation for horizontal scrolling courses */
+@keyframes scrollRow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-infinite-scroll {
+  display: flex;
+  width: max-content;
+  animation: scrollRow 40s linear infinite;
+}
+.animate-infinite-scroll:hover {
+  animation-play-state: paused;
+}
