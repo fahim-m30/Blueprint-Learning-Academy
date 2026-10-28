@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Course } from '@/lib/types';
-import { X, Clock, BookOpen, CheckCircle, Award, Users, ChevronRight } from 'lucide-react';
+import { X, Clock, BookOpen, Award, ChevronRight } from 'lucide-react';
 
 interface CourseModalProps {
   course: Course | null;

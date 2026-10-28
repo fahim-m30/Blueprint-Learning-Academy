@@ -4,32 +4,23 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
-import { Course, Enrollment, SiteSettings, User } from '@/lib/types';
+import { Course, Enrollment, SiteSettings } from '@/lib/types';
 import {
   ShieldCheck,
   Users,
-  DollarSign,
   BookOpen,
-  Clock,
   PlusCircle,
   Video,
   Calendar,
   ClipboardList,
   MessageSquare,
   LogOut,
-  CheckCircle,
-  XCircle,
   AlertTriangle,
-  Lock,
   Trash2,
   ExternalLink,
   Send,
   Save,
   RefreshCw,
-  Eye,
-  EyeOff,
-  UserX,
-  UserCheck,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -68,14 +59,14 @@ export default function AdminPortalPage() {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskDeadline, setNewTaskDeadline] = useState('');
-  const [newTaskPoints, setNewTaskPoints] = useState(100);
+  const newTaskPoints = 100;
 
   const [adminChatMsg, setAdminChatMsg] = useState('');
 
   // Course creation modal state
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
-  const [createCategory, setCreateCategory] = useState('Civil Engineering & Real Estate');
+  const createCategory = 'Civil Engineering & Real Estate';
   const [createShortDesc, setCreateShortDesc] = useState('');
   const [createFullDesc, setCreateFullDesc] = useState('');
   const [createDurationDays, setCreateDurationDays] = useState(30);

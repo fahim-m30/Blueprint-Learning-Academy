@@ -4,10 +4,9 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
-import { Course, TaskItem, TaskSubmission, ChatMessage, LiveClassItem, VideoItem } from '@/lib/types';
+import { Course, TaskSubmission, ChatMessage } from '@/lib/types';
 import {
   Clock,
-  BookOpen,
   Video,
   Calendar,
   ClipboardList,
@@ -16,10 +15,7 @@ import {
   Send,
   ExternalLink,
   CheckCircle,
-  AlertCircle,
-  FileCheck,
   ChevronRight,
-  Shield,
   MessageCircle,
 } from 'lucide-react';
 

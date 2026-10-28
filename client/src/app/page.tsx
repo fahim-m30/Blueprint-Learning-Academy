@@ -11,18 +11,10 @@ import {
   Clock,
   BookOpen,
   CheckCircle,
-  Award,
   ArrowRight,
-  Shield,
-  Users,
-  Briefcase,
-  Layers,
   ChevronRight,
   Sparkles,
   PhoneCall,
-  FileText,
-  DollarSign,
-  HelpCircle,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -60,6 +52,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#060a11] text-[#f3f7fc] selection:bg-[#ffb531] selection:text-[#1a1100]">
       {/* Navigation */}
       <Navbar settings={settings} />
+
+      {loading && (
+        <div className="bg-[#3a7bb8]/20 border-b border-[#3a7bb8] py-1 text-center text-xs text-[#7fb8ea]">
+          Refreshing latest batch schedules &amp; pricing...
+        </div>
+      )}
 
       {/* HERO SECTION */}
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden border-b border-[#2e4666]/50">
