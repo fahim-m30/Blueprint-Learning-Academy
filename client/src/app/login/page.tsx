@@ -56,7 +56,7 @@ export default function LoginPage() {
   const fillDemo = (role: 'admin' | 'student') => {
     if (role === 'admin') {
       setEmail('admin.blueprintlearning@gmail.com');
-      setPassword('admin123');
+      setPassword('adabor14');
     } else {
       setEmail('student@example.com');
       setPassword('student123');
