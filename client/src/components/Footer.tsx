@@ -22,7 +22,7 @@ export default function Footer({ settings }: FooterProps) {
           <div className="flex items-center gap-2 mb-4">
             <span className="text-2xl">🏗️</span>
             <span className="text-xl font-extrabold text-white">
-              Concrete Path <span className="text-[#ffb531]">Academy</span>
+              Blueprint <span className="text-[#ffb531]">Learning Academy</span>
             </span>
           </div>
           <p className="text-sm leading-relaxed max-w-md text-[#bccadb]/80 mb-4">
@@ -73,7 +73,7 @@ export default function Footer({ settings }: FooterProps) {
       </div>
 
       <div className="max-w-7xl mx-auto border-t border-[#1a2c42] mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#728296] gap-4">
-        <p>© {currentYear} Concrete Path Academy. All rights reserved.</p>
+        <p>© {currentYear} Blueprint Learning Academy. All rights reserved.</p>
         <p>Built with Next.js, Express & MongoDB for Civil Engineers in Bangladesh.</p>
       </div>
     </footer>

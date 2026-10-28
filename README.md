@@ -1,4 +1,4 @@
-# Concrete Path Academy - Professional Online Course & Learning Management Platform
+# Blueprint Learning Academy - Professional Online Course & Learning Management Platform
 
 A modern, full-stack online learning and course enrollment platform inspired by real-world engineering academies, built with **Next.js (App Router)**, **Express.js**, **MongoDB (Mongoose)**, and **Tailwind CSS**.
 

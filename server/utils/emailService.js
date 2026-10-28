@@ -46,7 +46,7 @@ const sendEnrollmentApprovedEmail = async ({
   <html>
   <head>
     <meta charset="utf-8">
-    <title>Enrollment Confirmed - Concrete Path Academy</title>
+    <title>Enrollment Confirmed - Blueprint Learning Academy</title>
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
       .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1px solid #2e4666; border-radius: 14px; overflow: hidden; }
@@ -66,7 +66,7 @@ const sendEnrollmentApprovedEmail = async ({
   <body>
     <div class="container">
       <div class="header">
-        <h1>Concrete Path <span>Academy</span></h1>
+        <h1>Blueprint Learning <span>Academy</span></h1>
         <p style="color: #7fb8ea; margin: 5px 0 0 0; font-size: 14px;">Real Estate & Construction Career Education</p>
       </div>
       <div class="content">
@@ -113,7 +113,7 @@ const sendEnrollmentApprovedEmail = async ({
         </p>
       </div>
       <div class="footer">
-        © ${new Date().getFullYear()} Concrete Path Academy. All rights reserved.<br>
+        © ${new Date().getFullYear()} Blueprint Learning Academy. All rights reserved.<br>
         Direct Helpline / WhatsApp: +8801313893838
       </div>
     </div>
@@ -124,7 +124,7 @@ const sendEnrollmentApprovedEmail = async ({
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"Concrete Path Academy" <no-reply@concretepathacademy.com>',
+        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
         to: studentEmail,
         subject: `Welcome to ${courseTitle} - Your Access Credentials`,
         html: htmlContent,
@@ -158,7 +158,7 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
   <html>
   <head>
     <meta charset="utf-8">
-    <title>Account Status Notice - Concrete Path Academy</title>
+    <title>Account Status Notice - Blueprint Learning Academy</title>
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
       .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1px solid #e2136e; border-radius: 14px; overflow: hidden; }
@@ -172,11 +172,11 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
   <body>
     <div class="container">
       <div class="header">
-        <h1>Concrete Path Academy - Account Notice</h1>
+        <h1>Blueprint Learning Academy - Account Notice</h1>
       </div>
       <div class="content">
         <p>Dear ${studentName},</p>
-        <p>This is an official notification that your student account access at Concrete Path Academy has been <strong>suspended / blocked</strong> by the administration.</p>
+        <p>This is an official notification that your student account access at Blueprint Learning Academy has been <strong>suspended / blocked</strong> by the administration.</p>
 
         <div class="reason-box">
           <strong style="color: #ff5252;">Official Reason Stated by Administration:</strong>
@@ -188,11 +188,11 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
         </p>
         <p style="color: #7fb8ea;">
           WhatsApp Helpline: +8801313893838<br>
-          Email: info@concretepathacademy.com
+          Email: info@blueprintlearningacademy.com
         </p>
       </div>
       <div class="footer">
-        © ${new Date().getFullYear()} Concrete Path Academy Administration.
+        © ${new Date().getFullYear()} Blueprint Learning Academy Administration.
       </div>
     </div>
   </body>
@@ -202,7 +202,7 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"Concrete Path Academy" <no-reply@concretepathacademy.com>',
+        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
         to: studentEmail,
         subject: `Important: Your Student Account Status Notice`,
         html: htmlContent,

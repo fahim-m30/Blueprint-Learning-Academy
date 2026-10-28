@@ -65,7 +65,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-flex items-center gap-2 mb-2">
             <span className="text-3xl">🏗️</span>
             <span className="text-2xl font-extrabold text-white">
-              Concrete Path <span className="text-[#ffb531]">Academy</span>
+              Blueprint <span className="text-[#ffb531]">Learning Academy</span>
             </span>
           </Link>
           <h2 className="text-xl font-bold tracking-tight text-white mt-2">

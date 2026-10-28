@@ -385,7 +385,7 @@ export default function AdminPortalPage() {
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl">🏗️</span>
               <span className="text-lg font-extrabold text-white hidden sm:inline">
-                Concrete Path <span className="text-[#ffb531]">Academy</span>
+                Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>
             </Link>
             <span className="text-xs bg-red-950/80 border border-red-500 text-red-300 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">

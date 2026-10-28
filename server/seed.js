@@ -278,14 +278,14 @@ async function seedDatabase() {
     // 1. Seed Site Settings
     await SiteSettings.deleteMany({});
     await SiteSettings.create({
-      siteName: 'Concrete Path Academy',
+      siteName: 'Blueprint Learning Academy',
       tagline: 'Real Estate Career Courses for Civil Engineers',
       heroTitle: 'Build a real estate career as a civil engineer in Bangladesh.',
       heroSubtitle: 'Six practical courses taught by an engineer with 10+ years on Bangladeshi construction and real estate projects. Learn what sites and employers actually ask for.',
       heroBengaliNote: 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।',
       contactPhone: '01313893838',
       whatsappNumber: '8801313893838',
-      contactEmail: 'info@concretepathacademy.com',
+      contactEmail: 'info@blueprintlearningacademy.com',
       bkashNumber: '01313893838',
       bkashType: 'Personal (Send Money)',
       nagadNumber: '01313893838',

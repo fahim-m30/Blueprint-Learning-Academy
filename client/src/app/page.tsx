@@ -491,7 +491,7 @@ export default function HomePage() {
                 <span className="transition group-open:rotate-180 text-[#ffb531]">▼</span>
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-[#bccadb]">
-                Yes! Upon completing the course lectures and submitting the designated assignments, students receive an official verifiable digital certificate from Concrete Path Academy.
+                Yes! Upon completing the course lectures and submitting the designated assignments, students receive an official verifiable digital certificate from Blueprint Learning Academy.
               </p>
             </details>
           </div>

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const siteSettingsSchema = new mongoose.Schema({
   siteName: {
     type: String,
-    default: 'Concrete Path Academy',
+    default: 'Blueprint Learning Academy',
   },
   tagline: {
     type: String,

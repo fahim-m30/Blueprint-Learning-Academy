@@ -72,7 +72,7 @@ export default function Navbar({ settings }: NavbarProps) {
             </div>
             <div>
               <span className="text-xl font-extrabold tracking-tight text-white">
-                Concrete Path <span className="text-[#ffb531]">Academy</span>
+                Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>
               <span className="block text-[10px] tracking-wider uppercase text-[#7fb8ea] -mt-1 font-semibold">
                 Civil Engineering Hub
