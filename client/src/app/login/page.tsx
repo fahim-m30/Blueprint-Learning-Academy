@@ -55,7 +55,7 @@ export default function LoginPage() {
 
   const fillDemo = (role: 'admin' | 'student') => {
     if (role === 'admin') {
-      setEmail('admin@careerpath.com');
+      setEmail('admin.blueprintlearning@gmail.com');
       setPassword('admin123');
     } else {
       setEmail('student@example.com');
@@ -222,8 +222,8 @@ export default function LoginPage() {
                 onClick={() => fillDemo('admin')}
                 className="p-2 rounded-lg bg-[#08111d] border border-[#3a7bb8] text-white hover:bg-[#3a7bb8]/20 transition text-center"
               >
-                <span className="block font-bold text-[#ffb531]">Admin Demo</span>
-                <span className="text-[10px] text-[#bccadb]">admin@careerpath.com</span>
+                <span className="block font-bold text-[#ffb531]">Admin Login</span>
+                <span className="text-[10px] text-[#bccadb] truncate block">admin.blueprintlearning</span>
               </button>
               <button
                 type="button"
