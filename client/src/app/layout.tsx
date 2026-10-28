@@ -17,9 +17,12 @@ export const metadata: Metadata = {
   title: "Blueprint Learning Academy | Real Estate & Civil Engineering Courses",
   description: "Practical online engineering courses for civil engineers in Bangladesh: interview success, software, project engineering, estimation and BOQ, planning, and quality control.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
