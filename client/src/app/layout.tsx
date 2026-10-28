@@ -16,6 +16,11 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Blueprint Learning Academy | Real Estate & Civil Engineering Courses",
   description: "Practical online engineering courses for civil engineers in Bangladesh: interview success, software, project engineering, estimation and BOQ, planning, and quality control.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

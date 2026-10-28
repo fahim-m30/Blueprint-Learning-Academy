@@ -163,8 +163,12 @@ export default function StudentDashboardPage() {
       <header className="sticky top-0 z-40 bg-[#0b1624] border-b border-[#2e4666] px-4 sm:px-6 lg:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🏗️</span>
+            <Link href="/" className="flex items-center gap-2.5">
+              <img
+                src="/logo.png"
+                alt="Blueprint Learning Academy"
+                className="w-9 h-9 object-contain rounded-full ring-2 ring-[#ffb531]/50 bg-white p-0.5 shadow"
+              />
               <span className="text-lg font-extrabold text-white hidden sm:inline">
                 Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>

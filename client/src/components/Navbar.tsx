@@ -66,10 +66,12 @@ export default function Navbar({ settings }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#101c2e] to-[#08111d] border border-[#3a7bb8] flex items-center justify-center text-[#ffb531] font-bold text-xl shadow-lg shadow-[#3a7bb8]/10 group-hover:border-[#ffb531] transition">
-              🏗️
-            </div>
+          <Link href="/" className="flex items-center gap-3 group">
+            <img
+              src="/logo.png"
+              alt="Blueprint Learning Academy"
+              className="w-11 h-11 object-contain rounded-full ring-2 ring-[#ffb531]/50 group-hover:ring-[#ffb531] transition shadow-md bg-white p-0.5"
+            />
             <div>
               <span className="text-xl font-extrabold tracking-tight text-white">
                 {settings?.siteName || (

@@ -19,8 +19,12 @@ export default function Footer({ settings }: FooterProps) {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl">🏗️</span>
+          <div className="flex items-center gap-3 mb-4">
+            <img
+              src="/logo.png"
+              alt="Blueprint Learning Academy"
+              className="w-12 h-12 object-contain rounded-full ring-2 ring-[#ffb531]/60 bg-white p-0.5 shadow-md"
+            />
             <span className="text-xl font-extrabold text-white">
               {settings?.siteName || (
                 <>

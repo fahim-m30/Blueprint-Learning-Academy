@@ -121,8 +121,12 @@ export default function LoginPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 mb-2">
-            <span className="text-3xl">🏗️</span>
+          <Link href="/" className="inline-flex items-center gap-3 mb-2">
+            <img
+              src="/logo.png"
+              alt="Blueprint Learning Academy"
+              className="w-12 h-12 object-contain rounded-full ring-2 ring-[#ffb531]/60 bg-white p-0.5 shadow-lg"
+            />
             <span className="text-2xl font-extrabold text-white">
               Blueprint <span className="text-[#ffb531]">Learning Academy</span>
             </span>
