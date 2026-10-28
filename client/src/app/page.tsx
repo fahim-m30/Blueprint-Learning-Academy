@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Sparkles,
   PhoneCall,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -118,56 +119,62 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column: Instructor Badge Card */}
+            {/* Right Column: Instructor Photo Portrait Card */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-md">
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#3a7bb8] via-[#ffb531] to-[#7fb8ea] opacity-30 blur-xl"></div>
-                <div className="relative bg-[#101c2e] border-2 border-[#3a7bb8] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[#08111d] border-2 border-[#ffb531] flex items-center justify-center text-3xl shadow-inner">
-                      👨‍💼
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Md Abdul Mazid</h3>
-                      <p className="text-xs font-semibold text-[#ffb531]">Lead Instructor & Civil Engineer</p>
-                      <p className="text-xs text-[#7fb8ea]">B.Sc. in Civil Engineering (BUET)</p>
+              <div className="relative w-full max-w-sm sm:max-w-md">
+                {/* Glow Background */}
+                <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#3a7bb8] via-[#ffb531]/30 to-[#7fb8ea] opacity-40 blur-2xl"></div>
+
+                {/* Photo Container */}
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border-2 border-[#3a7bb8] shadow-2xl shadow-[#3a7bb8]/25 bg-[#101c2e] group">
+                  <img
+                    src="/instructor.jpg"
+                    alt="Md Abdul Mazid, Civil Engineer and Lead Instructor at Blueprint Learning Academy"
+                    className="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
+                  />
+                  {/* Subtle gradient overlay at bottom */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060a11] via-[#060a11]/25 to-transparent"></div>
+
+                  {/* Instructor Badge Tag */}
+                  <div className="absolute bottom-4 left-4 right-4 bg-[#0b1624]/95 backdrop-blur-md border border-[#3a7bb8] rounded-2xl p-4 shadow-xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-extrabold text-white flex items-center gap-1.5">
+                          Md Abdul Mazid <span className="text-[#ffb531]">★</span>
+                        </h3>
+                        <p className="text-xs font-semibold text-[#ffb531]">Lead Instructor &amp; Civil Engineer</p>
+                        <p className="text-[11px] text-[#7fb8ea]">B.Sc. in Civil Engineering (BUET)</p>
+                      </div>
+                      <div className="px-3 py-1.5 rounded-xl bg-[#ffb531] text-[#1a1100] font-black text-xs shadow-md">
+                        10+ Yrs
+                      </div>
                     </div>
                   </div>
-
-                  <p className="text-xs text-[#bccadb] leading-relaxed">
-                    &quot;Our classes are designed around real Bangladeshi developer drawings, structural blueprints, RAJUK bylaws,
-                    and on-site execution situations, not generic foreign textbooks.&quot;
-                  </p>
-
-                  <div className="space-y-2.5 pt-2 border-t border-[#2e4666] text-xs text-[#bccadb]">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-[#50c878]" />
-                      <span>Live interactive classes via Google Meet</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-[#50c878]" />
-                      <span>Practical BOQ spreadsheets and BBS templates</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-[#50c878]" />
-                      <span>Dedicated WhatsApp Batch Group for Q&amp;A</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-[#50c878]" />
-                      <span>Personalized technical mock interviews</span>
-                    </div>
-                  </div>
-
-                  <a
-                    href="#courses"
-                    className="block text-center w-full py-2.5 rounded-xl bg-[#3a7bb8]/20 hover:bg-[#3a7bb8]/40 border border-[#3a7bb8] text-white text-xs font-bold transition"
-                  >
-                    View Class Schedules &amp; Enroll
-                  </a>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Architectural CAD Blueprint Skyline Decor */}
+        <div className="w-full overflow-hidden opacity-30 pointer-events-none mt-8 -mb-4">
+          <svg className="w-full h-14 sm:h-20 text-[#7fb8ea]" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <defs>
+              <pattern id="cad-fl" width="10" height="12" patternUnits="userSpaceOnUse">
+                <path d="M0 12h10" stroke="currentColor" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <g fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="60" y="50" width="90" height="70" fill="url(#cad-fl)" />
+              <rect x="170" y="20" width="70" height="100" fill="url(#cad-fl)" />
+              <rect x="270" y="60" width="110" height="60" fill="url(#cad-fl)" />
+              <rect x="420" y="30" width="80" height="90" fill="url(#cad-fl)" />
+              <path d="M560 120V10h60M560 10l-30 14M620 10v24M590 10V0M530 24h30" />
+              <rect x="700" y="55" width="100" height="65" fill="url(#cad-fl)" />
+              <rect x="840" y="15" width="75" height="105" fill="url(#cad-fl)" />
+              <rect x="950" y="45" width="120" height="75" fill="url(#cad-fl)" />
+            </g>
+          </svg>
         </div>
       </section>
 
@@ -386,6 +393,89 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* DEDICATED INSTRUCTOR SECTION (#about / #instructor) */}
+      <section id="about" className="py-20 bg-[#070d17] border-b border-[#2e4666]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+            {/* Instructor Photo with Tag */}
+            <div className="md:col-span-5 flex justify-center">
+              <div className="relative w-full max-w-sm">
+                <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#3a7bb8] via-[#ffb531]/30 to-[#7fb8ea] opacity-35 blur-xl"></div>
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border-2 border-[#3a7bb8] shadow-2xl bg-[#101c2e] group">
+                  <img
+                    src="/instructor.jpg"
+                    alt="Md Abdul Mazid, civil engineer and founder of Blueprint Learning Academy"
+                    className="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060a11] via-transparent to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4 bg-[#ffb531] text-[#1a1100] font-extrabold text-sm py-2 px-4 rounded-xl shadow-lg flex items-center justify-between">
+                    <span>Md Abdul Mazid</span>
+                    <span className="text-xs font-semibold text-[#1a1100]/80">BUET Civil Engg.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructor Bio & Mission */}
+            <div className="md:col-span-7 space-y-6">
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-[#ffb531] uppercase tracking-wider block">
+                  Lead Instructor &amp; Mentor
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+                  Learn From a Working Senior Engineer
+                </h2>
+                <p className="text-sm font-semibold text-[#7fb8ea]">
+                  B.Sc. in Civil Engineering (BUET) • 10+ Years On Real Projects in Bangladesh
+                </p>
+              </div>
+
+              <p className="text-sm text-[#bccadb] leading-relaxed">
+                Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience
+                leading residential, commercial, and high-rise developer construction projects in Dhaka.
+                He founded Blueprint Learning Academy to bridge the massive gap between academic university textbooks
+                and what Bangladeshi developer companies and site consultants actually demand.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="bg-[#101c2e] border border-[#2e4666] p-4 rounded-xl space-y-1">
+                  <div className="text-xl text-[#ffb531]">📐</div>
+                  <h4 className="text-sm font-bold text-white">Real Developer Drawings</h4>
+                  <p className="text-xs text-[#bccadb]">
+                    Learn using actual architectural, structural, and MEP drawings approved by RAJUK and CDA.
+                  </p>
+                </div>
+
+                <div className="bg-[#101c2e] border border-[#2e4666] p-4 rounded-xl space-y-1">
+                  <div className="text-xl text-[#50c878]">🏗️</div>
+                  <h4 className="text-sm font-bold text-white">Live Site Situations</h4>
+                  <p className="text-xs text-[#bccadb]">
+                    Master casting SOPs, rebar BBS optimization, defect prevention, and subcontractor measurement bills.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-wrap items-center gap-4">
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-xl bg-[#25d366] hover:bg-[#25d366]/90 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition shadow-lg"
+                >
+                  <MessageCircle className="w-4 h-4" /> Message Instructor on WhatsApp
+                </a>
+                <a
+                  href="#courses"
+                  className="px-6 py-3 rounded-xl bg-[#101c2e] hover:bg-[#1a2c42] border border-[#3a7bb8] text-white font-bold text-xs sm:text-sm transition"
+                >
+                  Explore All 6 Courses
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PAYMENT INSTRUCTIONS & BKASH GUIDE */}
       <section id="payment" className="py-20 bg-[#060a11] border-b border-[#2e4666]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -532,6 +622,19 @@ export default function HomePage() {
         isOpen={!!selectedCourseForEnroll}
         onClose={() => setSelectedCourseForEnroll(null)}
       />
+
+      {/* Floating 24/7 WhatsApp Quick Support Button */}
+      <a
+        href={`https://wa.me/${whatsapp}?text=Hello!%20I%20have%20questions%20about%20Blueprint%20Learning%20Academy%20courses.`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="fixed right-5 bottom-6 z-40 bg-[#25d366] hover:bg-[#20ba5a] text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl shadow-[#25d366]/40 flex items-center gap-2.5 font-bold text-xs sm:text-sm transition duration-300 hover:scale-105 group"
+      >
+        <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+        <MessageCircle className="w-5 h-5 text-white" />
+        <span className="hidden sm:inline">Talk on WhatsApp</span>
+      </a>
     </div>
   );
 }

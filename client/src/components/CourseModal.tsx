@@ -84,8 +84,12 @@ export default function CourseModal({ course, isOpen, onClose, onEnroll }: Cours
 
           {/* Instructor Box */}
           <div className="border border-[#2e4666] bg-[#0b1624] rounded-xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#101c2e] border border-[#3a7bb8] flex items-center justify-center text-xl shrink-0">
-              👷‍♂️
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ffb531] shadow shrink-0">
+              <img
+                src="/instructor.jpg"
+                alt="Md Abdul Mazid"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white">{course.instructor?.name || 'Md Abdul Mazid'}</h4>
