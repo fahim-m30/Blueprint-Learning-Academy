@@ -112,28 +112,29 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
   const whatsappNumber = settings?.whatsappNumber || '8801313893838';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="relative bg-[#0f172a] border border-slate-700/80 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4">
+      <div className="relative bg-[#0f172a] border border-slate-700/80 rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Modal Header */}
-        <div className="bg-[#0b1222] border-b border-slate-800 p-5 sm:p-6 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-sky-400 uppercase tracking-widest block mb-1">
+        <div className="sticky top-0 z-10 bg-[#0b1222]/95 backdrop-blur-md border-b border-slate-800 p-4 sm:p-5 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-[11px] sm:text-xs font-bold text-sky-400 uppercase tracking-widest block mb-0.5">
               Course Enrollment • Step {step} of 3
             </span>
-            <h3 className="text-lg sm:text-xl font-extrabold text-white truncate max-w-sm sm:max-w-md">{course.title}</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-white truncate">{course.title}</h3>
           </div>
           <button
             onClick={resetAndClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 hover:bg-slate-700 transition"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 hover:bg-slate-700 transition shrink-0"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {errorMessage && (
-            <div className="mb-5 p-3.5 bg-red-950/70 border border-red-500/50 rounded-xl text-red-200 text-xs flex items-center gap-2.5">
+            <div className="mb-4 sm:mb-5 p-3 sm:p-3.5 bg-red-950/70 border border-red-500/50 rounded-xl text-red-200 text-xs flex items-center gap-2.5">
               <ShieldAlert className="w-4 h-4 shrink-0 text-red-400" />
               <span>{errorMessage}</span>
             </div>
@@ -141,20 +142,20 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
 
           {/* STEP 1: Student Information */}
           {step === 1 && (
-            <form onSubmit={handleNextToPayment} className="space-y-4">
-              <div className="bg-gradient-to-r from-[#131f38] to-[#0d1628] border border-slate-700/80 p-4 rounded-2xl flex items-center justify-between text-sm shadow-md">
+            <form onSubmit={handleNextToPayment} className="space-y-3.5 sm:space-y-4">
+              <div className="bg-gradient-to-r from-[#131f38] to-[#0d1628] border border-slate-700/80 p-3.5 sm:p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-md">
                 <div>
-                  <span className="text-xs text-slate-400 font-medium">Payable Amount</span>
-                  <p className="text-2xl font-black text-amber-400 mt-0.5">৳{course.price.toLocaleString()}</p>
+                  <span className="text-[11px] sm:text-xs text-slate-400 font-medium">Payable Amount</span>
+                  <p className="text-xl sm:text-2xl font-black text-amber-400 mt-0.5">৳{course.price.toLocaleString()}</p>
                 </div>
-                <div className="text-right text-xs text-slate-300">
+                <div className="text-right text-[11px] sm:text-xs text-slate-300">
                   <p>Duration: <span className="text-white font-bold">{course.durationDays} Days</span></p>
-                  <p>Classes: <span className="text-white font-bold">{course.totalClasses} Master Classes</span></p>
+                  <p>Classes: <span className="text-white font-bold">{course.totalClasses} Classes</span></p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Full Name (আপনার পূর্ণ নাম) *
                 </label>
                 <input
@@ -162,14 +163,14 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Engr. Tanvir Ahmed"
-                  className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                  placeholder="e.g. Engineer Rahim Chowdhury"
+                  className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     Mobile Number (মোবাইল নম্বর) *
                   </label>
                   <input
@@ -177,54 +178,51 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="01XXXXXXXXX"
-                    className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                    placeholder="017XXXXXXXX"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Email Address (ইমেইল ঠিকানা) *
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Email (লগইন ইমেইল ঠিকানা) *
                   </label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="student@example.com"
-                    className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                    placeholder="rahim@gmail.com"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                   />
-                  <span className="text-[10px] text-sky-400 mt-1 block">
-                    * Your login credentials will be emailed to this address.
-                  </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Present Address / University (বর্তমান ঠিকানা বা বিশ্ববিদ্যালয়)
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Current City / Address (ঠিকানা বা শহর)
                 </label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g. Dhaka, Bangladesh"
-                  className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                  placeholder="e.g. Dhanmondi, Dhaka"
+                  className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                 />
               </div>
 
-              <div className="pt-3 flex justify-end">
+              <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition"
+                  className="w-full py-3 sm:py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition"
                 >
-                  Proceed to Payment <ArrowRight className="w-4 h-4" />
+                  Proceed to Payment Details <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             </form>
           )}
 
-          {/* STEP 2: Payment & Transaction ID Entry */}
+          {/* STEP 2: Payment and Transaction Verification */}
           {step === 2 && (
             <form onSubmit={handleSubmitEnrollment} className="space-y-4">
               {/* Payment Method Selector */}
@@ -232,170 +230,164 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Select Payment Method (পেমেন্ট মাধ্যম বেছে নিন):
                 </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {(['bKash', 'Nagad', 'Rocket'] as const).map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setPaymentMethod(m)}
-                      className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                        paymentMethod === m
-                          ? m === 'bKash'
-                            ? 'border-pink-500 bg-pink-500/20 text-pink-300 shadow-md'
-                            : 'border-orange-500 bg-orange-500/20 text-orange-300 shadow-md'
-                          : 'border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700'
-                      }`}
-                    >
-                      {m === 'bKash' ? '📱 bKash' : m === 'Nagad' ? '💳 Nagad' : '🚀 Rocket'}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bKash')}
+                    className={`p-3 rounded-xl border text-center transition ${
+                      paymentMethod === 'bKash'
+                        ? 'border-pink-500 bg-pink-950/30 text-white font-black'
+                        : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <span className="block text-sm sm:text-base font-extrabold text-pink-400">bKash</span>
+                    <span className="text-[10px] text-slate-400">Send Money</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('Nagad')}
+                    className={`p-3 rounded-xl border text-center transition ${
+                      paymentMethod === 'Nagad'
+                        ? 'border-orange-500 bg-orange-950/30 text-white font-black'
+                        : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <span className="block text-sm sm:text-base font-extrabold text-orange-400">Nagad</span>
+                    <span className="text-[10px] text-slate-400">Send Money</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Number and Amount display card */}
-              <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4.5 space-y-3 shadow-md">
+              {/* Number Card */}
+              <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400">Account Type</span>
-                  <span className="text-xs font-bold text-white bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">
-                    {paymentMethod} {activeType}
+                  <div>
+                    <span className="text-[11px] text-slate-400 block font-medium">Send exact amount via {paymentMethod}:</span>
+                    <span className="text-xl sm:text-2xl font-black text-amber-400">৳{course.price.toLocaleString()}</span>
+                  </div>
+                  <span className="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-semibold">
+                    {activeType}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between bg-[#080d1a] border border-slate-700 rounded-xl p-3">
                   <div>
-                    <span className="text-[11px] text-slate-400 block font-medium">Send Money to this number:</span>
-                    <span className="text-lg font-mono font-black text-amber-400 tracking-wider">{activeNumber}</span>
+                    <span className="text-[10px] text-slate-400 block">Official {paymentMethod} Number</span>
+                    <span className="text-base sm:text-lg font-mono font-bold text-white tracking-wider">{activeNumber}</span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopy(activeNumber, 'num')}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition"
+                    onClick={() => handleCopy(activeNumber, 'number')}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition"
                   >
-                    {copiedField === 'num' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedField === 'num' ? 'Copied' : 'Copy'}
+                    {copiedField === 'number' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedField === 'number' ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-
-                <div className="flex items-center justify-between bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
-                  <div>
-                    <span className="text-[11px] text-slate-400 block font-medium">Exact Amount to Send:</span>
-                    <span className="text-xl font-black text-white">৳{course.price.toLocaleString()}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(String(course.price), 'amt')}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition"
-                  >
-                    {copiedField === 'amt' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedField === 'amt' ? 'Copied' : 'Copy'}
-                  </button>
-                </div>
-
-                <p className="text-[11px] text-sky-400 leading-relaxed font-medium">
-                  ℹ️ বিকাশ/নগদে <strong>Send Money</strong> অপশন ব্যবহার করুন। রেফারেন্সে আপনার নাম লিখুন এবং সফল পেমেন্টের পর প্রাপ্ত Transaction ID নিচে প্রদান করুন।
-                </p>
               </div>
 
-              {/* Payment Proof Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Transaction Inputs */}
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Your {paymentMethod} Number (যে নম্বর থেকে টাকা পাঠিয়েছেন) *
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Your {paymentMethod} Sender Number (যে নম্বর থেকে টাকা পাঠিয়েছেন) *
                   </label>
                   <input
                     type="tel"
                     required
                     value={senderNumber}
                     onChange={(e) => setSenderNumber(e.target.value)}
-                    placeholder="01XXXXXXXXX"
-                    className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                    placeholder="017XXXXXXXX"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Transaction ID / TrxID (ট্রানজেকশন আইডি) *
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Transaction ID / TrxID (বিকাশ বা নগদ ট্রানজেকশন আইডি) *
                   </label>
                   <input
                     type="text"
                     required
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value.toUpperCase())}
-                    placeholder="e.g. 9K4A7B2C1D"
-                    className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white font-mono uppercase tracking-wider placeholder-slate-500 outline-none transition"
+                    placeholder="e.g. BL9X4Q8M2Z"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-mono uppercase placeholder-slate-500 outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Reference / Notes (ঐচ্ছিক নোট)
+                  </label>
+                  <input
+                    type="text"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Reference note or questions"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Additional Note (ঐচ্ছিক মন্তব্য)
-                </label>
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Optional reference note"
-                  className="w-full bg-slate-900 border border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
-                />
-              </div>
-
-              <div className="pt-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-5 py-2.5 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 transition"
+                  className="py-3 px-4 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition"
                 >
-                  <ArrowLeft className="w-4 h-4" /> Back
+                  <ArrowLeft className="w-4 h-4 shrink-0" /> Back
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-7 py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition disabled:opacity-50"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Enrollment & TrxID'}
+                  {submitting ? 'Submitting Application...' : 'Confirm & Submit Application'}
                 </button>
               </div>
             </form>
           )}
 
-          {/* STEP 3: Submission Success */}
+          {/* STEP 3: Success Confirmation */}
           {step === 3 && (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
-                <CheckCircle className="w-8 h-8" />
+            <div className="text-center py-4 space-y-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center mx-auto text-2xl sm:text-3xl">
+                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10" />
               </div>
+
               <div>
-                <h3 className="text-2xl font-black text-white">Enrollment Submitted!</h3>
-                <p className="text-sm text-slate-300 mt-1">
-                  Thank you, <strong className="text-white">{name}</strong>. We have received your payment proof for <strong>{course.title}</strong>.
+                <h3 className="text-lg sm:text-xl font-black text-white">Enrollment Application Received!</h3>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
+                  Thank you, <span className="text-amber-400 font-bold">{name}</span>. Your application and TrxID (<span className="font-mono text-sky-400">{transactionId}</span>) have been queued for administrative approval.
                 </p>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4.5 text-left text-xs space-y-2.5 text-slate-300 shadow-md">
-                <p className="text-amber-400 font-bold text-sm">What happens next?</p>
-                <p>1. Our admin will match and verify your Transaction ID (<strong className="font-mono text-white">{transactionId}</strong>).</p>
-                <p>2. Upon approval, the system will automatically generate your student credentials and email them to <strong className="text-white">{email}</strong>.</p>
-                <p>3. You can then login directly at <span className="text-sky-400 font-bold">/login</span> to access all lectures, live class links, tasks, and WhatsApp batch group.</p>
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-left text-xs text-slate-300 space-y-2">
+                <p className="font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                  What happens next?
+                </p>
+                <p>1. Our admin team will verify your {paymentMethod} transaction within 15–30 minutes.</p>
+                <p>2. An auto-generated student login password will be emailed to <strong className="text-amber-400">{email}</strong>.</p>
+                <p>3. You will gain immediate access to the course videos, resources, and live Google Meet batch link.</p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+              <div className="pt-2 space-y-2.5">
                 <a
-                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-                    `Hello, I just submitted enrollment for "${course.title}". My TrxID: ${transactionId}, Mobile: ${phone}`
-                  )}`}
+                  href={`https://wa.me/${whatsappNumber}?text=Hello!%20I%20just%20submitted%20my%20enrollment%20for%20${encodeURIComponent(course.title)}.%20TrxID:%20${transactionId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20"
+                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition"
                 >
-                  <MessageCircle className="w-4 h-4" /> Message on WhatsApp
+                  <MessageCircle className="w-4 h-4 shrink-0" /> Notify Admin on WhatsApp for Quick Approval
                 </a>
                 <button
                   type="button"
                   onClick={resetAndClose}
-                  className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition"
+                  className="w-full py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold transition"
                 >
-                  Close Window
+                  Back to Website
                 </button>
               </div>
             </div>

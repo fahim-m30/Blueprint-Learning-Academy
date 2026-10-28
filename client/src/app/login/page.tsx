@@ -115,41 +115,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060a11] text-[#f3f7fc] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#3a7bb8]/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Radial Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 sm:w-96 h-80 sm:h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+      <div className="w-full max-w-md mx-auto relative z-10">
         <div className="text-center">
-          <Link href="/" className="inline-flex flex-col items-center gap-3 mb-4 group">
+          <Link href="/" className="inline-flex flex-col items-center gap-2.5 mb-3 group">
             <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ffb531] to-[#3a7bb8] opacity-50 blur-sm group-hover:opacity-100 transition"></div>
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 to-sky-500 opacity-60 blur-md group-hover:opacity-100 transition duration-300"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="relative w-20 h-20 object-contain rounded-full ring-2 ring-[#ffb531] bg-white p-1 shadow-2xl shadow-[#ffb531]/25 group-hover:scale-105 transition"
+                className="relative w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full ring-2 ring-amber-400 bg-white p-1 shadow-2xl shadow-amber-500/25 group-hover:scale-105 transition"
               />
             </div>
             <div className="text-center">
               <span className="text-2xl sm:text-3xl font-black text-white block">
-                Blueprint <span className="text-[#ffb531]">Learning Academy</span>
+                Blueprint <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">Learning Academy</span>
               </span>
-              <span className="block text-xs uppercase tracking-widest text-[#7fb8ea] font-bold mt-1">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-sky-400 font-extrabold mt-0.5">
                 Real Estate Career Courses for Civil Engineers
               </span>
             </div>
           </Link>
-          <h2 className="text-xl font-bold tracking-tight text-white mt-2">
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white mt-2">
             Sign in to Your Learning Portal
           </h2>
-          <p className="text-xs text-[#bccadb] mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Access your course lectures, live meet links, tasks, and instructor discussions.
           </p>
         </div>
 
-        <div className="mt-8 bg-[#101c2e] border-2 border-[#2e4666] py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
+        <div className="mt-6 bg-[#0f182c] border border-slate-800 py-6 sm:py-8 px-4 sm:px-8 shadow-2xl rounded-2xl">
           {errorMsg && (
-            <div className="mb-5 p-3.5 bg-red-950/70 border border-red-500 rounded-xl text-red-200 text-xs flex items-start gap-2.5">
+            <div className="mb-5 p-3 sm:p-3.5 bg-red-950/70 border border-red-500/50 rounded-xl text-red-200 text-xs flex items-start gap-2.5">
               <ShieldAlert className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
               <div className="leading-relaxed">{errorMsg}</div>
             </div>
@@ -157,11 +157,11 @@ export default function LoginPage() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-xs font-semibold text-[#bccadb] mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#728296]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -170,17 +170,17 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@example.com"
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#728296] outline-none transition"
+                  className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#bccadb] mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#728296]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -189,7 +189,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#728296] outline-none transition"
+                  className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition"
                 />
               </div>
               <div className="flex justify-end mt-1.5">
@@ -200,7 +200,7 @@ export default function LoginPage() {
                     setModalFeedback(null);
                     setOtpSent(false);
                   }}
-                  className="text-xs text-[#7fb8ea] hover:text-[#ffb531] transition font-medium"
+                  className="text-xs text-sky-400 hover:text-amber-400 transition font-medium"
                 >
                   Forgot Password? (Reset via Email OTP)
                 </button>
@@ -211,60 +211,60 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-bold text-sm shadow-lg shadow-[#ffb531]/20 flex items-center justify-center gap-2 transition disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition disabled:opacity-50"
               >
                 {loading ? 'Authenticating...' : 'Sign In to Portal'}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             </div>
           </form>
 
-          {/* Quick Demo Fill Buttons for Ease of Testing */}
-          <div className="mt-6 pt-5 border-t border-[#1a2c42]">
-            <span className="text-[11px] font-semibold text-[#7fb8ea] uppercase tracking-wider block text-center mb-2.5">
+          {/* Quick Demo Fill Buttons */}
+          <div className="mt-6 pt-5 border-t border-slate-800">
+            <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider block text-center mb-2.5">
               Quick Test Credentials:
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => fillDemo('admin')}
-                className="p-2 rounded-lg bg-[#08111d] border border-[#3a7bb8] text-white hover:bg-[#3a7bb8]/20 transition text-center"
+                className="p-2 sm:p-2.5 rounded-xl bg-[#080d1a] border border-slate-700 hover:border-amber-400/80 text-white transition text-center"
               >
-                <span className="block font-bold text-[#ffb531]">Admin Login</span>
-                <span className="text-[10px] text-[#bccadb] truncate block">admin.blueprintlearning</span>
+                <span className="block font-bold text-amber-400">Admin Login</span>
+                <span className="text-[10px] text-slate-400 truncate block">admin.blueprintlearning</span>
               </button>
               <button
                 type="button"
                 onClick={() => fillDemo('student')}
-                className="p-2 rounded-lg bg-[#08111d] border border-[#3a7bb8] text-white hover:bg-[#3a7bb8]/20 transition text-center"
+                className="p-2 sm:p-2.5 rounded-xl bg-[#080d1a] border border-slate-700 hover:border-emerald-400/80 text-white transition text-center"
               >
                 <span className="block font-bold text-emerald-400">Student Demo</span>
-                <span className="text-[10px] text-[#bccadb]">student@example.com</span>
+                <span className="text-[10px] text-slate-400 truncate block">student@example.com</span>
               </button>
             </div>
           </div>
         </div>
 
         <div className="text-center mt-6">
-          <Link href="/" className="text-xs text-[#bccadb] hover:text-[#ffb531] transition">
-            ← Back to Homepage
+          <Link href="/" className="text-xs text-slate-400 hover:text-amber-400 transition font-semibold">
+            ← Back to Academy Homepage
           </Link>
         </div>
       </div>
 
       {/* FORGOT PASSWORD MODAL WITH EMAIL OTP VERIFICATION */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101c2e] border-2 border-[#3a7bb8] rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2e4666]">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#ffb531]" />
-                <h3 className="text-base font-bold text-white">Reset Password via Email OTP</h3>
+                <KeyRound className="w-5 h-5 text-amber-400" />
+                <h3 className="text-sm sm:text-base font-bold text-white">Reset Password via Email OTP</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                className="p-1 rounded-lg text-[#bccadb] hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -284,41 +284,41 @@ export default function LoginPage() {
 
             {!otpSent ? (
               <form onSubmit={handleForgotRequestOtp} className="space-y-3 text-xs">
-                <p className="text-[#bccadb]">
+                <p className="text-slate-400">
                   Enter your registered administrator or student email address. We will send you a 6-digit one-time verification code.
                 </p>
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Registered Email Address *</label>
+                  <label className="block text-slate-300 mb-1 font-semibold">Registered Email Address *</label>
                   <input
                     type="email"
                     required
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="admin@careerpath.com"
-                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    placeholder="admin.blueprintlearning@gmail.com"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
                   />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="px-3.5 py-2 rounded-lg border border-[#2e4666] text-[#bccadb]"
+                    className="px-3.5 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="px-4 py-2 rounded-lg bg-[#ffb531] text-[#1a1100] font-bold shadow disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow disabled:opacity-50"
                   >
-                    {otpLoading ? 'Sending...' : 'Send Verification Code (OTP)'}
+                    {otpLoading ? 'Sending...' : 'Send OTP Code'}
                   </button>
                 </div>
               </form>
             ) : (
               <form onSubmit={handleForgotVerifyOtp} className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                  <label className="block text-slate-300 mb-1 font-semibold">
                     6-Digit Verification Code (OTP) *
                   </label>
                   <input
@@ -328,11 +328,11 @@ export default function LoginPage() {
                     value={resetOtp}
                     onChange={(e) => setResetOtp(e.target.value)}
                     placeholder="e.g. 482915"
-                    className="w-full bg-[#08111d] border border-[#ffb531] rounded-lg px-3 py-2 text-center font-mono text-base font-bold text-[#ffb531] outline-none"
+                    className="w-full bg-[#080d1a] border border-amber-400 rounded-xl px-3 py-2 text-center font-mono text-base font-bold text-amber-400 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">New Password *</label>
+                  <label className="block text-slate-300 mb-1 font-semibold">New Password *</label>
                   <input
                     type="password"
                     required
@@ -340,21 +340,21 @@ export default function LoginPage() {
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value)}
                     placeholder="Enter at least 6 characters"
-                    className="w-full bg-[#08111d] border border-[#2e4666] focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#080d1a] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
                   />
                 </div>
                 <div className="pt-2 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setOtpSent(false)}
-                    className="text-[11px] text-[#7fb8ea] hover:underline"
+                    className="text-[11px] text-sky-400 hover:underline"
                   >
                     Change Email
                   </button>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow disabled:opacity-50"
                   >
                     {otpLoading ? 'Verifying...' : 'Set New Password'}
                   </button>
