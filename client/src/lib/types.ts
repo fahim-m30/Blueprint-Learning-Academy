@@ -89,6 +89,11 @@ export interface SiteSettings {
   nagadType: string;
   rocketNumber: string;
   paymentInstructions: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPass?: string;
+  emailFrom?: string;
 }
 
 export interface StudentCV {

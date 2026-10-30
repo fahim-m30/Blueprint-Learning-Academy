@@ -1,31 +1,50 @@
 const nodemailer = require('nodemailer');
+const SiteSettings = require('../models/SiteSettings');
 
-const createTransporter = () => {
-  // If SMTP environment variables are set, use them
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+const createTransporter = async () => {
+  let settings = null;
+  try {
+    settings = await SiteSettings.findOne({});
+  } catch (err) {
+    console.warn('Could not load SiteSettings for SMTP, falling back to env:', err.message);
   }
 
-  // Gmail fallback if standard user/pass is provided
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    return nodemailer.createTransport({
+  // 1. Check SiteSettings from MongoDB Atlas first (works on Render/Vercel without manual env vars)
+  const smtpHost = settings?.smtpHost || process.env.SMTP_HOST || 'smtp-relay.brevo.com';
+  const smtpPort = Number(settings?.smtpPort) || Number(process.env.SMTP_PORT) || 587;
+  const smtpUser = settings?.smtpUser || process.env.SMTP_USER;
+  const smtpPass = settings?.smtpPass || process.env.SMTP_PASS;
+  const smtpSecure = (settings?.smtpSecure === true) || (process.env.SMTP_SECURE === 'true');
+  const emailFrom = settings?.emailFrom || process.env.EMAIL_FROM || '"Blueprint Learning Academy" <admin.blueprintlearning@gmail.com>';
+
+  if (smtpHost && smtpUser && smtpPass) {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+    return { transporter, emailFrom };
+  }
+
+  // 2. Gmail fallback (from DB or process.env)
+  const gmailUser = settings?.gmailUser || process.env.EMAIL_USER;
+  const gmailPass = settings?.gmailPass || process.env.EMAIL_PASS;
+  if (gmailUser && gmailPass) {
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: gmailUser,
+        pass: gmailPass,
       },
     });
+    return { transporter, emailFrom: `"Blueprint Learning Academy" <${gmailUser}>` };
   }
 
-  return null;
+  return { transporter: null, emailFrom };
 };
 
 /**
@@ -39,7 +58,7 @@ const sendEnrollmentApprovedEmail = async ({
   loginUrl,
   whatsappGroupLink,
 }) => {
-  const transporter = createTransporter();
+  const { transporter, emailFrom } = await createTransporter();
 
   const htmlContent = `
   <!DOCTYPE html>
@@ -123,16 +142,44 @@ const sendEnrollmentApprovedEmail = async ({
 
   if (transporter) {
     try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
+      const sendResult = await transporter.sendMail({
+        from: emailFrom,
         to: studentEmail,
         subject: `Welcome to ${courseTitle} - Your Access Credentials`,
         html: htmlContent,
       });
-      return { success: true };
+      console.log('✅ Student Credentials Email Sent Successfully:', sendResult.messageId);
+      return { success: true, messageId: sendResult.messageId };
     } catch (err) {
-      console.error('SMTP Mail Sending Error:', err.message);
-      return { success: false, error: err.message };
+      console.error('SMTP Mail Sending Error, attempting Gmail fallback:', err.message);
+      // Try fallback to Gmail if Brevo had an issue
+      try {
+        let settings = null;
+        try { settings = await SiteSettings.findOne({}); } catch {}
+        const gUser = settings?.gmailUser || process.env.EMAIL_USER;
+        const gPass = settings?.gmailPass || process.env.EMAIL_PASS;
+        if (gUser && gPass) {
+          const fallbackTransporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: gUser,
+              pass: gPass,
+            },
+          });
+          const fallbackResult = await fallbackTransporter.sendMail({
+            from: `"Blueprint Learning Academy" <${gUser}>`,
+            to: studentEmail,
+            subject: `Welcome to ${courseTitle} - Your Access Credentials`,
+            html: htmlContent,
+          });
+          console.log('✅ Fallback Gmail Sent Successfully:', fallbackResult.messageId);
+          return { success: true, messageId: fallbackResult.messageId };
+        }
+        return { success: false, error: err.message };
+      } catch (fallbackErr) {
+        console.error('Fallback Gmail Error:', fallbackErr.message);
+        return { success: false, error: err.message };
+      }
     }
   } else {
     console.log('\n==========================================================');
@@ -151,7 +198,7 @@ const sendEnrollmentApprovedEmail = async ({
  * Send Account Block Notification with Admin's Reason
  */
 const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) => {
-  const transporter = createTransporter();
+  const { transporter, emailFrom } = await createTransporter();
 
   const htmlContent = `
   <!DOCTYPE html>
@@ -202,7 +249,7 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
+        from: emailFrom,
         to: studentEmail,
         subject: `Important: Your Student Account Status Notice`,
         html: htmlContent,
@@ -226,7 +273,7 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
  * Send Password Reset OTP Email
  */
 const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
-  const transporter = createTransporter();
+  const { transporter, emailFrom } = await createTransporter();
 
   const htmlContent = `
   <!DOCTYPE html>
@@ -279,7 +326,7 @@ const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"Blueprint Learning Academy" <no-reply@blueprintlearningacademy.com>',
+        from: emailFrom,
         to: email,
         subject: `Your Verification Code: ${otp} - Blueprint Learning Academy`,
         html: htmlContent,

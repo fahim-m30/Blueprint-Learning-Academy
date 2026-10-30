@@ -127,6 +127,40 @@ const siteSettingsSchema = new mongoose.Schema({
     default: 'Please use Send Money to our official number, write your name as reference, and enter the Transaction ID in the enrollment form.',
   },
 
+  // Email / SMTP Dispatch Settings (Brevo & Gmail)
+  smtpHost: {
+    type: String,
+    default: 'smtp-relay.brevo.com',
+  },
+  smtpPort: {
+    type: Number,
+    default: 587,
+  },
+  smtpUser: {
+    type: String,
+    default: '',
+  },
+  smtpPass: {
+    type: String,
+    default: '',
+  },
+  smtpSecure: {
+    type: Boolean,
+    default: false,
+  },
+  emailFrom: {
+    type: String,
+    default: '"Blueprint Learning Academy" <admin.blueprintlearning@gmail.com>',
+  },
+  gmailUser: {
+    type: String,
+    default: '',
+  },
+  gmailPass: {
+    type: String,
+    default: '',
+  },
+
   updatedAt: {
     type: Date,
     default: Date.now,

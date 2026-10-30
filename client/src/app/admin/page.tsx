@@ -28,6 +28,7 @@ import {
   Download,
   Search,
   CheckCircle2,
+  Mail,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -121,6 +122,7 @@ export default function AdminPortalPage() {
   // Block modal state
   const [blockingUser, setBlockingUser] = useState<any | null>(null);
   const [blockReasonInput, setBlockReasonInput] = useState('');
+  const [sendingTestEmail, setSendingTestEmail] = useState(false);
 
   // Feedback notifications
   const [alertBanner, setAlertBanner] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -540,6 +542,20 @@ export default function AdminPortalPage() {
   const handleSaveSettings = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     await handleSaveSection('all', 'All settings & payment numbers');
+  };
+
+  const handleSendTestEmail = async () => {
+    setSendingTestEmail(true);
+    const res = await apiRequest('/admin/test-email', {
+      method: 'POST',
+      body: JSON.stringify({ targetEmail: siteSettings?.contactEmail || 'admin.blueprintlearning@gmail.com' }),
+    });
+    setSendingTestEmail(false);
+    if (res.success) {
+      showAlert(res.message || '✅ Test email dispatched successfully via SMTP!');
+    } else {
+      showAlert(res.message || '❌ Failed to dispatch test email. Please check your SMTP settings.', 'error');
+    }
   };
 
   // 10. Manual Expired Cleanup Trigger
@@ -2201,6 +2217,91 @@ export default function AdminPortalPage() {
                 >
                   <Save className="w-4 h-4" />
                   <span>{savingSection === 'payment' ? 'Saving Numbers...' : 'Save Payment Numbers'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* SECTION 6: EMAIL & SMTP DISPATCH GATEWAY (BREVO & GMAIL) */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-sky-700 flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-sky-600" /> Brevo &amp; Gmail SMTP Email System
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                    Automatically sends student login credentials and WhatsApp links when you approve payments.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSendTestEmail}
+                  disabled={sendingTestEmail}
+                  className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition hover:scale-105 disabled:opacity-50 shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{sendingTestEmail ? 'Sending Test...' : 'Send Live Test Email'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm">
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">SMTP Server Host</label>
+                  <input
+                    type="text"
+                    value={siteSettings.smtpHost || 'smtp-relay.brevo.com'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, smtpHost: e.target.value })}
+                    placeholder="smtp-relay.brevo.com"
+                    className="w-full bg-white border border-slate-200 focus:border-sky-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">Default: smtp-relay.brevo.com</span>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">SMTP Port</label>
+                  <input
+                    type="number"
+                    value={siteSettings.smtpPort || 587}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, smtpPort: Number(e.target.value) })}
+                    placeholder="587"
+                    className="w-full bg-white border border-slate-200 focus:border-sky-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">Port: 587 (TLS)</span>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Brevo SMTP Login Email</label>
+                  <input
+                    type="text"
+                    value={siteSettings.smtpUser || 'c0c2b6001@smtp-brevo.com'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, smtpUser: e.target.value })}
+                    placeholder="c0c2b6001@smtp-brevo.com"
+                    className="w-full bg-white border border-slate-200 focus:border-sky-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">Your Brevo Login</span>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Brevo SMTP Key (Password)</label>
+                  <input
+                    type="password"
+                    value={siteSettings.smtpPass || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, smtpPass: e.target.value })}
+                    placeholder="xsmtpsib-..."
+                    className="w-full bg-white border border-slate-200 focus:border-sky-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium font-mono"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">Master Brevo Key</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('email', 'Email & SMTP Settings')}
+                  disabled={savingSection === 'email'}
+                  className="px-5 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'email' ? 'Saving Email Settings...' : 'Save Email & SMTP Settings'}</span>
                 </button>
               </div>
             </div>

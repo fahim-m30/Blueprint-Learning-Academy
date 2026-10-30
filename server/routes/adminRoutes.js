@@ -182,7 +182,7 @@ router.post('/enrollments/:id/approve', async (req, res) => {
     await enrollment.save();
 
     // Send professional email to the student
-    const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
+    const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
     await sendEnrollmentApprovedEmail({
       studentName: enrollment.studentName,
       studentEmail: enrollment.studentEmail,
@@ -420,7 +420,7 @@ router.post('/courses/:id/students', async (req, res) => {
 
     // Send email notification to the student (wrapped in try/catch so it doesn't block if email not configured)
     try {
-      const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
+      const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
       await sendEnrollmentApprovedEmail({
         studentName: user.name,
         studentEmail: user.email,
@@ -924,6 +924,47 @@ router.post('/cvs/:studentId/feedback', async (req, res) => {
   } catch (err) {
     console.error('Update CV feedback error:', err);
     res.status(500).json({ success: false, message: 'Error updating CV feedback.' });
+  }
+});
+
+/**
+ * POST /api/admin/test-email
+ * Sends a real test email to verify SMTP credentials
+ */
+router.post('/test-email', async (req, res) => {
+  try {
+    const adminUser = req.user;
+    const targetEmail = req.body.targetEmail || adminUser.email || 'admin.blueprintlearning@gmail.com';
+    const { sendEnrollmentApprovedEmail } = require('../utils/emailService');
+
+    const result = await sendEnrollmentApprovedEmail({
+      studentName: 'Admin Test Student',
+      studentEmail: targetEmail,
+      courseTitle: 'Real Estate Job Interview Success (Test Run)',
+      generatedPassword: 'BP-TEST-' + Math.floor(1000 + Math.random() * 9000),
+      loginUrl: 'https://blueprint-learning-academy.vercel.app/login',
+      whatsappGroupLink: 'https://chat.whatsapp.com/test-link',
+    });
+
+    if (result.success && !result.simulated) {
+      return res.json({
+        success: true,
+        message: `Test email dispatched successfully via SMTP to ${targetEmail}! Message ID: ${result.messageId || 'OK'}`,
+      });
+    } else if (result.simulated) {
+      return res.json({
+        success: false,
+        message: 'SMTP is not configured yet. Email was only simulated in server logs.',
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: result.error || 'Failed to dispatch test email. Please check your SMTP settings.',
+      });
+    }
+  } catch (err) {
+    console.error('Test email route error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Internal error sending test email.' });
   }
 });
 
