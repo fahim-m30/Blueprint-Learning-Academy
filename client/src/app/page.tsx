@@ -22,6 +22,7 @@ import {
   FileSpreadsheet,
   CalendarCheck,
   Users,
+  Layers,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -173,30 +174,49 @@ export default function HomePage() {
       </section>
 
       {/* INFINITE MARQUEE ROW (All 6 Specializations) */}
-      <section className="py-5 bg-white border-y border-slate-200/80 overflow-hidden shadow-xs">
-        <div className="animate-infinite-scroll flex gap-6 sm:gap-8 items-center">
+      <section className="py-7 sm:py-9 bg-white border-y border-slate-200/90 overflow-hidden relative shadow-xs">
+        {/* Left & Right Edge Vignette Fades */}
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+
+        <div className="animate-infinite-scroll flex gap-5 sm:gap-6 items-center">
           {[
-            'Real Estate Job Interview Success',
-            'Civil Software: AutoCAD, ETABS & Excel',
-            'Site & Project Engineering Mastery',
-            'Estimation, BOQ & Cost Control',
-            'MS Project Scheduling & Planning',
-            'Structural Drawing QA/QC & BBS Detailing',
-            'Real Estate Job Interview Success',
-            'Civil Software: AutoCAD, ETABS & Excel',
-            'Site & Project Engineering Mastery',
-            'Estimation, BOQ & Cost Control',
-            'MS Project Scheduling & Planning',
-            'Structural Drawing QA/QC & BBS Detailing',
-          ].map((title, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-xs sm:text-sm font-bold text-slate-700 shrink-0 hover:border-blue-400 hover:text-blue-700 transition"
-            >
-              <CheckCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span>{title}</span>
-            </div>
-          ))}
+            { title: 'Real Estate Job Interview Success', tag: 'Career & Interview', icon: Award },
+            { title: 'Civil Software: AutoCAD, ETABS & Excel', tag: 'Software Mastery', icon: Layers },
+            { title: 'Site & Project Engineering Mastery', tag: 'Site Execution', icon: Building2 },
+            { title: 'Estimation, BOQ & Cost Control', tag: 'BOQ & Budgeting', icon: FileSpreadsheet },
+            { title: 'MS Project Scheduling & Planning', tag: 'Project Planning', icon: CalendarCheck },
+            { title: 'Structural Drawing QA/QC & BBS Detailing', tag: 'QA/QC & Detailing', icon: ShieldCheck },
+            { title: 'Real Estate Job Interview Success', tag: 'Career & Interview', icon: Award },
+            { title: 'Civil Software: AutoCAD, ETABS & Excel', tag: 'Software Mastery', icon: Layers },
+            { title: 'Site & Project Engineering Mastery', tag: 'Site Execution', icon: Building2 },
+            { title: 'Estimation, BOQ & Cost Control', tag: 'BOQ & Budgeting', icon: FileSpreadsheet },
+            { title: 'MS Project Scheduling & Planning', tag: 'Project Planning', icon: CalendarCheck },
+            { title: 'Structural Drawing QA/QC & BBS Detailing', tag: 'QA/QC & Detailing', icon: ShieldCheck },
+          ].map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-3.5 sm:gap-4 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#fcfdff] border-2 border-slate-200/90 hover:border-blue-600 shadow-xs hover:shadow-lg hover:shadow-blue-900/10 hover:-translate-y-0.5 transition-all duration-300 shrink-0 group cursor-default"
+              >
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100/80 border border-blue-200/80 flex items-center justify-center text-blue-700 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition duration-300 shadow-xs shrink-0">
+                  <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5 shrink-0 transition-transform group-hover:scale-110" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/70">
+                      {item.tag}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  </div>
+                  <span className="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-blue-700 transition block whitespace-nowrap">
+                    {item.title}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
