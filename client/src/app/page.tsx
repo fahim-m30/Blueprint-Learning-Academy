@@ -53,7 +53,7 @@ export default function HomePage() {
   }, []);
 
   const phone = settings?.contactPhone || '01313893838';
-  const whatsapp = settings?.whatsappNumber || '8801313893838';
+  const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-amber-400 selection:text-slate-950 overflow-x-hidden">

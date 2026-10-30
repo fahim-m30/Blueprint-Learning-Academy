@@ -25,7 +25,7 @@ export default function Navbar({ settings }: NavbarProps) {
   };
 
   const phone = settings?.contactPhone || '01313893838';
-  const whatsapp = settings?.whatsappNumber || '8801313893838';
+  const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 shadow-sm">

@@ -11,7 +11,7 @@ interface FooterProps {
 export default function Footer({ settings }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const phone = settings?.contactPhone || '01313893838';
-  const whatsapp = settings?.whatsappNumber || '8801313893838';
+  const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
   const email = settings?.contactEmail || 'info@blueprintlearningacademy.com';
 
   return (

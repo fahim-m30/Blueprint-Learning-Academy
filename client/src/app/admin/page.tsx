@@ -1664,7 +1664,7 @@ export default function AdminPortalPage() {
                   <label className="block text-slate-600 mb-1 font-semibold">Hero Main Headline Title (প্রধান হেডলাইন)</label>
                   <input
                     type="text"
-                    value={siteSettings.heroTitle}
+                    value={siteSettings.heroTitle || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
@@ -1695,7 +1695,7 @@ export default function AdminPortalPage() {
                   <input
                     type="text"
                     required
-                    value={siteSettings.contactPhone}
+                    value={siteSettings.contactPhone || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
                     placeholder="013XXXXXXXX"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
@@ -1710,7 +1710,7 @@ export default function AdminPortalPage() {
                   <input
                     type="text"
                     required
-                    value={siteSettings.whatsappNumber}
+                    value={siteSettings.whatsappNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
                     placeholder="88013XXXXXXXX"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
@@ -1725,7 +1725,7 @@ export default function AdminPortalPage() {
                   <input
                     type="email"
                     required
-                    value={siteSettings.contactEmail}
+                    value={siteSettings.contactEmail || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
                     placeholder="info@blueprintlearningacademy.com"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
@@ -1746,7 +1746,7 @@ export default function AdminPortalPage() {
                   <input
                     type="text"
                     required
-                    value={siteSettings.bkashNumber}
+                    value={siteSettings.bkashNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
@@ -1765,7 +1765,7 @@ export default function AdminPortalPage() {
                   <input
                     type="text"
                     required
-                    value={siteSettings.nagadNumber}
+                    value={siteSettings.nagadNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
@@ -1783,7 +1783,7 @@ export default function AdminPortalPage() {
                   <label className="block text-slate-600 mb-1 font-semibold">Rocket Number</label>
                   <input
                     type="text"
-                    value={siteSettings.rocketNumber}
+                    value={siteSettings.rocketNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
                     placeholder="013XXXXXXXX-X"
                     className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"

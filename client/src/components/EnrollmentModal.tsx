@@ -109,7 +109,7 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
       ? settings?.nagadType || 'Personal (Send Money)'
       : 'Personal';
 
-  const whatsappNumber = settings?.whatsappNumber || '8801313893838';
+  const whatsappNumber = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">

@@ -13,6 +13,34 @@ router.get('/settings', async (req, res) => {
     let settings = await SiteSettings.findOne();
     if (!settings) {
       settings = await SiteSettings.create({});
+    } else {
+      // Auto-fill default fields if any are missing on existing records
+      const defaults = {
+        instructorName: 'Engr. Md Abdul Mazid',
+        instructorDegree: 'B.Sc. in Civil Engineering (BUET)',
+        instructorExp: '10+ Years On Real Projects in Bangladesh',
+        instructorShortExp: '10+ Yrs Exp',
+        instructorImage: '/instructor.jpg?v=2',
+        instructorBio: 'Engr. Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience leading residential, commercial, and high-rise developer construction projects in Dhaka. He founded Blueprint Learning Academy to bridge the massive gap between academic university textbooks and what Bangladeshi developer companies and site consultants actually demand.',
+        feature1Title: 'Real Developer Drawings',
+        feature1Desc: 'Learn using actual architectural, structural, and MEP drawings approved by RAJUK and CDA.',
+        feature2Title: 'Live Site Situations',
+        feature2Desc: 'Master casting SOPs, rebar BBS optimization, defect prevention, and subcontractor measurement bills.',
+        statsCourses: '6+',
+        statsExperience: '10+ Yrs',
+        statsMentorTag: 'BUET',
+        heroBadgeText: "Bangladesh's #1 Practical Civil Engineering Academy",
+      };
+      let needsSave = false;
+      for (const [key, val] of Object.entries(defaults)) {
+        if (!settings[key]) {
+          settings[key] = val;
+          needsSave = true;
+        }
+      }
+      if (needsSave) {
+        await settings.save();
+      }
     }
     res.json({ success: true, settings });
   } catch (err) {
