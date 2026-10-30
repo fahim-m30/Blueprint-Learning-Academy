@@ -71,19 +71,19 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20 lg:h-22 py-2">
+        <div className="flex items-center justify-between h-20 sm:h-22 lg:h-24 py-2 sm:py-2.5">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-3 sm:gap-4 group min-w-0">
+          <Link href="/" className="flex items-center gap-2.5 xs:gap-3.5 sm:gap-4 group min-w-0">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-40 blur-md group-hover:opacity-75 transition duration-300"></div>
+              <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-45 blur-md group-hover:opacity-85 transition duration-300"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="relative w-12 h-12 sm:w-15 sm:h-15 object-contain rounded-full ring-2 ring-blue-600/20 shadow-md bg-white p-0.5 sm:p-1 transition duration-300 group-hover:scale-105"
+                className="relative w-14 h-14 xs:w-16 xs:h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 object-contain rounded-full ring-2 xs:ring-3 ring-amber-400/90 shadow-lg shadow-blue-950/15 bg-white p-1 sm:p-1.5 transition duration-300 group-hover:scale-105"
               />
             </div>
             <div className="min-w-0">
-              <span className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 block leading-tight truncate">
+              <span className="text-base xs:text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 block leading-tight truncate">
                 {settings?.siteName || (
                   <>
                     Blueprint <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 bg-clip-text text-transparent">Learning Academy</span>

@@ -19,13 +19,13 @@ export default function Footer({ settings }: FooterProps) {
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
         {/* Brand */}
         <div className="sm:col-span-2 space-y-4">
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-5">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-blue-500 to-amber-400 opacity-50 blur-sm"></div>
+              <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-500 via-blue-500 to-amber-400 opacity-55 blur-md"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="relative w-14 h-14 sm:w-16 sm:h-16 object-contain rounded-full ring-2 ring-amber-400 bg-white p-1 shadow-xl shadow-amber-500/20"
+                className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-22 md:h-22 object-contain rounded-full ring-3 ring-amber-400 bg-white p-1.5 shadow-2xl shadow-amber-500/25 transition hover:scale-105"
               />
             </div>
             <div className="min-w-0">
