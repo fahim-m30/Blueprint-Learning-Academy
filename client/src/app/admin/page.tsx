@@ -557,19 +557,19 @@ export default function AdminPortalPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080d1a] text-[#f3f7fc] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-[#3a7bb8] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-[#bccadb]">Loading Administrator Portal...</p>
+          <div className="w-10 h-10 border-4 border-blue-500/40 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-slate-600">Loading Administrator Portal...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-[#f3f7fc]">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       {/* Top Admin Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0b1222] border-b border-slate-800 px-4 sm:px-6 lg:px-8 py-3.5">
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3">
@@ -578,11 +578,11 @@ export default function AdminPortalPage() {
                 alt="Blueprint Learning Academy"
                 className="w-12 h-12 object-contain rounded-full ring-2 ring-[#ffb531] bg-white p-0.5 shadow-md"
               />
-              <span className="text-xl font-black text-white hidden sm:inline">
+              <span className="text-xl font-black text-slate-900 hidden sm:inline">
                 Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>
             </Link>
-            <span className="text-xs bg-red-950/80 border border-red-500 text-red-300 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+            <span className="text-xs bg-red-50 border border-red-200 text-red-700 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" />
               Master Admin Portal
             </span>
@@ -591,7 +591,7 @@ export default function AdminPortalPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleTriggerCleanup}
-              className="px-3 py-1.5 rounded-lg bg-[#0f182c] hover:bg-[#1a2c42] border border-slate-800 text-xs text-[#bccadb] hover:text-white flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
               title="Permanently remove expired courses from database"
             >
               <RefreshCw className="w-3.5 h-3.5 text-[#ffb531]" />
@@ -599,7 +599,7 @@ export default function AdminPortalPage() {
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg border border-slate-800 text-[#bccadb] hover:text-white hover:bg-[#0f182c] transition"
+              className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white transition"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -616,8 +616,8 @@ export default function AdminPortalPage() {
           <div
             className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
               alertBanner.type === 'success'
-                ? 'bg-emerald-950/80 border-emerald-500 text-emerald-200'
-                : 'bg-red-950/80 border-red-500 text-red-200'
+                ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                : 'bg-red-50 border-red-300 text-red-700'
             }`}
           >
             <span>{alertBanner.text}</span>
@@ -629,7 +629,7 @@ export default function AdminPortalPage() {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-800 gap-2 overflow-x-auto pb-1">
+        <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => {
               setActiveMainTab('overview');
@@ -637,8 +637,8 @@ export default function AdminPortalPage() {
             }}
             className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap ${
               activeMainTab === 'overview'
-                ? 'bg-[#3a7bb8] text-white shadow-md'
-                : 'text-[#bccadb] hover:bg-[#0f182c]'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-600 hover:bg-white'
             }`}
           >
             📊 Analytics &amp; Courses Overview
@@ -651,8 +651,8 @@ export default function AdminPortalPage() {
             }}
             className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
               activeMainTab === 'enrollments'
-                ? 'bg-[#3a7bb8] text-white shadow-md'
-                : 'text-[#bccadb] hover:bg-[#0f182c]'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-600 hover:bg-white'
             }`}
           >
             💳 Pending Enrollments
@@ -667,8 +667,8 @@ export default function AdminPortalPage() {
             onClick={() => setActiveMainTab('settings')}
             className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap ${
               activeMainTab === 'settings'
-                ? 'bg-[#3a7bb8] text-white shadow-md'
-                : 'text-[#bccadb] hover:bg-[#0f182c]'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-600 hover:bg-white'
             }`}
           >
             ⚙️ Payment &amp; Site Settings
@@ -678,8 +678,8 @@ export default function AdminPortalPage() {
             onClick={() => setActiveMainTab('security')}
             className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
               activeMainTab === 'security'
-                ? 'bg-[#3a7bb8] text-white shadow-md'
-                : 'text-[#bccadb] hover:bg-[#0f182c]'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-600 hover:bg-white'
             }`}
           >
             🔐 Security &amp; Admin Team
@@ -701,24 +701,24 @@ export default function AdminPortalPage() {
                     setSelectedCourseId(null);
                     setSelectedCourseData(null);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition shadow-sm self-start group"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 hover:text-slate-900 text-xs font-bold transition shadow-sm self-start group"
                 >
                   <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-1 transition" />
                   <span>← Back to All Courses (সকল কোর্স তালিকা)</span>
                 </button>
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-sky-400 font-bold bg-sky-950/60 border border-sky-800/40 px-3 py-1 rounded-full">
+                  <span className="text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
                     Course Workspace Mode: {selectedCourseData.title}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-[#0f182c] border-2 border-[#3a7bb8] rounded-2xl p-6 shadow-2xl space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+              <div className="bg-white border-2 border-blue-500/40 rounded-2xl p-6 shadow-2xl space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                   <div>
-                    <span className="text-xs text-[#7fb8ea] font-semibold uppercase">Currently Managing:</span>
-                    <h3 className="text-xl font-extrabold text-white">{selectedCourseData.title}</h3>
-                    <p className="text-xs text-[#bccadb] mt-0.5">
+                    <span className="text-xs text-blue-700 font-semibold uppercase">Currently Managing:</span>
+                    <h3 className="text-xl font-extrabold text-slate-900">{selectedCourseData.title}</h3>
+                    <p className="text-xs text-slate-600 mt-0.5">
                       Fee: ৳{selectedCourseData.price} | Duration: {selectedCourseData.durationDays} Days | Classes: {selectedCourseData.totalClasses}
                     </p>
                   </div>
@@ -740,7 +740,7 @@ export default function AdminPortalPage() {
                     </button>
                     <button
                       onClick={() => handleDeleteCourse(selectedCourseData._id)}
-                      className="px-3.5 py-2 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-500 text-red-200 text-xs font-bold flex items-center gap-1.5 transition"
+                      className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-1.5 transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Delete Course
                     </button>
@@ -748,11 +748,11 @@ export default function AdminPortalPage() {
                 </div>
 
                 {/* Sub Tabs Inside Course Hub */}
-                <div className="flex border-b border-slate-800 gap-2 overflow-x-auto pb-1 text-xs">
+                <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 text-xs">
                   <button
                     onClick={() => setCourseSubTab('students')}
                     className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-[#bccadb] hover:bg-[#1a2c42]'
+                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
                     <Users className="w-3.5 h-3.5" />
@@ -762,7 +762,7 @@ export default function AdminPortalPage() {
                   <button
                     onClick={() => setCourseSubTab('videos')}
                     className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-[#bccadb] hover:bg-[#1a2c42]'
+                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
                     <Video className="w-3.5 h-3.5" />
@@ -772,7 +772,7 @@ export default function AdminPortalPage() {
                   <button
                     onClick={() => setCourseSubTab('live')}
                     className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'live' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-[#bccadb] hover:bg-[#1a2c42]'
+                      courseSubTab === 'live' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
                     <Calendar className="w-3.5 h-3.5" />
@@ -782,7 +782,7 @@ export default function AdminPortalPage() {
                   <button
                     onClick={() => setCourseSubTab('tasks')}
                     className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'tasks' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-[#bccadb] hover:bg-[#1a2c42]'
+                      courseSubTab === 'tasks' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
                     <ClipboardList className="w-3.5 h-3.5" />
@@ -792,7 +792,7 @@ export default function AdminPortalPage() {
                   <button
                     onClick={() => setCourseSubTab('chat')}
                     className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'chat' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-[#bccadb] hover:bg-[#1a2c42]'
+                      courseSubTab === 'chat' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
@@ -803,12 +803,12 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 1: ENROLLED STUDENTS WITH VISIBLE PASSWORDS & BLOCK ACTION */}
                 {courseSubTab === 'students' && (
                   <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#08111d] p-4 rounded-xl border border-slate-700/80">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                       <div>
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Users className="w-4 h-4 text-[#7fb8ea]" /> Enrolled Students ({courseStudents.length})
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-700" /> Enrolled Students ({courseStudents.length})
                         </h4>
-                        <p className="text-xs text-[#bccadb] mt-0.5">
+                        <p className="text-xs text-slate-600 mt-0.5">
                           Students registered for this course. Passwords are provided so you can assist students directly.
                         </p>
                       </div>
@@ -829,13 +829,13 @@ export default function AdminPortalPage() {
                     </div>
 
                     {courseStudents.length === 0 ? (
-                      <div className="p-8 text-center text-xs text-[#bccadb] bg-[#08111d] rounded-xl border border-slate-800">
+                      <div className="p-8 text-center text-xs text-slate-600 bg-slate-50 rounded-xl border border-slate-200">
                         No students enrolled in this course yet.
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border border-slate-700 rounded-xl overflow-hidden min-w-[640px]">
-                          <thead className="bg-[#0b1222] text-[#7fb8ea] font-semibold border-b border-slate-800">
+                        <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[640px]">
+                          <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
                             <tr>
                               <th className="p-3">Student Name</th>
                               <th className="p-3">Mobile</th>
@@ -845,13 +845,13 @@ export default function AdminPortalPage() {
                               <th className="p-3 text-right">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#1a2c42] bg-[#08111d]">
+                          <tbody className="divide-y divide-slate-200 bg-slate-50">
                             {courseStudents.map((st) => (
-                              <tr key={st._id} className="hover:bg-[#0f182c]">
-                                <td className="p-3 font-bold text-white">{st.name}</td>
-                                <td className="p-3 font-mono text-[#bccadb]">{st.phone}</td>
-                                <td className="p-3 font-mono text-[#7fb8ea]">{st.email}</td>
-                                <td className="p-3 font-mono font-bold text-[#ffb531] bg-[#0f182c] px-2 py-1 rounded">
+                              <tr key={st._id} className="hover:bg-white">
+                                <td className="p-3 font-bold text-slate-900">{st.name}</td>
+                                <td className="p-3 font-mono text-slate-600">{st.phone}</td>
+                                <td className="p-3 font-mono text-blue-700">{st.email}</td>
+                                <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
                                   {st.plainPasswordForAdmin || 'Hidden (Hashed)'}
                                 </td>
                                 <td className="p-3">
@@ -860,7 +860,7 @@ export default function AdminPortalPage() {
                                       st.status === 'active'
                                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                         : st.status === 'blocked'
-                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        ? 'bg-red-500/20 text-red-400 border border-red-300/30'
                                         : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                                     }`}
                                   >
@@ -883,7 +883,7 @@ export default function AdminPortalPage() {
                                   ) : (
                                     <button
                                       onClick={() => setBlockingUser(st)}
-                                      className="px-3 py-1 bg-red-950 hover:bg-red-900 border border-red-500 text-red-300 rounded text-[11px] font-bold transition"
+                                      className="px-3 py-1 bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded text-[11px] font-bold transition"
                                     >
                                       Block Student
                                     </button>
@@ -901,52 +901,52 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 2: PUSH YOUTUBE VIDEOS */}
                 {courseSubTab === 'videos' && (
                   <div className="space-y-6">
-                    <form onSubmit={handleAddVideo} className="bg-[#08111d] border border-slate-800 p-4 rounded-xl space-y-3">
-                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <form onSubmit={handleAddVideo} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <PlusCircle className="w-4 h-4 text-[#ffb531]" />
                         Upload / Push New YouTube Video Lecture
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Class Video Title *</label>
+                          <label className="block text-slate-600 mb-1">Class Video Title *</label>
                           <input
                             type="text"
                             required
                             value={newVideoTitle}
                             onChange={(e) => setNewVideoTitle(e.target.value)}
                             placeholder="e.g. Class 03: Rebar Detailing and BBS"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">YouTube URL / Link *</label>
+                          <label className="block text-slate-600 mb-1">YouTube URL / Link *</label>
                           <input
                             type="url"
                             required
                             value={newVideoUrl}
                             onChange={(e) => setNewVideoUrl(e.target.value)}
                             placeholder="https://www.youtube.com/watch?v=..."
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Duration (Optional)</label>
+                          <label className="block text-slate-600 mb-1">Duration (Optional)</label>
                           <input
                             type="text"
                             value={newVideoDuration}
                             onChange={(e) => setNewVideoDuration(e.target.value)}
                             placeholder="e.g. 1 hr 15 mins"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Lecture Note / Instructions</label>
+                          <label className="block text-slate-600 mb-1">Lecture Note / Instructions</label>
                           <input
                             type="text"
                             value={newVideoNote}
                             onChange={(e) => setNewVideoNote(e.target.value)}
                             placeholder="e.g. Download BBS excel from resources tab"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                       </div>
@@ -962,19 +962,19 @@ export default function AdminPortalPage() {
 
                     {/* Existing Videos List */}
                     <div className="space-y-2">
-                      <h4 className="text-xs font-bold text-[#bccadb]">Published Videos ({selectedCourseData.videos?.length || 0}):</h4>
+                      <h4 className="text-xs font-bold text-slate-600">Published Videos ({selectedCourseData.videos?.length || 0}):</h4>
                       {selectedCourseData.videos?.map((vid) => (
                         <div
                           key={vid._id}
-                          className="bg-[#08111d] border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs"
+                          className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between text-xs"
                         >
                           <div>
-                            <span className="font-bold text-white block">{vid.title}</span>
-                            <span className="text-[#7fb8ea] font-mono text-[11px] truncate max-w-sm block">
+                            <span className="font-bold text-slate-900 block">{vid.title}</span>
+                            <span className="text-blue-700 font-mono text-[11px] truncate max-w-sm block">
                               {vid.youtubeUrl}
                             </span>
                           </div>
-                          <span className="text-[#bccadb] text-[11px]">{vid.duration}</span>
+                          <span className="text-slate-600 text-[11px]">{vid.duration}</span>
                         </div>
                       ))}
                     </div>
@@ -984,60 +984,60 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 3: SCHEDULE LIVE CLASS */}
                 {courseSubTab === 'live' && (
                   <div className="space-y-6">
-                    <form onSubmit={handleAddLiveClass} className="bg-[#08111d] border border-slate-800 p-4 rounded-xl space-y-3">
-                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <form onSubmit={handleAddLiveClass} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-[#ffb531]" />
                         Schedule Online Live Class (Google Meet / Zoom)
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Class Topic / Headline *</label>
+                          <label className="block text-slate-600 mb-1">Class Topic / Headline *</label>
                           <input
                             type="text"
                             required
                             value={newLiveTitle}
                             onChange={(e) => setNewLiveTitle(e.target.value)}
                             placeholder="e.g. Live Structural Drawing Coordination"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Google Meet / Meeting Link *</label>
+                          <label className="block text-slate-600 mb-1">Google Meet / Meeting Link *</label>
                           <input
                             type="url"
                             required
                             value={newLiveLink}
                             onChange={(e) => setNewLiveLink(e.target.value)}
                             placeholder="https://meet.google.com/abc-defg-hij"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Date *</label>
+                          <label className="block text-slate-600 mb-1">Date *</label>
                           <input
                             type="date"
                             required
                             value={newLiveDate}
                             onChange={(e) => setNewLiveDate(e.target.value)}
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Time Slot *</label>
+                          <label className="block text-slate-600 mb-1">Time Slot *</label>
                           <input
                             type="text"
                             required
                             value={newLiveTime}
                             onChange={(e) => setNewLiveTime(e.target.value)}
                             placeholder="e.g. 08:30 PM (BST)"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                       </div>
                       <div className="flex justify-end pt-2">
                         <button
                           type="submit"
-                          className="px-5 py-2 bg-[#3a7bb8] hover:bg-[#3a7bb8]/80 text-white font-bold text-xs rounded-lg shadow transition"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-700/80 text-white font-bold text-xs rounded-lg shadow transition"
                         >
                           Publish Live Class Schedule
                         </button>
@@ -1046,15 +1046,15 @@ export default function AdminPortalPage() {
 
                     {/* Existing Live Classes */}
                     <div className="space-y-2">
-                      <h4 className="text-xs font-bold text-[#bccadb]">Scheduled Sessions:</h4>
+                      <h4 className="text-xs font-bold text-slate-600">Scheduled Sessions:</h4>
                       {selectedCourseData.liveClasses?.map((item) => (
                         <div
                           key={item._id}
-                          className="bg-[#08111d] border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs"
+                          className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between text-xs"
                         >
                           <div>
-                            <span className="font-bold text-white">{item.title}</span>
-                            <span className="text-[#bccadb] block text-[11px]">
+                            <span className="font-bold text-slate-900">{item.title}</span>
+                            <span className="text-slate-600 block text-[11px]">
                               {new Date(item.classDate).toLocaleDateString()} at {item.classTime}
                             </span>
                           </div>
@@ -1062,7 +1062,7 @@ export default function AdminPortalPage() {
                             href={item.meetingLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#7fb8ea] underline flex items-center gap-1"
+                            className="text-blue-700 underline flex items-center gap-1"
                           >
                             Meet Link <ExternalLink className="w-3 h-3" />
                           </a>
@@ -1075,42 +1075,42 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 4: TASKS & SUBMISSIONS */}
                 {courseSubTab === 'tasks' && (
                   <div className="space-y-6">
-                    <form onSubmit={handleAddTask} className="bg-[#08111d] border border-slate-800 p-4 rounded-xl space-y-3">
-                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <form onSubmit={handleAddTask} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <ClipboardList className="w-4 h-4 text-[#ffb531]" />
                         Assign New Task / Homework
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Task Title *</label>
+                          <label className="block text-slate-600 mb-1">Task Title *</label>
                           <input
                             type="text"
                             required
                             value={newTaskTitle}
                             onChange={(e) => setNewTaskTitle(e.target.value)}
                             placeholder="e.g. Prepare Rebar BBS for Footing"
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[#bccadb] mb-1">Submission Deadline *</label>
+                          <label className="block text-slate-600 mb-1">Submission Deadline *</label>
                           <input
                             type="date"
                             required
                             value={newTaskDeadline}
                             onChange={(e) => setNewTaskDeadline(e.target.value)}
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
                         <div className="sm:col-span-2">
-                          <label className="block text-[#bccadb] mb-1">Instructions &amp; Requirements *</label>
+                          <label className="block text-slate-600 mb-1">Instructions &amp; Requirements *</label>
                           <textarea
                             rows={2}
                             required
                             value={newTaskDesc}
                             onChange={(e) => setNewTaskDesc(e.target.value)}
                             placeholder="Describe what the student needs to submit..."
-                            className="w-full bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           ></textarea>
                         </div>
                       </div>
@@ -1126,33 +1126,33 @@ export default function AdminPortalPage() {
 
                     {/* Student Submissions List */}
                     <div className="space-y-3">
-                      <h4 className="text-xs font-bold text-white">Student Homework Submissions ({courseSubmissions.length}):</h4>
+                      <h4 className="text-xs font-bold text-slate-900">Student Homework Submissions ({courseSubmissions.length}):</h4>
                       {courseSubmissions.length === 0 ? (
-                        <p className="text-xs text-[#bccadb] italic">No submissions yet for this course.</p>
+                        <p className="text-xs text-slate-600 italic">No submissions yet for this course.</p>
                       ) : (
                         courseSubmissions.map((sub) => (
                           <div
                             key={sub._id}
-                            className="bg-[#08111d] border border-slate-800 p-4 rounded-xl space-y-2 text-xs"
+                            className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2 text-xs"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-white">
+                              <span className="font-bold text-slate-900">
                                 {sub.studentName} ({sub.studentEmail})
                               </span>
-                              <span className="text-[#bccadb]">
+                              <span className="text-slate-600">
                                 Submitted on {new Date(sub.submittedAt).toLocaleDateString()}
                               </span>
                             </div>
                             <p className="text-[#ffb531] font-semibold">Task: {sub.taskTitle}</p>
                             {sub.submissionLink && (
-                              <p className="text-[#7fb8ea]">
+                              <p className="text-blue-700">
                                 Link:{' '}
                                 <a href={sub.submissionLink} target="_blank" rel="noopener noreferrer" className="underline">
                                   {sub.submissionLink}
                                 </a>
                               </p>
                             )}
-                            {sub.submissionText && <p className="text-[#bccadb]">{sub.submissionText}</p>}
+                            {sub.submissionText && <p className="text-slate-600">{sub.submissionText}</p>}
                           </div>
                         ))
                       )}
@@ -1162,24 +1162,24 @@ export default function AdminPortalPage() {
 
                 {/* HUB TAB 5: ADMIN CHAT WITH STUDENTS */}
                 {courseSubTab === 'chat' && (
-                  <div className="bg-[#08111d] border border-slate-800 rounded-xl overflow-hidden flex flex-col h-[450px]">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[450px]">
                     <div className="flex-1 p-4 overflow-y-auto space-y-3">
                       {courseChat.length === 0 ? (
-                        <p className="text-center py-8 text-xs text-[#bccadb]">No discussion in this course room yet.</p>
+                        <p className="text-center py-8 text-xs text-slate-600">No discussion in this course room yet.</p>
                       ) : (
                         courseChat.map((msg, idx) => {
                           const isAdmin = msg.senderRole === 'admin';
 
                           return (
                             <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
-                              <span className="text-[10px] text-[#bccadb] mb-0.5 px-1">
+                              <span className="text-[10px] text-slate-600 mb-0.5 px-1">
                                 {msg.senderName} ({msg.senderRole})
                               </span>
                               <div
                                 className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-xs ${
                                   isAdmin
-                                    ? 'bg-[#3a7bb8] text-white rounded-br-none'
-                                    : 'bg-[#0f182c] text-white border border-slate-800 rounded-bl-none'
+                                    ? 'bg-blue-700 text-white rounded-br-none'
+                                    : 'bg-white text-slate-900 border border-slate-200 rounded-bl-none'
                                 }`}
                               >
                                 {msg.message}
@@ -1190,13 +1190,13 @@ export default function AdminPortalPage() {
                       )}
                     </div>
 
-                    <form onSubmit={handleSendAdminChat} className="p-3 bg-[#0b1222] border-t border-slate-800 flex gap-2">
+                    <form onSubmit={handleSendAdminChat} className="p-3 bg-white border-t border-slate-200 flex gap-2">
                       <input
                         type="text"
                         value={adminChatMsg}
                         onChange={(e) => setAdminChatMsg(e.target.value)}
                         placeholder="Reply to students in this course..."
-                        className="flex-1 bg-[#0f182c] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                        className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 outline-none"
                       />
                       <button
                         type="submit"
@@ -1214,47 +1214,47 @@ export default function AdminPortalPage() {
             <div className="space-y-8 animate-in fade-in duration-200">
               {/* Top Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Total Enrolled Students</span>
-                <p className="text-3xl font-extrabold text-white flex items-center gap-2">
-                  <Users className="w-6 h-6 text-[#7fb8ea]" />
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-slate-600">Total Enrolled Students</span>
+                <p className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-700" />
                   {stats?.totalStudents || 0}
                 </p>
                 <span className="text-[11px] text-emerald-400">Verified learners across batches</span>
               </div>
 
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Total Verified Revenue</span>
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-slate-600">Total Verified Revenue</span>
                 <p className="text-3xl font-extrabold text-[#ffb531] flex items-center gap-2">
                   ৳{(stats?.totalRevenue || 0).toLocaleString()}
                 </p>
-                <span className="text-[11px] text-[#bccadb]">From confirmed bKash/Nagad payments</span>
+                <span className="text-[11px] text-slate-600">From confirmed bKash/Nagad payments</span>
               </div>
 
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Pending Verification</span>
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-slate-600">Pending Verification</span>
                 <p className="text-3xl font-extrabold text-amber-400 flex items-center gap-2">
                   {stats?.pendingEnrollments || 0}
                 </p>
-                <span className="text-[11px] text-[#7fb8ea]">TrxID submissions awaiting approval</span>
+                <span className="text-[11px] text-blue-700">TrxID submissions awaiting approval</span>
               </div>
 
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Active Courses</span>
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-slate-600">Active Courses</span>
                 <p className="text-3xl font-extrabold text-[#50c878] flex items-center gap-2">
                   <BookOpen className="w-6 h-6 text-[#50c878]" />
                   {coursesList.length}
                 </p>
-                <span className="text-[11px] text-[#bccadb]">Published on academy catalog</span>
+                <span className="text-[11px] text-slate-600">Published on academy catalog</span>
               </div>
             </div>
 
             {/* COURSE BUTTONS SECTION (Requirement 1: 'end jei koita course create koreche seigular button hisabe thakbe') */}
-            <div className="bg-[#0b1222] border border-slate-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Course Management Buttons</h2>
-                  <p className="text-xs text-[#bccadb]">
+                  <h2 className="text-lg font-bold text-slate-900">Course Management Buttons</h2>
+                  <p className="text-xs text-slate-600">
                     Click any course button below to open its dedicated hub (add videos, schedule live classes, view enrolled students &amp; login credentials, or chat).
                   </p>
                 </div>
@@ -1277,26 +1277,26 @@ export default function AdminPortalPage() {
                       onClick={() => loadCourseHub(c._id)}
                       className={`text-left p-4 rounded-xl border transition flex flex-col justify-between gap-3 ${
                         isSelected
-                          ? 'bg-[#1a2c42] border-[#ffb531] shadow-lg shadow-[#ffb531]/10'
-                          : 'bg-[#0f182c] border-slate-800 hover:border-[#3a7bb8] hover:bg-[#142339]'
+                          ? 'bg-slate-100 border-[#ffb531] shadow-lg shadow-[#ffb531]/10'
+                          : 'bg-white border-slate-200 hover:border-blue-500/40 hover:bg-slate-50'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between text-[11px] mb-1">
                           <span className="text-[#ffb531] font-bold">৳{c.price.toLocaleString()}</span>
-                          <span className="text-[#7fb8ea] font-medium">{c.durationDays} Days</span>
+                          <span className="text-blue-700 font-medium">{c.durationDays} Days</span>
                         </div>
-                        <h3 className="text-sm font-bold text-white line-clamp-1">{c.title}</h3>
+                        <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{c.title}</h3>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-[#bccadb] pt-2 border-t border-[#1a2c42]">
+                      <div className="flex items-center justify-between text-[11px] text-slate-600 pt-2 border-t border-slate-200">
                         <span className="flex items-center gap-1">
                           <Users className="w-3 h-3 text-emerald-400" /> {c.studentCount} Students
                         </span>
                         {c.pendingCount > 0 && (
                           <span className="text-[#ffb531] font-bold">({c.pendingCount} Pending)</span>
                         )}
-                        <span className={`text-[10px] font-bold ${isSelected ? 'text-[#ffb531]' : 'text-[#7fb8ea]'}`}>
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-[#ffb531]' : 'text-blue-700'}`}>
                           {isSelected ? '● Active Hub' : 'Manage Course →'}
                         </span>
                       </div>
@@ -1315,20 +1315,20 @@ export default function AdminPortalPage() {
         {activeMainTab === 'enrollments' && (
           <div className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-white">Pending &amp; Processed Enrollments</h2>
-              <p className="text-xs text-[#bccadb]">
+              <h2 className="text-lg font-bold text-slate-900">Pending &amp; Processed Enrollments</h2>
+              <p className="text-xs text-slate-600">
                 Verify the Transaction ID against your bKash/Nagad statement. Clicking &quot;Approve&quot; automatically creates the student credentials and emails them to the student.
               </p>
             </div>
 
             {enrollments.length === 0 ? (
-              <div className="bg-[#0f182c] border border-slate-800 rounded-xl p-8 text-center text-xs text-[#bccadb]">
+              <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-600">
                 No enrollment submissions found.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border border-slate-700 rounded-xl overflow-hidden min-w-[850px]">
-                  <thead className="bg-[#0b1222] text-[#7fb8ea] font-semibold border-b border-slate-800">
+                <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[850px]">
+                  <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
                     <tr>
                       <th className="p-3">Applicant Name</th>
                       <th className="p-3">Contact</th>
@@ -1341,21 +1341,21 @@ export default function AdminPortalPage() {
                       <th className="p-3 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1a2c42] bg-[#08111d]">
+                  <tbody className="divide-y divide-slate-200 bg-slate-50">
                     {enrollments.map((en) => (
-                      <tr key={en._id} className="hover:bg-[#0f182c]">
-                        <td className="p-3 font-bold text-white">
+                      <tr key={en._id} className="hover:bg-white">
+                        <td className="p-3 font-bold text-slate-900">
                           {en.studentName}
-                          <span className="block text-[10px] text-[#bccadb]">{en.studentAddress}</span>
+                          <span className="block text-[10px] text-slate-600">{en.studentAddress}</span>
                         </td>
                         <td className="p-3">
-                          <span className="block font-mono text-[#bccadb]">{en.studentPhone}</span>
-                          <span className="block text-[#7fb8ea]">{en.studentEmail}</span>
+                          <span className="block font-mono text-slate-600">{en.studentPhone}</span>
+                          <span className="block text-blue-700">{en.studentEmail}</span>
                         </td>
-                        <td className="p-3 font-semibold text-white max-w-xs">{en.courseTitle}</td>
-                        <td className="p-3 font-medium text-[#bccadb]">{en.paymentMethod}</td>
-                        <td className="p-3 font-mono text-white">{en.senderNumber}</td>
-                        <td className="p-3 font-mono font-bold text-[#ffb531] bg-[#0f182c] px-2 py-1 rounded">
+                        <td className="p-3 font-semibold text-slate-900 max-w-xs">{en.courseTitle}</td>
+                        <td className="p-3 font-medium text-slate-600">{en.paymentMethod}</td>
+                        <td className="p-3 font-mono text-slate-900">{en.senderNumber}</td>
+                        <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
                           {en.transactionId}
                         </td>
                         <td className="p-3 font-bold text-emerald-400">৳{en.amount.toLocaleString()}</td>
@@ -1365,14 +1365,14 @@ export default function AdminPortalPage() {
                               en.status === 'approved'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : en.status === 'rejected'
-                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                ? 'bg-red-500/20 text-red-400 border border-red-300/30'
                                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                             }`}
                           >
                             {en.status.toUpperCase()}
                           </span>
                           {en.generatedPassword && (
-                            <span className="block text-[10px] text-[#bccadb] font-mono mt-0.5">
+                            <span className="block text-[10px] text-slate-600 font-mono mt-0.5">
                               Pass: {en.generatedPassword}
                             </span>
                           )}
@@ -1388,7 +1388,7 @@ export default function AdminPortalPage() {
                               </button>
                               <button
                                 onClick={() => handleRejectEnrollment(en._id)}
-                                className="px-2.5 py-1.5 rounded-lg border border-red-500 text-red-300 hover:bg-red-950 text-xs transition"
+                                className="px-2.5 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs transition"
                               >
                                 Reject
                               </button>
@@ -1408,13 +1408,13 @@ export default function AdminPortalPage() {
             TAB 3: SITE SETTINGS & PAYMENT NUMBERS
         ======================================================== */}
         {activeMainTab === 'settings' && siteSettings && (
-          <form onSubmit={handleSaveSettings} className="bg-[#0f182c] border border-slate-800 rounded-2xl p-6 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <form onSubmit={handleSaveSettings} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Globe className="w-5 h-5 text-amber-400" /> Homepage Content, Instructor Profile &amp; Gateway Settings
                 </h2>
-                <p className="text-xs text-[#bccadb]">
+                <p className="text-xs text-slate-600">
                   Change instructor photo, names, headings, experience, phone numbers, and bKash/Nagad accounts. Updates appear live across the site immediately.
                 </p>
               </div>
@@ -1427,15 +1427,15 @@ export default function AdminPortalPage() {
             </div>
 
             {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
-            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-5">
-              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
+              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
                 👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications (ইন্সট্রাক্টর প্রোফাইল ও ছবি)
               </h3>
               
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Photo Preview and File Uploader */}
-                <div className="w-full md:w-auto flex flex-col items-center gap-3 p-4 bg-[#0f182c] border border-slate-700/80 rounded-2xl shrink-0">
-                  <span className="text-[11px] font-bold text-[#bccadb] uppercase tracking-wider">Instructor Photo</span>
+                <div className="w-full md:w-auto flex flex-col items-center gap-3 p-4 bg-white border border-slate-200 rounded-2xl shrink-0">
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Instructor Photo</span>
                   <div className="relative w-28 h-36 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-xl bg-slate-900 group">
                     <img
                       src={siteSettings.instructorImage || '/instructor.jpg?v=2'}
@@ -1461,7 +1461,7 @@ export default function AdminPortalPage() {
                 {/* Details Form Grid */}
                 <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Instructor Full Name (ইন্সট্রাক্টরের পুরো নাম) *
                     </label>
                     <input
@@ -1470,12 +1470,12 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorName || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorName: e.target.value })}
                       placeholder="Engr. Md Abdul Mazid"
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Degree &amp; University (ডিগ্রি ও বিশ্ববিদ্যালয়) *
                     </label>
                     <input
@@ -1484,12 +1484,12 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorDegree || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorDegree: e.target.value })}
                       placeholder="B.Sc. in Civil Engineering (BUET)"
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Full Experience Label (অভিজ্ঞতা শিরোনাম)
                     </label>
                     <input
@@ -1497,12 +1497,12 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorExp || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorExp: e.target.value })}
                       placeholder="10+ Years On Real Projects in Bangladesh"
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Short Experience Badge (ছোট ব্যাজ)
                     </label>
                     <input
@@ -1510,12 +1510,12 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorShortExp || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorShortExp: e.target.value })}
                       placeholder="10+ Yrs Exp"
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Instructor Image URL (বা ছবির সরাসরি লিংক)
                     </label>
                     <input
@@ -1523,12 +1523,12 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorImage || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorImage: e.target.value })}
                       placeholder="/instructor.jpg?v=2 or https://..."
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none text-[11px] font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none text-[11px] font-mono"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Detailed Bio / Mission Paragraph (শিক্ষকের বিস্তারিত বিবরণ)
                     </label>
                     <textarea
@@ -1536,160 +1536,160 @@ export default function AdminPortalPage() {
                       value={siteSettings.instructorBio || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, instructorBio: e.target.value })}
                       placeholder="Engr. Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience..."
-                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none leading-relaxed"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none leading-relaxed"
                     ></textarea>
                   </div>
                 </div>
               </div>
 
               {/* Two Feature Highlights */}
-              <div className="border-t border-slate-800/80 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-3 bg-[#0f182c] border border-slate-800 rounded-xl space-y-2">
+              <div className="border-t border-slate-200 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
                   <label className="block text-amber-400 font-bold">Feature 1: Title &amp; Description (ফিচার ১)</label>
                   <input
                     type="text"
                     value={siteSettings.feature1Title || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, feature1Title: e.target.value })}
                     placeholder="Real Developer Drawings"
-                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.feature1Desc || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, feature1Desc: e.target.value })}
                     placeholder="Learn using actual architectural, structural, and MEP drawings..."
-                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[#bccadb] outline-none text-[11px]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 outline-none text-[11px]"
                   />
                 </div>
 
-                <div className="p-3 bg-[#0f182c] border border-slate-800 rounded-xl space-y-2">
+                <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
                   <label className="block text-emerald-400 font-bold">Feature 2: Title &amp; Description (ফিচার ২)</label>
                   <input
                     type="text"
                     value={siteSettings.feature2Title || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, feature2Title: e.target.value })}
                     placeholder="Live Site Situations"
-                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.feature2Desc || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, feature2Desc: e.target.value })}
                     placeholder="Master casting SOPs, rebar BBS optimization..."
-                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[#bccadb] outline-none text-[11px]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 outline-none text-[11px]"
                   />
                 </div>
               </div>
             </div>
 
             {/* SECTION 2: HOMEPAGE STATS COUNTERS & TOP BADGE */}
-            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-sky-400 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-2.5">
                 📊 Homepage Badges &amp; Stat Numbers (পরিসংখ্যান ও টপ ব্যাজ)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Total Courses Count (কোর্স সংখ্যা)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Total Courses Count (কোর্স সংখ্যা)</label>
                   <input
                     type="text"
                     value={siteSettings.statsCourses || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsCourses: e.target.value })}
                     placeholder="6+"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Experience Stat (অভিজ্ঞতা)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Experience Stat (অভিজ্ঞতা)</label>
                   <input
                     type="text"
                     value={siteSettings.statsExperience || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsExperience: e.target.value })}
                     placeholder="10+ Yrs"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Mentor Institution (প্রতিষ্ঠান)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Mentor Institution (প্রতিষ্ঠান)</label>
                   <input
                     type="text"
                     value={siteSettings.statsMentorTag || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsMentorTag: e.target.value })}
                     placeholder="BUET"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Top Hero Badge Text</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Top Hero Badge Text</label>
                   <input
                     type="text"
                     value={siteSettings.heroBadgeText || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroBadgeText: e.target.value })}
                     placeholder="Bangladesh's #1 Practical Civil Engineering Academy"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
-            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2.5">
                 🌐 Academy Branding, Hero Title &amp; Bengali Note (মূল শিরোনাম)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Academy / Platform Name</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Academy / Platform Name</label>
                   <input
                     type="text"
                     value={siteSettings.siteName || 'Blueprint Learning Academy'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Bengali Tagline Note (বাংলা ব্যানার)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Bengali Tagline Note (বাংলা ব্যানার)</label>
                   <input
                     type="text"
                     value={siteSettings.heroBengaliNote || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroBengaliNote: e.target.value })}
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Main Headline Title (প্রধান হেডলাইন)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Main Headline Title (প্রধান হেডলাইন)</label>
                   <input
                     type="text"
                     value={siteSettings.heroTitle}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Subtitle Description (উপ-বিবরণ)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Subtitle Description (উপ-বিবরণ)</label>
                   <textarea
                     rows={2}
                     value={siteSettings.heroSubtitle || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   ></textarea>
                 </div>
               </div>
             </div>
 
             {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
-            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
                 📞 Official Helpline &amp; WhatsApp Numbers (ফোন নম্বর ও সাপোর্ট)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                  <label className="block text-slate-600 mb-1 font-semibold">
                     Contact Helpline Phone * (ফোন নম্বর)
                   </label>
                   <input
@@ -1698,13 +1698,13 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactPhone}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
-                  <span className="text-[10px] text-[#7fb8ea]">Appears in header, footer &amp; direct calling</span>
+                  <span className="text-[10px] text-blue-700">Appears in header, footer &amp; direct calling</span>
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                  <label className="block text-slate-600 mb-1 font-semibold">
                     WhatsApp Number (with country code e.g. 880) *
                   </label>
                   <input
@@ -1713,13 +1713,13 @@ export default function AdminPortalPage() {
                     value={siteSettings.whatsappNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
                     placeholder="88013XXXXXXXX"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                   <span className="text-[10px] text-emerald-400">Used for direct WhatsApp chat button links</span>
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">
+                  <label className="block text-slate-600 mb-1 font-semibold">
                     Official Support Email * (ইমেইল ঠিকানা)
                   </label>
                   <input
@@ -1728,71 +1728,71 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactEmail}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
                     placeholder="info@blueprintlearningacademy.com"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
-                  <span className="text-[10px] text-[#7fb8ea]">Displayed in contact links &amp; email notifications</span>
+                  <span className="text-[10px] text-blue-700">Displayed in contact links &amp; email notifications</span>
                 </div>
               </div>
             </div>
 
             {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
-            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 border-b border-slate-200 pb-2.5">
                 💳 bKash, Nagad &amp; Rocket Payment Numbers (পেমেন্ট নম্বরসমূহ)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">bKash Number *</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">bKash Number *</label>
                   <input
                     type="text"
                     required
                     value={siteSettings.bkashNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.bkashType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-[#0f182c] border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                    className="w-full mt-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] text-slate-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Nagad Number *</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Nagad Number *</label>
                   <input
                     type="text"
                     required
                     value={siteSettings.nagadNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.nagadType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-[#0f182c] border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                    className="w-full mt-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] text-slate-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Rocket Number</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Rocket Number</label>
                   <input
                     type="text"
                     value={siteSettings.rocketNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
                     placeholder="013XXXXXXXX-X"
-                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-800">
+            <div className="flex justify-end pt-4 border-t border-slate-200">
               <button
                 type="submit"
                 className="px-8 py-3 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-xl transition"
@@ -1809,23 +1809,23 @@ export default function AdminPortalPage() {
         {activeMainTab === 'security' && (
           <div className="space-y-8">
             {/* PART 1: PASSWORD CHANGE VIA EMAIL VERIFICATION */}
-            <div className="bg-[#0f182c] border-2 border-[#3a7bb8] rounded-2xl p-6 shadow-xl space-y-6">
+            <div className="bg-white border-2 border-blue-500/40 rounded-2xl p-6 shadow-xl space-y-6">
               <div>
                 <span className="text-xs text-[#ffb531] font-bold uppercase tracking-wider block">
                   Security Authentication
                 </span>
-                <h2 className="text-lg font-bold text-white mt-1">
+                <h2 className="text-lg font-bold text-slate-900 mt-1">
                   Change Administrator Password via Email Verification (OTP)
                 </h2>
-                <p className="text-xs text-[#bccadb]">
+                <p className="text-xs text-slate-600">
                   To change your password, request a secure 6-digit one-time verification code to your registered email address.
                 </p>
               </div>
 
               {!otpSent ? (
-                <form onSubmit={handleRequestOtp} className="max-w-lg space-y-3 text-xs bg-[#08111d] p-5 rounded-xl border border-slate-800">
+                <form onSubmit={handleRequestOtp} className="max-w-lg space-y-3 text-xs bg-slate-50 p-5 rounded-xl border border-slate-200">
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Your Registered Administrator Email Address *
                     </label>
                     <input
@@ -1834,7 +1834,7 @@ export default function AdminPortalPage() {
                       value={otpEmail}
                       onChange={(e) => setOtpEmail(e.target.value)}
                       placeholder="admin@careerpath.com"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
                   </div>
                   <div className="pt-2">
@@ -1848,13 +1848,13 @@ export default function AdminPortalPage() {
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleVerifyOtp} className="max-w-lg space-y-4 text-xs bg-[#08111d] p-5 rounded-xl border border-[#ffb531]">
-                  <div className="p-3 bg-[#0f182c] border border-emerald-500 rounded-lg text-emerald-300">
+                <form onSubmit={handleVerifyOtp} className="max-w-lg space-y-4 text-xs bg-slate-50 p-5 rounded-xl border border-[#ffb531]">
+                  <div className="p-3 bg-white border border-emerald-500 rounded-lg text-emerald-800">
                     ✅ A 6-digit verification code has been dispatched to <strong>{otpEmail}</strong> (valid for 10 minutes).
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Enter 6-Digit Verification Code (OTP) *
                     </label>
                     <input
@@ -1864,12 +1864,12 @@ export default function AdminPortalPage() {
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
                       placeholder="e.g. 482915"
-                      className="w-full bg-[#0f182c] border border-[#ffb531] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-[#ffb531] text-center font-bold outline-none"
+                      className="w-full bg-white border border-[#ffb531] rounded-lg px-3 py-2.5 text-lg font-mono tracking-widest text-[#ffb531] text-center font-bold outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                    <label className="block text-slate-600 mb-1 font-semibold">
                       Enter New Secure Password *
                     </label>
                     <input
@@ -1879,9 +1879,9 @@ export default function AdminPortalPage() {
                       value={otpNewPassword}
                       onChange={(e) => setOtpNewPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-slate-900 outline-none"
                     />
-                    <span className="text-[11px] text-[#7fb8ea]">Minimum 6 characters long</span>
+                    <span className="text-[11px] text-blue-700">Minimum 6 characters long</span>
                   </div>
 
                   <div className="flex items-center gap-3 pt-2">
@@ -1895,7 +1895,7 @@ export default function AdminPortalPage() {
                     <button
                       type="button"
                       onClick={() => setOtpSent(false)}
-                      className="text-xs text-[#bccadb] hover:underline"
+                      className="text-xs text-slate-600 hover:underline"
                     >
                       Resend Code / Change Email
                     </button>
@@ -1905,64 +1905,64 @@ export default function AdminPortalPage() {
             </div>
 
             {/* PART 2: MANAGE ADMINISTRATOR TEAM (ADD NEW ADMIN) */}
-            <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl space-y-6">
               <div>
-                <span className="text-xs text-[#7fb8ea] font-bold uppercase tracking-wider block">
+                <span className="text-xs text-blue-700 font-bold uppercase tracking-wider block">
                   Team Access Control
                 </span>
-                <h2 className="text-lg font-bold text-white mt-1">
+                <h2 className="text-lg font-bold text-slate-900 mt-1">
                   Administrator Team ({adminsList.length})
                 </h2>
-                <p className="text-xs text-[#bccadb]">
+                <p className="text-xs text-slate-600">
                   Authorized administrators with full portal permissions (managing courses, approving enrollments, and viewing credentials).
                 </p>
               </div>
 
               {/* Add New Admin Form */}
-              <form onSubmit={handleAddNewAdmin} className="bg-[#08111d] border border-slate-800 p-5 rounded-xl space-y-3 text-xs">
-                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <form onSubmit={handleAddNewAdmin} className="bg-slate-50 border border-slate-200 p-5 rounded-xl space-y-3 text-xs">
+                <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <PlusCircle className="w-4 h-4 text-[#ffb531]" />
                   Add New Administrator (নতুন অ্যাডমিন যুক্ত করুন)
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">Full Name *</label>
+                    <label className="block text-slate-600 mb-1 font-semibold">Full Name *</label>
                     <input
                       type="text"
                       required
                       value={newAdminName}
                       onChange={(e) => setNewAdminName(e.target.value)}
                       placeholder="e.g. Engr. Shafiqul Islam"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">Login Email *</label>
+                    <label className="block text-slate-600 mb-1 font-semibold">Login Email *</label>
                     <input
                       type="email"
                       required
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
                       placeholder="admin2@careerpath.com"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">Phone Number *</label>
+                    <label className="block text-slate-600 mb-1 font-semibold">Phone Number *</label>
                     <input
                       type="tel"
                       required
                       value={newAdminPhone}
                       onChange={(e) => setNewAdminPhone(e.target.value)}
                       placeholder="017XXXXXXXX"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#bccadb] mb-1 font-semibold">Admin Password *</label>
+                    <label className="block text-slate-600 mb-1 font-semibold">Admin Password *</label>
                     <input
                       type="password"
                       required
@@ -1970,7 +1970,7 @@ export default function AdminPortalPage() {
                       value={newAdminPassword}
                       onChange={(e) => setNewAdminPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                      className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
                     />
                   </div>
                 </div>
@@ -1979,7 +1979,7 @@ export default function AdminPortalPage() {
                   <button
                     type="submit"
                     disabled={creatingAdmin}
-                    className="px-5 py-2.5 bg-[#3a7bb8] hover:bg-[#3a7bb8]/80 text-white font-bold text-xs rounded-lg shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                    className="px-5 py-2.5 bg-blue-700 hover:bg-blue-700/80 text-white font-bold text-xs rounded-lg shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
                     {creatingAdmin ? 'Adding Admin...' : 'Register New Administrator'}
@@ -1989,8 +1989,8 @@ export default function AdminPortalPage() {
 
               {/* List of Admins */}
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border border-slate-700 rounded-xl overflow-hidden min-w-[640px]">
-                  <thead className="bg-[#0b1222] text-[#7fb8ea] font-semibold border-b border-slate-800">
+                <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[640px]">
+                  <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
                     <tr>
                       <th className="p-3">Administrator Name</th>
                       <th className="p-3">Login Email</th>
@@ -2000,24 +2000,24 @@ export default function AdminPortalPage() {
                       <th className="p-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1a2c42] bg-[#08111d]">
+                  <tbody className="divide-y divide-slate-200 bg-slate-50">
                     {adminsList.map((adm) => (
-                      <tr key={adm._id} className="hover:bg-[#0f182c]">
-                        <td className="p-3 font-bold text-white">{adm.name}</td>
-                        <td className="p-3 font-mono text-[#7fb8ea]">{adm.email}</td>
-                        <td className="p-3 font-mono text-[#bccadb]">{adm.phone}</td>
+                      <tr key={adm._id} className="hover:bg-white">
+                        <td className="p-3 font-bold text-slate-900">{adm.name}</td>
+                        <td className="p-3 font-mono text-blue-700">{adm.email}</td>
+                        <td className="p-3 font-mono text-slate-600">{adm.phone}</td>
                         <td className="p-3">
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                             {adm.status?.toUpperCase() || 'ACTIVE'}
                           </span>
                         </td>
-                        <td className="p-3 text-[#bccadb]">
+                        <td className="p-3 text-slate-600">
                           {new Date(adm.createdAt).toLocaleDateString()}
                         </td>
                         <td className="p-3 text-right">
                           <button
                             onClick={() => handleDeleteAdmin(adm._id, adm.name)}
-                            className="px-2.5 py-1 text-[11px] bg-red-950/70 hover:bg-red-900 border border-red-500 text-red-300 rounded transition"
+                            className="px-2.5 py-1 text-[11px] bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded transition"
                           >
                             Remove
                           </button>
@@ -2034,97 +2034,97 @@ export default function AdminPortalPage() {
 
       {/* CREATE COURSE MODAL */}
       {showCreateCourseModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0f182c] border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white">Create New Engineering Course</h3>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">Create New Engineering Course</h3>
             <form onSubmit={handleCreateCourseSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#bccadb] mb-1">Course Title *</label>
+                <label className="block text-slate-600 mb-1">Course Title *</label>
                 <input
                   type="text"
                   required
                   value={createTitle}
                   onChange={(e) => setCreateTitle(e.target.value)}
                   placeholder="e.g. Real Estate Project Planning and Scheduling"
-                  className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#bccadb] mb-1">Offer Price (৳) *</label>
+                  <label className="block text-slate-600 mb-1">Offer Price (৳) *</label>
                   <input
                     type="number"
                     required
                     value={createPrice}
                     onChange={(e) => setCreatePrice(Number(e.target.value))}
-                    className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#bccadb] mb-1">Regular Price (৳)</label>
+                  <label className="block text-slate-600 mb-1">Regular Price (৳)</label>
                   <input
                     type="number"
                     value={createRegularPrice}
                     onChange={(e) => setCreateRegularPrice(Number(e.target.value))}
-                    className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#bccadb] mb-1">Course Duration (Days) *</label>
+                  <label className="block text-slate-600 mb-1">Course Duration (Days) *</label>
                   <input
                     type="number"
                     required
                     value={createDurationDays}
                     onChange={(e) => setCreateDurationDays(Number(e.target.value))}
-                    className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#bccadb] mb-1">Total Classes Count *</label>
+                  <label className="block text-slate-600 mb-1">Total Classes Count *</label>
                   <input
                     type="number"
                     required
                     value={createTotalClasses}
                     onChange={(e) => setCreateTotalClasses(Number(e.target.value))}
-                    className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#bccadb] mb-1">WhatsApp Batch Group Invite Link *</label>
+                <label className="block text-slate-600 mb-1">WhatsApp Batch Group Invite Link *</label>
                 <input
                   type="url"
                   required
                   value={createWhatsappLink}
                   onChange={(e) => setCreateWhatsappLink(e.target.value)}
                   placeholder="https://chat.whatsapp.com/..."
-                  className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[#bccadb] mb-1">Short Description *</label>
+                <label className="block text-slate-600 mb-1">Short Description *</label>
                 <input
                   type="text"
                   required
                   value={createShortDesc}
                   onChange={(e) => setCreateShortDesc(e.target.value)}
                   placeholder="Brief 1-2 sentence overview for cards"
-                  className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[#bccadb] mb-1">Full Detailed Description *</label>
+                <label className="block text-slate-600 mb-1">Full Detailed Description *</label>
                 <textarea
                   rows={3}
                   required
                   value={createFullDesc}
                   onChange={(e) => setCreateFullDesc(e.target.value)}
                   placeholder="Comprehensive description of the course..."
-                  className="w-full bg-[#08111d] border border-slate-800 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                 ></textarea>
               </div>
 
@@ -2132,7 +2132,7 @@ export default function AdminPortalPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateCourseModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-800 text-[#bccadb]"
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600"
                 >
                   Cancel
                 </button>
@@ -2150,20 +2150,20 @@ export default function AdminPortalPage() {
 
       {/* BLOCK USER MODAL (Requirement: Admin enters reason and email is dispatched) */}
       {blockingUser && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0f182c] border-2 border-red-500 rounded-2xl w-full max-w-md max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-red-300 rounded-2xl w-full max-w-md max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-red-400 font-bold text-base">
               <AlertTriangle className="w-5 h-5 shrink-0" />
               Suspend / Block Student Access
             </div>
-            <p className="text-xs text-[#bccadb]">
+            <p className="text-xs text-slate-600">
               You are about to block <strong>{blockingUser.name}</strong> ({blockingUser.email}).
               Please enter the official reason. This reason will be <strong>emailed to the student</strong> immediately.
             </p>
 
             <form onSubmit={handleBlockUserSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-red-300 mb-1 font-semibold">
+                <label className="block text-red-700 mb-1 font-semibold">
                   Reason for Suspension (কারণ) *
                 </label>
                 <textarea
@@ -2172,7 +2172,7 @@ export default function AdminPortalPage() {
                   value={blockReasonInput}
                   onChange={(e) => setBlockReasonInput(e.target.value)}
                   placeholder="e.g. Disciplinary breach in class, payment reversal, or code of conduct violation..."
-                  className="w-full bg-[#08111d] border border-red-500/50 rounded-lg p-2.5 text-white outline-none"
+                  className="w-full bg-slate-50 border border-red-300/50 rounded-lg p-2.5 text-slate-900 outline-none"
                 ></textarea>
               </div>
 
@@ -2180,7 +2180,7 @@ export default function AdminPortalPage() {
                 <button
                   type="button"
                   onClick={() => setBlockingUser(null)}
-                  className="px-4 py-2 rounded-lg border border-slate-800 text-[#bccadb]"
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600"
                 >
                   Cancel
                 </button>
@@ -2198,21 +2198,21 @@ export default function AdminPortalPage() {
 
       {/* MANUAL ADD STUDENT MODAL */}
       {showAddStudentModal && selectedCourseData && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0f182c] border border-slate-700 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <UserPlus className="w-4 h-4 text-amber-400" /> Manually Add Student to Course
                 </h3>
-                <p className="text-xs text-sky-400 font-semibold mt-0.5 truncate max-w-sm">
+                <p className="text-xs text-blue-700 font-semibold mt-0.5 truncate max-w-sm">
                   {selectedCourseData.title}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddStudentModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition"
               >
                 ✕
               </button>
@@ -2220,7 +2220,7 @@ export default function AdminPortalPage() {
 
             <form onSubmit={handleAddStudentSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-300 mb-1 font-semibold">
+                <label className="block text-slate-700 mb-1 font-semibold">
                   Student Full Name (শিক্ষার্থীর পূর্ণ নাম) *
                 </label>
                 <input
@@ -2229,13 +2229,13 @@ export default function AdminPortalPage() {
                   value={addStudentName}
                   onChange={(e) => setAddStudentName(e.target.value)}
                   placeholder="e.g. Engr. Tanvir Ahmed"
-                  className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 mb-1 font-semibold">
+                  <label className="block text-slate-700 mb-1 font-semibold">
                     Mobile Number (মোবাইল নম্বর) *
                   </label>
                   <input
@@ -2244,12 +2244,12 @@ export default function AdminPortalPage() {
                     value={addStudentPhone}
                     onChange={(e) => setAddStudentPhone(e.target.value)}
                     placeholder="017XXXXXXXX"
-                    className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 mb-1 font-semibold">
+                  <label className="block text-slate-700 mb-1 font-semibold">
                     Login Email (লগইন ইমেইল) *
                   </label>
                   <input
@@ -2258,20 +2258,20 @@ export default function AdminPortalPage() {
                     value={addStudentEmail}
                     onChange={(e) => setAddStudentEmail(e.target.value)}
                     placeholder="tanvir@gmail.com"
-                    className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-slate-300 font-semibold">
+                  <label className="text-slate-700 font-semibold">
                     Login Password (লগইন পাসওয়ার্ড)
                   </label>
                   <button
                     type="button"
                     onClick={() => setAddStudentPassword('BLP-' + Math.random().toString(36).substring(2, 8).toUpperCase())}
-                    className="text-[10px] text-amber-400 hover:underline font-bold"
+                    className="text-[10px] text-amber-700 hover:underline font-bold"
                   >
                     🎲 Regenerate Auto-Password
                   </button>
@@ -2281,7 +2281,7 @@ export default function AdminPortalPage() {
                   value={addStudentPassword}
                   onChange={(e) => setAddStudentPassword(e.target.value)}
                   placeholder="Auto-generated if left empty"
-                  className="w-full bg-[#08111d] border border-amber-400/80 rounded-xl px-3.5 py-2.5 text-amber-300 font-mono font-bold outline-none"
+                  className="w-full bg-amber-50/60 border border-amber-300 rounded-xl px-3.5 py-2.5 text-amber-950 font-mono font-bold outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
                   You can give this password directly to the student so they can log in immediately.
@@ -2289,7 +2289,7 @@ export default function AdminPortalPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 mb-1 font-semibold">
+                <label className="block text-slate-700 mb-1 font-semibold">
                   Address / City (ঠিকানা বা শহর - ঐচ্ছিক)
                 </label>
                 <input
@@ -2297,15 +2297,15 @@ export default function AdminPortalPage() {
                   value={addStudentAddress}
                   onChange={(e) => setAddStudentAddress(e.target.value)}
                   placeholder="e.g. Uttara, Dhaka"
-                  className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
                 />
               </div>
 
-              <div className="pt-3 flex justify-end gap-2 border-t border-slate-800">
+              <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowAddStudentModal(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
                 >
                   Cancel
                 </button>
