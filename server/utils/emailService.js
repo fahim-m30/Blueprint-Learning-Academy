@@ -19,11 +19,48 @@ const dispatchMail = async ({ to, subject, html, text, attachments = [] }) => {
   const gmailUser = settings?.gmailUser || process.env.EMAIL_USER || 'admin.blueprintlearning@gmail.com';
   const gmailPass = settings?.gmailPass || process.env.EMAIL_PASS || 'ncpcooxwigjauknm';
 
+  const brevoApiKey = settings?.brevoApiKey || process.env.BREVO_API_KEY;
   const smtpHost = settings?.smtpHost || process.env.SMTP_HOST || 'smtp-relay.brevo.com';
   const smtpPort = Number(settings?.smtpPort) || Number(process.env.SMTP_PORT) || 587;
   const smtpUser = settings?.smtpUser || process.env.SMTP_USER;
   const smtpPass = settings?.smtpPass || process.env.SMTP_PASS;
   const smtpSecure = (settings?.smtpSecure === true) || (process.env.SMTP_SECURE === 'true');
+
+  // Attempt 1: Brevo HTTPS REST API (Port 443 - 100% unblocked on Render Cloud)
+  if (brevoApiKey) {
+    try {
+      const payload = {
+        sender: {
+          name: 'Blueprint Learning Academy',
+          email: 'admin.blueprintlearning@gmail.com',
+        },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        textContent: text || '',
+      };
+
+      const apiRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoApiKey.trim(),
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const apiData = await apiRes.json();
+      if (apiRes.ok && (apiData.messageId || apiData.id)) {
+        console.log('✅ Email Sent via Brevo HTTPS API Successfully:', apiData.messageId || apiData.id);
+        return { success: true, provider: 'brevo-api', messageId: apiData.messageId || apiData.id };
+      } else {
+        console.warn('⚠️ Brevo API response warning:', apiData);
+      }
+    } catch (apiErr) {
+      console.warn('⚠️ Brevo HTTPS API request failed, falling back to SMTP:', apiErr.message);
+    }
+  }
 
   // Prepare logo attachment for inline CID display
   const finalAttachments = [...attachments];

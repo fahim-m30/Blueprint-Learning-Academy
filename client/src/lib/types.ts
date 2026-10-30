@@ -105,6 +105,7 @@ export interface SiteSettings {
   nagadType: string;
   rocketNumber: string;
   paymentInstructions: string;
+  brevoApiKey?: string;
   smtpHost?: string;
   smtpPort?: number;
   smtpUser?: string;

@@ -2360,6 +2360,23 @@ export default function AdminPortalPage() {
                 </button>
               </div>
 
+              <div className="bg-blue-50/70 border border-blue-200 p-4 rounded-xl mb-4">
+                <label className="block text-blue-950 mb-1.5 font-bold flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-blue-700" />
+                  Brevo v3 API Key (Recommended for Render Cloud &mdash; Port 443 HTTPS)
+                </label>
+                <input
+                  type="password"
+                  value={siteSettings.brevoApiKey || ''}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, brevoApiKey: e.target.value })}
+                  placeholder="xkeysib-..."
+                  className="w-full bg-white border border-blue-300 focus:border-blue-600 rounded-xl px-4 py-2.5 text-slate-950 outline-none font-medium font-mono text-xs sm:text-sm"
+                />
+                <span className="text-[11px] text-blue-700 mt-1 block">
+                  Generate from Brevo Dashboard &rarr; <strong>SMTP &amp; API</strong> &rarr; <strong>API Keys</strong> &rarr; <strong>+ Generate a new API key</strong>. Works 100% on Render cloud without SMTP port restrictions.
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm">
                 <div>
                   <label className="block text-slate-700 mb-1.5 font-bold">SMTP Server Host</label>

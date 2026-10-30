@@ -128,6 +128,10 @@ const siteSettingsSchema = new mongoose.Schema({
   },
 
   // Email / SMTP Dispatch Settings (Brevo & Gmail)
+  brevoApiKey: {
+    type: String,
+    default: '',
+  },
   smtpHost: {
     type: String,
     default: 'smtp-relay.brevo.com',
