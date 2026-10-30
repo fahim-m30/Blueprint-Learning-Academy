@@ -111,6 +111,8 @@ export interface SiteSettings {
   smtpUser?: string;
   smtpPass?: string;
   emailFrom?: string;
+  gmailUser?: string;
+  gmailPass?: string;
 }
 
 export interface StudentCV {

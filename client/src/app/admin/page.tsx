@@ -286,28 +286,120 @@ export default function AdminPortalPage() {
   };
 
   // 1. Enrollment Approval
-  const handleApproveEnrollment = async (enrollmentId: string) => {
+  const handleApproveEnrollment = async (enrollmentId: string, en?: any) => {
     showAlert('Approving enrollment and dispatching email...');
     const res = await apiRequest(`/admin/enrollments/${enrollmentId}/approve`, {
       method: 'POST',
     });
     if (res.success) {
       showAlert(res.message || 'Enrollment approved and email sent successfully!');
+      const anyRes = res as any;
+      if (anyRes.emailResult && !anyRes.emailResult.success && en) {
+        // Backend indicated email needed relay - dispatch immediately via Vercel HTTPS relay
+        handleResendCredentialsEmail({
+          ...en,
+          generatedPassword: anyRes.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
+        });
+      }
       loadAdminData();
     } else {
       showAlert(res.message || 'Error approving enrollment.', 'error');
     }
   };
 
-  const handleResendCredentialsEmail = async (enrollmentId: string) => {
-    showAlert('Dispatching credentials email to student...');
-    const res = await apiRequest(`/admin/enrollments/${enrollmentId}/resend-email`, {
-      method: 'POST',
-    });
-    if (res.success) {
-      showAlert(res.message || 'Credentials email resent successfully!');
-    } else {
-      showAlert(res.message || 'Failed to resend email.', 'error');
+  const handleResendCredentialsEmail = async (en: any) => {
+    showAlert(`Dispatching credentials email to ${en.studentEmail || 'student'}...`);
+    try {
+      const res = await apiRequest(`/admin/enrollments/${en._id}/resend-email`, {
+        method: 'POST',
+      });
+      if (res && res.success) {
+        showAlert(res.message || 'Credentials email resent successfully!');
+        return;
+      }
+    } catch (backendErr) {
+      console.warn('Backend resend endpoint not reachable, engaging direct relay:', backendErr);
+    }
+
+    // Direct Vercel HTTPS Relay Fallback
+    try {
+      const courseTitle = en.course?.title || 'Blueprint Learning Career Course';
+      const password = en.generatedPassword || 'BLP-LEARN2026';
+      const loginUrl = typeof window !== 'undefined' && window.location.origin ? `${window.location.origin}/login` : 'https://blueprint-learning-academy.vercel.app/login';
+      const currentYear = new Date().getFullYear();
+
+      const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Welcome to Blueprint Learning Academy</title></head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="width:100%;padding:30px 10px 40px;box-sizing:border-box;">
+    <div style="max-width:580px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 15px 35px -5px rgba(15,23,42,0.08);">
+      <div style="background:linear-gradient(135deg,#091224 0%,#0f274a 55%,#1e3a8a 100%);padding:36px 24px 28px;text-align:center;">
+        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900;">Blueprint <span style="color:#ffb531;">Learning Academy</span></h1>
+        <p style="margin:6px 0 0;color:#93c5fd;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;">Bangladesh's #1 Practical Civil Engineering Academy</p>
+      </div>
+      <div style="padding:32px 30px;">
+        <div style="display:inline-block;background-color:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:11px;font-weight:800;text-transform:uppercase;padding:5px 14px;border-radius:9999px;margin-bottom:16px;">
+          ✓ Enrollment &amp; Payment Verified
+        </div>
+        <h2 style="margin:0 0 12px;color:#0f172a;font-size:22px;font-weight:900;">Welcome to the Batch, ${en.studentName}!</h2>
+        <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">Congratulations on enrolling in Blueprint Learning Academy. Your student portal account is now active with the credentials below:</p>
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:16px 20px;margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;margin-bottom:4px;">Enrolled Course</div>
+          <div style="color:#0f172a;font-size:16px;font-weight:900;">${courseTitle}</div>
+        </div>
+        <div style="background:#0b1528;border:1.5px solid #ffb531;border-radius:16px;padding:20px;margin-bottom:24px;">
+          <div style="color:#ffb531;font-size:13px;font-weight:800;text-transform:uppercase;margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:8px;">🔐 Student Access Credentials</div>
+          <div style="margin-bottom:10px;">
+            <div style="color:#94a3b8;font-size:11px;font-weight:700;">Student Email</div>
+            <div style="background:#0f1d35;border:1px solid #254070;border-radius:8px;padding:8px 12px;color:#fff;font-family:monospace;font-weight:700;font-size:14px;">${en.studentEmail}</div>
+          </div>
+          <div>
+            <div style="color:#94a3b8;font-size:11px;font-weight:700;">Portal Password</div>
+            <div style="background:#1c1917;border:1px solid #b45309;border-radius:8px;padding:8px 12px;color:#ffb531;font-family:monospace;font-weight:800;font-size:15px;letter-spacing:1px;">${password}</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-bottom:24px;">
+          <a href="${loginUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#fff;text-decoration:none;font-size:15px;font-weight:800;padding:14px 32px;border-radius:12px;">Sign In to Student Portal</a>
+        </div>
+      </div>
+      <div style="background:#091224;padding:20px;text-align:center;color:#94a3b8;font-size:12px;">
+        Blueprint Learning Academy &copy; ${currentYear}. Helpline: +880 1313-916161
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      const emailRes = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: 'blueprint_academy_email_secret_key_2026',
+          to: en.studentEmail,
+          subject: `🎉 Enrollment Confirmation & Student Access - Blueprint Learning Academy`,
+          html,
+          text: `Welcome ${en.studentName}! Your course access for ${courseTitle} is active. Email: ${en.studentEmail}, Password: ${password}, Login URL: ${loginUrl}`,
+          config: {
+            smtpHost: siteSettings?.smtpHost || 'smtp-relay.brevo.com',
+            smtpPort: Number(siteSettings?.smtpPort) || 587,
+            smtpUser: siteSettings?.smtpUser || 'c0c2b6001@smtp-brevo.com',
+            smtpPass: siteSettings?.smtpPass,
+            gmailUser: siteSettings?.gmailUser,
+            gmailPass: siteSettings?.gmailPass,
+          }
+        }),
+      });
+
+      const emailData = await emailRes.json();
+      if (emailRes.ok && emailData.success) {
+        showAlert(`Credentials email sent to ${en.studentEmail} successfully via ${emailData.provider || 'Relay'}!`);
+      } else {
+        showAlert(`Failed to resend email: ${emailData.message || emailData.error}`, 'error');
+      }
+    } catch (relayErr: any) {
+      showAlert(`Error sending email: ${relayErr.message}`, 'error');
     }
   };
 
@@ -1655,7 +1747,7 @@ export default function AdminPortalPage() {
                           {en.status === 'pending' ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => handleApproveEnrollment(en._id)}
+                                onClick={() => handleApproveEnrollment(en._id, en)}
                                 className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm shadow-md transition"
                               >
                                 Approve &amp; Send Email
@@ -1670,7 +1762,7 @@ export default function AdminPortalPage() {
                           ) : en.status === 'approved' ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => handleResendCredentialsEmail(en._id)}
+                                onClick={() => handleResendCredentialsEmail(en)}
                                 className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
                                 title="Resend Welcome & Login Credentials Email"
                               >
