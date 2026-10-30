@@ -18,11 +18,12 @@ export const metadata: Metadata = {
   description: "Practical online engineering courses for civil engineers in Bangladesh: interview success, software, project engineering, estimation and BOQ, planning, and quality control.",
   icons: {
     icon: [
-      { url: "/icon.png?v=2", type: "image/png" },
-      { url: "/favicon.ico?v=2" },
+      { url: "/icon.png?v=4", type: "image/png" },
+      { url: "/favicon.ico?v=4", type: "image/x-icon" },
+      { url: "/favicon.png?v=4", type: "image/png" },
     ],
-    shortcut: "/icon.png?v=2",
-    apple: "/apple-touch-icon.png?v=2",
+    shortcut: "/icon.png?v=4",
+    apple: "/apple-touch-icon.png?v=4",
   },
 };
 
