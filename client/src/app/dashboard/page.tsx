@@ -279,32 +279,32 @@ export default function StudentDashboardPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 selection:bg-amber-400 selection:text-slate-950">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200 px-3 sm:px-6 lg:px-8 py-3 shadow-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3.5 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <Link href="/" className="flex items-center gap-3 shrink-0 group">
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full ring-2 ring-blue-600/20 bg-white p-0.5 shadow-xs group-hover:scale-105 transition"
+                className="w-11 h-11 sm:w-13 sm:h-13 object-contain rounded-full ring-2 ring-blue-600/20 bg-white p-0.5 shadow-xs group-hover:scale-105 transition"
               />
-              <span className="text-base sm:text-xl font-black text-slate-900 hidden md:inline truncate">
+              <span className="text-lg sm:text-2xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
                 Blueprint <span className="text-blue-700">Learning Academy</span>
               </span>
             </Link>
-            <span className="text-[11px] sm:text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 sm:px-2.5 py-0.5 rounded-full font-bold shrink-0">
+            <span className="text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full font-extrabold shrink-0">
               Student Dashboard
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <div className="text-right hidden sm:block">
-              <span className="block text-xs font-bold text-slate-900 truncate max-w-[160px]">{studentInfo?.name}</span>
-              <span className="block text-[10px] text-slate-500 truncate max-w-[160px]">{studentInfo?.email}</span>
+              <span className="block text-sm font-black text-slate-900 truncate max-w-[200px]">{studentInfo?.name}</span>
+              <span className="block text-xs font-semibold text-slate-500 truncate max-w-[200px]">{studentInfo?.email}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+              className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition shadow-xs"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -316,17 +316,17 @@ export default function StudentDashboardPage() {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         {enrolledList.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-sm">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center mx-auto text-2xl">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center mx-auto text-3xl">
               📚
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">No Active Enrolled Courses</h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-950">No Active Enrolled Courses</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
               You are not currently enrolled in any active courses, or your enrollment application is pending verification.
             </p>
             <Link
               href="/#courses"
-              className="inline-block px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-md"
+              className="inline-block px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black text-sm shadow-md"
             >
               Explore Available Courses
             </Link>
@@ -335,16 +335,16 @@ export default function StudentDashboardPage() {
           <div className="space-y-6">
             {/* Multi-Course Switcher Tabs (if enrolled in multiple) */}
             {enrolledList.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-xs font-semibold text-slate-500 shrink-0 mr-1">Enrolled Courses:</span>
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5">
+                <span className="text-xs sm:text-sm font-bold text-slate-600 shrink-0 mr-1">Enrolled Courses:</span>
                 {enrolledList.map((e) => (
                   <button
                     key={e.course._id}
                     onClick={() => handleSelectCourse(e.course._id)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border ${
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition border ${
                       selectedCourseId === e.course._id
-                        ? 'bg-blue-700 text-white border-blue-700 shadow-xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     {e.course.title}
@@ -355,24 +355,24 @@ export default function StudentDashboardPage() {
 
             {/* Course Summary Banner with Countdown Timer & WhatsApp Button */}
             {courseDetails && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
                   <div className="min-w-0">
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold inline-block mb-2">
+                    <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold inline-block mb-2">
                       {courseDetails.category}
                     </span>
-                    <h1 className="text-xl sm:text-2xl font-black text-slate-900">{courseDetails.title}</h1>
-                    <p className="text-xs text-slate-600 mt-1 max-w-2xl line-clamp-2">
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">{courseDetails.title}</h1>
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-2xl line-clamp-2 leading-relaxed">
                       {courseDetails.shortDescription}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 shrink-0">
                     {/* Remaining Days Countdown */}
-                    <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-center">
-                      <span className="text-[10px] uppercase font-bold text-slate-500 block">Course Validity</span>
-                      <span className="text-base sm:text-lg font-black text-slate-900 flex items-center justify-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <div className="bg-slate-50 border border-slate-200 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl text-center">
+                      <span className="text-[11px] sm:text-xs uppercase font-extrabold text-slate-500 block tracking-wider">Course Validity</span>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 flex items-center justify-center gap-1.5 mt-0.5">
+                        <Clock className="w-4 h-4 text-amber-500" />
                         {activeEnrolledItem?.daysRemaining !== undefined
                           ? `${activeEnrolledItem.daysRemaining} Days Left`
                           : `${courseDetails.durationDays} Days`}
@@ -385,7 +385,7 @@ export default function StudentDashboardPage() {
                         href={courseDetails.whatsappGroupLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-emerald-600/20 transition"
+                        className="px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-emerald-600/20 transition hover:scale-105"
                       >
                         <MessageCircle className="w-4 h-4 shrink-0" />
                         Join WhatsApp Batch
@@ -397,10 +397,10 @@ export default function StudentDashboardPage() {
             )}
 
             {/* Main Tabs Navigation */}
-            <div className="flex border-b border-slate-200 gap-1 sm:gap-2 overflow-x-auto pb-1">
+            <div className="flex border-b border-slate-200 gap-2 sm:gap-3 overflow-x-auto pb-1 text-sm sm:text-base">
               <button
                 onClick={() => setActiveTab('videos')}
-                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === 'videos'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -412,7 +412,7 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('live')}
-                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === 'live'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -424,7 +424,7 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('tasks')}
-                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === 'tasks'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -436,7 +436,7 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === 'chat'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -448,7 +448,7 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('cv')}
-                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === 'cv'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -490,15 +490,15 @@ export default function StudentDashboardPage() {
                             ></iframe>
                           </div>
 
-                          <div className="p-4 space-y-2">
-                            <div className="flex items-center justify-between text-[11px] text-blue-700 font-semibold">
+                          <div className="p-4 sm:p-5 space-y-2.5">
+                            <div className="flex items-center justify-between text-xs text-blue-700 font-bold uppercase tracking-wider">
                               <span>Class Lecture #{idx + 1}</span>
-                              {vid.duration && <span>{vid.duration}</span>}
+                              {vid.duration && <span className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md font-mono">{vid.duration}</span>}
                             </div>
-                            <h3 className="text-sm font-bold text-slate-900">{vid.title}</h3>
+                            <h3 className="text-base sm:text-lg font-black text-slate-950 leading-snug">{vid.title}</h3>
                             {vid.note && (
-                              <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                📌 <strong>Note:</strong> {vid.note}
+                              <p className="text-xs sm:text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                                📌 <strong>Instructor Note:</strong> {vid.note}
                               </p>
                             )}
                             <div className="pt-2 flex justify-end">
@@ -506,9 +506,9 @@ export default function StudentDashboardPage() {
                                 href={vid.youtubeUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-700 hover:underline flex items-center gap-1 font-semibold"
+                                className="text-xs sm:text-sm text-blue-700 hover:text-blue-800 flex items-center gap-1.5 font-bold hover:underline"
                               >
-                                Watch on YouTube <ExternalLink className="w-3 h-3" />
+                                Watch on YouTube <ExternalLink className="w-3.5 h-3.5" />
                               </a>
                             </div>
                           </div>
@@ -517,7 +517,7 @@ export default function StudentDashboardPage() {
                     })}
                   </div>
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500 shadow-xs">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500 shadow-xs">
                     No video recordings published yet for this batch. New lectures are uploaded after each live class.
                   </div>
                 )}
@@ -531,31 +531,31 @@ export default function StudentDashboardPage() {
                   courseDetails.liveClasses.map((item, idx) => (
                     <div
                       key={item._id || idx}
-                      className="bg-white border border-slate-200 hover:border-blue-300 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-xs"
+                      className="bg-white border border-slate-200 hover:border-blue-400 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-xs hover:shadow-md"
                     >
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                          <span className="text-xs font-bold text-red-600 uppercase tracking-wider">
+                          <span className="text-xs sm:text-sm font-extrabold text-red-600 uppercase tracking-wider">
                             Live Class #{idx + 1}
                           </span>
                         </div>
-                        <h3 className="text-sm sm:text-base font-bold text-slate-900">{item.title}</h3>
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                            {new Date(item.classDate).toLocaleDateString()}
+                        <h3 className="text-base sm:text-lg font-black text-slate-950">{item.title}</h3>
+                        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 font-medium">
+                          <span className="flex items-center gap-1.5 font-semibold text-slate-900">
+                            <Calendar className="w-4 h-4 text-amber-500" />
+                            {new Date(item.classDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                           <span>•</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 text-blue-600" />
+                          <span className="flex items-center gap-1.5 font-bold text-blue-700">
+                            <Clock className="w-4 h-4 text-blue-600" />
                             {item.classTime}
                           </span>
                           <span>•</span>
-                          <span className="text-emerald-700 font-medium">{item.platform}</span>
+                          <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{item.platform}</span>
                         </div>
                         {item.note && (
-                          <p className="text-xs text-blue-700 mt-1 italic">Note: {item.note}</p>
+                          <p className="text-xs sm:text-sm text-blue-700 mt-1 italic font-medium">📌 Note: {item.note}</p>
                         )}
                       </div>
 
@@ -563,14 +563,14 @@ export default function StudentDashboardPage() {
                         href={item.meetingLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm shrink-0"
+                        className="px-6 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-blue-700/20 shrink-0 hover:scale-105"
                       >
-                        Join Live Class <ExternalLink className="w-3.5 h-3.5" />
+                        Join Live Class <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
                   ))
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500 shadow-xs">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500 shadow-xs">
                     No live classes scheduled at this moment. You will receive WhatsApp group notifications when new sessions are posted.
                   </div>
                 )}
@@ -593,60 +593,60 @@ export default function StudentDashboardPage() {
                     return (
                       <div
                         key={task._id}
-                        className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xs"
+                        className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 space-y-4 shadow-xs"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                          <div>
-                            <span className="text-[11px] font-bold text-amber-600 uppercase">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xs font-black text-amber-800 bg-amber-50 border border-amber-300 px-3 py-1 rounded-lg uppercase tracking-wider">
                               Points: {task.points}
                             </span>
-                            <h3 className="text-sm sm:text-base font-bold text-slate-900">{task.title}</h3>
+                            <h3 className="text-base sm:text-lg font-black text-slate-950">{task.title}</h3>
                           </div>
-                          <div className="text-xs text-slate-500">
-                            Deadline: <span className="text-red-600 font-semibold">{new Date(task.deadline).toLocaleDateString()}</span>
+                          <div className="text-xs sm:text-sm font-medium text-slate-500">
+                            Deadline: <span className="text-red-600 font-black">{new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/80 p-4 rounded-2xl border border-slate-200">
                           {task.description}
                         </p>
 
                         {submission ? (
-                          <div className="bg-slate-50 border border-blue-200 rounded-xl p-4 space-y-2 text-xs">
+                          <div className="bg-slate-50 border border-blue-200 rounded-2xl p-4 sm:p-5 space-y-2.5 text-xs sm:text-sm">
                             <div className="flex items-center justify-between">
-                              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                              <span className="text-emerald-700 font-black flex items-center gap-1.5">
                                 <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" /> Submitted on {new Date(submission.submittedAt).toLocaleDateString()}
                               </span>
-                              <span className="text-slate-500">Status: <strong className="text-slate-900">{submission.status}</strong></span>
+                              <span className="text-slate-500 font-medium">Status: <strong className="text-slate-950 font-black uppercase text-xs bg-slate-200 px-2 py-0.5 rounded">{submission.status}</strong></span>
                             </div>
                             {submission.submissionLink && (
-                              <p className="text-blue-700">
+                              <p className="text-blue-700 font-medium">
                                 <strong>Your Link:</strong>{' '}
-                                <a href={submission.submissionLink} target="_blank" rel="noopener noreferrer" className="underline break-all">
+                                <a href={submission.submissionLink} target="_blank" rel="noopener noreferrer" className="underline break-all font-semibold">
                                   {submission.submissionLink}
                                 </a>
                               </p>
                             )}
                             {submission.submissionText && (
-                              <p className="text-slate-600">
+                              <p className="text-slate-700 font-medium">
                                 <strong>Your Note:</strong> {submission.submissionText}
                               </p>
                             )}
                             {submission.feedback && (
-                              <div className="mt-2 p-2.5 bg-white border border-amber-300 rounded-lg shadow-xs">
-                                <strong className="text-amber-700 block mb-0.5">Instructor Feedback:</strong>
-                                <span className="text-slate-900">{submission.feedback}</span>
-                                {submission.grade && <span className="block mt-1 font-bold text-emerald-700">Grade: {submission.grade}</span>}
+                              <div className="mt-3 p-3 bg-white border border-amber-300 rounded-xl shadow-xs space-y-1">
+                                <strong className="text-amber-800 block font-black text-xs uppercase tracking-wide">Instructor Feedback:</strong>
+                                <span className="text-slate-900 leading-relaxed">{submission.feedback}</span>
+                                {submission.grade && <span className="block mt-1.5 font-black text-emerald-700">Grade: {submission.grade}</span>}
                               </div>
                             )}
                           </div>
                         ) : (
                           <div>
                             {selectedTaskId === task._id ? (
-                              <form onSubmit={(e) => handleTaskSubmit(e, task._id)} className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <h4 className="text-xs font-bold text-slate-900">Submit Your Assignment</h4>
+                              <form onSubmit={(e) => handleTaskSubmit(e, task._id)} className="space-y-3.5 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                <h4 className="text-sm font-black text-slate-950">Submit Your Assignment Solution</h4>
                                 <div>
-                                  <label className="block text-[11px] text-slate-700 mb-1">
+                                  <label className="block text-xs sm:text-sm font-bold text-slate-800 mb-1">
                                     Google Drive / PDF / File URL
                                   </label>
                                   <input
@@ -654,33 +654,33 @@ export default function StudentDashboardPage() {
                                     value={submissionLink}
                                     onChange={(e) => setSubmissionLink(e.target.value)}
                                     placeholder="https://drive.google.com/..."
-                                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 outline-none font-medium"
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-[11px] text-slate-700 mb-1">
+                                  <label className="block text-xs sm:text-sm font-bold text-slate-800 mb-1">
                                     Notes / Explanation
                                   </label>
                                   <textarea
-                                    rows={2}
+                                    rows={3}
                                     value={submissionText}
                                     onChange={(e) => setSubmissionText(e.target.value)}
                                     placeholder="Write any note regarding your solution..."
-                                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 outline-none font-medium"
                                   ></textarea>
                                 </div>
-                                <div className="flex justify-end gap-2">
+                                <div className="flex justify-end gap-2.5 pt-1">
                                   <button
                                     type="button"
                                     onClick={() => setSelectedTaskId(null)}
-                                    className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs text-slate-600 hover:bg-slate-100"
+                                    className="px-4 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-100"
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     type="submit"
                                     disabled={submittingTask}
-                                    className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold text-xs shadow-xs disabled:opacity-50"
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 disabled:opacity-50"
                                   >
                                     {submittingTask ? 'Submitting...' : 'Upload & Submit'}
                                   </button>
@@ -689,9 +689,9 @@ export default function StudentDashboardPage() {
                             ) : (
                               <button
                                 onClick={() => setSelectedTaskId(task._id)}
-                                className="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs"
+                                className="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition shadow-sm hover:scale-105"
                               >
-                                Submit Assignment Solution <ChevronRight className="w-3.5 h-3.5" />
+                                Submit Assignment Solution <ChevronRight className="w-4 h-4" />
                               </button>
                             )}
                           </div>
@@ -700,7 +700,7 @@ export default function StudentDashboardPage() {
                     );
                   })
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500 shadow-xs">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500 shadow-xs">
                     No assignments posted for this course yet.
                   </div>
                 )}
@@ -709,25 +709,25 @@ export default function StudentDashboardPage() {
 
             {/* TAB 4: DIRECT CHAT WITH INSTRUCTOR / ADMIN */}
             {activeTab === 'chat' && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col h-[520px] sm:h-[600px] shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden flex flex-col h-[540px] sm:h-[620px] shadow-sm">
                 {/* Chat Header */}
-                <div className="bg-slate-50 border-b border-slate-200 p-3.5 sm:p-4 flex items-center justify-between">
+                <div className="bg-slate-50 border-b border-slate-200 p-4 sm:p-5 flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-slate-950 flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                       Course Instructor &amp; Support Discussion
                     </h3>
-                    <p className="text-[10px] sm:text-[11px] text-slate-500">Direct line with Engr. Md Abdul Mazid &amp; Course Admin</p>
+                    <p className="text-xs text-slate-500 mt-0.5 font-medium">Direct line with Engr. Md Abdul Mazid &amp; Course Admin</p>
                   </div>
-                  <span className="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-blue-200">
+                  <span className="text-xs text-blue-700 font-extrabold bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                     Batch Active
                   </span>
                 </div>
 
                 {/* Messages Feed */}
-                <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-[#f8fafc]">
+                <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3.5 bg-[#f8fafc]">
                   {chatMessages.length === 0 ? (
-                    <div className="text-center py-12 text-xs text-slate-400">
+                    <div className="text-center py-16 text-sm text-slate-400 font-medium">
                       No messages yet. Send a question to start the conversation!
                     </div>
                   ) : (
@@ -739,19 +739,19 @@ export default function StudentDashboardPage() {
                           key={msg._id || idx}
                           className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                         >
-                          <span className="text-[10px] text-slate-500 mb-0.5 px-1 font-medium">
+                          <span className="text-xs text-slate-500 mb-1 px-1 font-bold">
                             {msg.senderName} ({msg.senderRole === 'admin' ? 'Instructor' : 'You'})
                           </span>
                           <div
-                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs ${
+                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed ${
                               isMe
-                                ? 'bg-blue-600 text-white font-medium rounded-br-none shadow-xs'
-                                : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none shadow-xs'
+                                ? 'bg-blue-600 text-white rounded-br-none shadow-xs'
+                                : 'bg-white text-slate-900 border border-slate-200/90 rounded-bl-none shadow-xs'
                             }`}
                           >
                             {msg.message}
                           </div>
-                          <span className="text-[9px] text-slate-400 mt-0.5 px-1">
+                          <span className="text-[10px] sm:text-xs text-slate-400 mt-0.5 px-1 font-medium">
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -761,20 +761,20 @@ export default function StudentDashboardPage() {
                 </div>
 
                 {/* Message Input Box */}
-                <form onSubmit={handleSendMessage} className="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex gap-2">
+                <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-white border-t border-slate-200 flex gap-2.5">
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Type your question or message to the instructor..."
-                    className="flex-1 bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none"
+                    className="flex-1 bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-2xl px-4 sm:px-5 py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none font-medium"
                   />
                   <button
                     type="submit"
                     disabled={sendingChat || !chatInput.trim()}
-                    className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm disabled:opacity-50 shrink-0"
+                    className="px-5 sm:px-6 py-3 rounded-2xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-sm disabled:opacity-50 shrink-0"
                   >
-                    <Send className="w-3.5 h-3.5" /> <span className="hidden xs:inline">Send</span>
+                    <Send className="w-4 h-4" /> <span className="hidden xs:inline">Send</span>
                   </button>
                 </form>
               </div>
@@ -801,43 +801,43 @@ export default function StudentDashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Left Column: Current Submitted Status */}
                   <div className="lg:col-span-1 space-y-4">
-                    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs space-y-4">
+                      <h3 className="text-base font-black text-slate-950 flex items-center gap-2 border-b border-slate-100 pb-3.5">
                         <FileText className="w-4 h-4 text-blue-700" /> Current CV Status
                       </h3>
 
                       {studentCv?.updatedAt ? (
-                        <div className="space-y-3.5 text-xs">
+                        <div className="space-y-4 text-xs sm:text-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-slate-500">Review Status:</span>
-                            <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${
+                            <span className="text-slate-500 font-medium">Review Status:</span>
+                            <span className={`px-3 py-1 rounded-full font-black uppercase text-xs ${
                               studentCv.status === 'reviewed'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                                 : studentCv.status === 'needs_revision'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-300'
-                                : 'bg-blue-50 text-blue-700 border border-blue-300'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-300'
+                                : 'bg-blue-50 text-blue-800 border border-blue-300'
                             }`}>
                               {studentCv.status || 'Submitted'}
                             </span>
                           </div>
 
                           <div>
-                            <span className="text-slate-500 block mb-0.5">Target Job Role:</span>
-                            <span className="font-bold text-slate-900">
+                            <span className="text-slate-500 block mb-0.5 font-medium">Target Job Role:</span>
+                            <span className="font-extrabold text-slate-950 text-sm sm:text-base">
                               {studentCv.targetJobTitle || 'Civil / Site / Project Engineer'}
                             </span>
                           </div>
 
                           <div>
-                            <span className="text-slate-500 block mb-0.5">File Submitted:</span>
-                            <span className="font-semibold text-slate-800 block truncate">
+                            <span className="text-slate-500 block mb-0.5 font-medium">File Submitted:</span>
+                            <span className="font-bold text-slate-900 block truncate">
                               {studentCv.fileName || 'Resume.pdf'}
                             </span>
                           </div>
 
                           <div>
-                            <span className="text-slate-500 block mb-0.5">Last Updated:</span>
-                            <span className="font-medium text-slate-600">
+                            <span className="text-slate-500 block mb-0.5 font-medium">Last Updated:</span>
+                            <span className="font-semibold text-slate-700">
                               {new Date(studentCv.updatedAt).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
@@ -852,7 +852,7 @@ export default function StudentDashboardPage() {
                               <a
                                 href={studentCv.fileData}
                                 download={studentCv.fileName || 'My_CV.pdf'}
-                                className="w-full py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+                                className="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                               >
                                 <Download className="w-4 h-4" /> Download / View My CV
                               </a>
@@ -861,7 +861,7 @@ export default function StudentDashboardPage() {
                                 href={studentCv.fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+                                className="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                               >
                                 <ExternalLink className="w-4 h-4" /> Open Submitted Link
                               </a>
@@ -870,20 +870,20 @@ export default function StudentDashboardPage() {
 
                           {/* Instructor Feedback If Any */}
                           {studentCv.adminFeedback && (
-                            <div className="mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-1 text-xs">
-                              <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-1.5 text-xs sm:text-sm">
+                              <span className="font-black text-amber-900 flex items-center gap-1.5 uppercase text-xs tracking-wider">
                                 💬 Instructor Review Feedback
                               </span>
-                              <p className="text-amber-800 leading-relaxed">
+                              <p className="text-amber-900 leading-relaxed font-medium">
                                 {studentCv.adminFeedback}
                               </p>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="text-center py-6 space-y-2 text-xs text-slate-500">
-                          <p>You have not submitted a CV yet.</p>
-                          <p className="text-[11px] text-slate-400">
+                        <div className="text-center py-8 space-y-2 text-xs sm:text-sm text-slate-500 font-medium">
+                          <p className="font-bold text-slate-800">You have not submitted a CV yet.</p>
+                          <p className="text-xs text-slate-400">
                             Upload your resume using the form to get recruiter recommendations and instructor feedback.
                           </p>
                         </div>
@@ -893,26 +893,26 @@ export default function StudentDashboardPage() {
 
                   {/* Right Column: Upload / Update Form */}
                   <div className="lg:col-span-2">
-                    <form onSubmit={handleCvSubmit} className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                    <form onSubmit={handleCvSubmit} className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+                        <h3 className="text-base sm:text-lg font-black text-slate-950">
                           {studentCv?.updatedAt ? 'Update Your Submitted CV' : 'Upload & Submit Your CV'}
                         </h3>
-                        <span className="text-[11px] text-blue-700 font-semibold">PDF / DOC / DOCX</span>
+                        <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">PDF / DOC / DOCX</span>
                       </div>
 
                       {cvMsg && (
-                        <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
+                        <div className={`p-3.5 rounded-xl border text-xs sm:text-sm font-bold flex items-center gap-2 ${
                           cvMsg.isError ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
                         }`}>
                           {cvMsg.text}
                         </div>
                       )}
 
-                      <div className="space-y-4 text-xs">
+                      <div className="space-y-4 text-xs sm:text-sm">
                         {/* Target Job Title */}
                         <div>
-                          <label className="block text-slate-700 font-bold mb-1">
+                          <label className="block text-slate-800 font-bold mb-1.5">
                             Target Job Role / Career Track *
                           </label>
                           <input
@@ -921,31 +921,31 @@ export default function StudentDashboardPage() {
                             value={cvTargetJobTitle}
                             onChange={(e) => setCvTargetJobTitle(e.target.value)}
                             placeholder="e.g. Site Engineer, Project Engineer, BOQ Specialist, QA/QC Inspector"
-                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-4 py-3 text-slate-900 outline-none font-medium text-xs sm:text-sm"
                           />
                         </div>
 
                         {/* File Upload (Option A) */}
                         <div>
-                          <label className="block text-slate-700 font-bold mb-1">
+                          <label className="block text-slate-800 font-bold mb-1.5">
                             Upload CV Document (PDF / DOC / DOCX - Max 8MB)
                           </label>
-                          <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center bg-slate-50/60 transition group cursor-pointer relative">
+                          <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center bg-slate-50/60 transition group cursor-pointer relative">
                             <input
                               type="file"
                               accept=".pdf,.doc,.docx"
                               onChange={handleCvFileUpload}
                               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             />
-                            <div className="flex flex-col items-center gap-2">
-                              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center group-hover:scale-110 transition">
-                                <Upload className="w-5 h-5" />
+                            <div className="flex flex-col items-center gap-2.5">
+                              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center group-hover:scale-110 transition shadow-xs">
+                                <Upload className="w-6 h-6" />
                               </div>
                               <div>
-                                <span className="font-bold text-slate-800 block text-xs">
+                                <span className="font-extrabold text-slate-900 block text-xs sm:text-sm">
                                   {cvFileName ? `Selected: ${cvFileName}` : 'Click or Drag & Drop CV file here'}
                                 </span>
-                                <span className="text-[10px] text-slate-400 block mt-0.5">
+                                <span className="text-xs text-slate-500 block mt-1">
                                   Supported formats: PDF, DOCX (Maximum file size 8MB)
                                 </span>
                               </div>
@@ -955,7 +955,7 @@ export default function StudentDashboardPage() {
 
                         {/* Cloud URL (Option B) */}
                         <div>
-                          <label className="block text-slate-700 font-bold mb-1">
+                          <label className="block text-slate-800 font-bold mb-1.5">
                             Or Provide Google Drive / Cloud Link
                           </label>
                           <input
@@ -963,16 +963,16 @@ export default function StudentDashboardPage() {
                             value={cvFileUrl}
                             onChange={(e) => setCvFileUrl(e.target.value)}
                             placeholder="https://drive.google.com/file/d/..."
-                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-4 py-3 text-slate-900 outline-none font-medium text-xs sm:text-sm"
                           />
-                          <span className="text-[10px] text-slate-400 mt-1 block">
+                          <span className="text-xs text-slate-500 mt-1 block">
                             Ensure link sharing is set to "Anyone with the link can view".
                           </span>
                         </div>
 
                         {/* Note to Instructor */}
                         <div>
-                          <label className="block text-slate-700 font-bold mb-1">
+                          <label className="block text-slate-800 font-bold mb-1.5">
                             Career Summary / Note for the Placement Team
                           </label>
                           <textarea
@@ -980,7 +980,7 @@ export default function StudentDashboardPage() {
                             value={cvNote}
                             onChange={(e) => setCvNote(e.target.value)}
                             placeholder="Briefly state your graduation year, university, site experience (if any), and preferred company types (developer, contractor, consultancy)..."
-                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-4 py-3 text-slate-900 outline-none font-medium text-xs sm:text-sm leading-relaxed"
                           ></textarea>
                         </div>
 
@@ -988,7 +988,7 @@ export default function StudentDashboardPage() {
                           <button
                             type="submit"
                             disabled={submittingCv}
-                            className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2"
+                            className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2 hover:scale-105"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                             {submittingCv ? 'Submitting CV...' : studentCv?.updatedAt ? 'Update My CV' : 'Submit CV for Review'}

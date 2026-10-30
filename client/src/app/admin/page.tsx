@@ -721,16 +721,16 @@ export default function AdminPortalPage() {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1">
+        <div className="flex border-b border-slate-200 gap-2.5 overflow-x-auto pb-1.5">
           <button
             onClick={() => {
               setActiveMainTab('overview');
               setSelectedCourseId(null);
             }}
-            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap ${
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs ${
               activeMainTab === 'overview'
                 ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-600 hover:bg-white'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
             📊 Analytics &amp; Courses Overview
@@ -741,15 +741,15 @@ export default function AdminPortalPage() {
               setActiveMainTab('enrollments');
               setSelectedCourseId(null);
             }}
-            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
               activeMainTab === 'enrollments'
                 ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-600 hover:bg-white'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
             💳 Pending Enrollments
             {stats?.pendingEnrollments > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[#ffb531] text-[#1a1100] text-[10px] font-extrabold flex items-center justify-center">
+              <span className="min-w-5 h-5 px-1.5 rounded-full bg-[#ffb531] text-[#1a1100] text-xs font-black flex items-center justify-center">
                 {stats.pendingEnrollments}
               </span>
             )}
@@ -761,15 +761,15 @@ export default function AdminPortalPage() {
               setSelectedCourseId(null);
               loadStudentCvs();
             }}
-            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
               activeMainTab === 'cvs'
                 ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-600 hover:bg-white'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
             📄 Student CVs &amp; Resumes
             {allStudentCvs.length > 0 && (
-              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-xs">
+              <span className="min-w-5 h-5 px-1.5 rounded-full bg-emerald-500 text-white text-xs font-black flex items-center justify-center shadow-xs">
                 {allStudentCvs.length}
               </span>
             )}
@@ -777,10 +777,10 @@ export default function AdminPortalPage() {
 
           <button
             onClick={() => setActiveMainTab('settings')}
-            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap ${
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs ${
               activeMainTab === 'settings'
                 ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-600 hover:bg-white'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
             ⚙️ Payment &amp; Site Settings
@@ -788,10 +788,10 @@ export default function AdminPortalPage() {
 
           <button
             onClick={() => setActiveMainTab('security')}
-            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
               activeMainTab === 'security'
                 ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-600 hover:bg-white'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
             🔐 Security &amp; Admin Team
@@ -813,24 +813,24 @@ export default function AdminPortalPage() {
                     setSelectedCourseId(null);
                     setSelectedCourseData(null);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 hover:text-slate-900 text-xs font-bold transition shadow-sm self-start group"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 hover:text-slate-900 text-xs sm:text-sm font-extrabold transition shadow-sm self-start group"
                 >
-                  <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-1 transition" />
+                  <ArrowLeft className="w-4 h-4 text-amber-500 group-hover:-translate-x-1 transition" />
                   <span>← Back to All Courses</span>
                 </button>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <span className="text-blue-700 font-extrabold bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-full">
                     Course Workspace Mode: {selectedCourseData.title}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-blue-500/40 rounded-2xl p-6 shadow-2xl space-y-6">
+              <div className="bg-white border-2 border-blue-500/40 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                   <div>
-                    <span className="text-xs text-blue-700 font-semibold uppercase">Currently Managing:</span>
-                    <h3 className="text-xl font-extrabold text-slate-900">{selectedCourseData.title}</h3>
-                    <p className="text-xs text-slate-600 mt-0.5">
+                    <span className="text-xs sm:text-sm text-blue-700 font-bold uppercase tracking-wider">Currently Managing:</span>
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-950 mt-1">{selectedCourseData.title}</h3>
+                    <p className="text-xs sm:text-sm text-slate-700 font-semibold mt-1">
                       Fee: BDT {selectedCourseData.price} | Duration: {selectedCourseData.durationDays} Days | Classes: {selectedCourseData.totalClasses}
                     </p>
                   </div>
@@ -860,54 +860,54 @@ export default function AdminPortalPage() {
                 </div>
 
                 {/* Sub Tabs Inside Course Hub */}
-                <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 text-xs">
+                <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1.5 text-xs sm:text-sm">
                   <button
                     onClick={() => setCourseSubTab('students')}
-                    className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Users className="w-3.5 h-3.5" />
+                    <Users className="w-4 h-4" />
                     Enrolled Students &amp; Passwords ({courseStudents.length})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('videos')}
-                    className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Video className="w-3.5 h-3.5" />
+                    <Video className="w-4 h-4" />
                     Push Video Links ({selectedCourseData.videos?.length || 0})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('live')}
-                    className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'live' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                      courseSubTab === 'live' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Calendar className="w-3.5 h-3.5" />
+                    <Calendar className="w-4 h-4" />
                     Schedule Live Class ({selectedCourseData.liveClasses?.length || 0})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('tasks')}
-                    className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'tasks' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                      courseSubTab === 'tasks' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <ClipboardList className="w-3.5 h-3.5" />
+                    <ClipboardList className="w-4 h-4" />
                     Tasks &amp; Homework ({selectedCourseData.tasks?.length || 0})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('chat')}
-                    className={`py-2 px-3.5 rounded-lg font-bold transition flex items-center gap-1.5 ${
-                      courseSubTab === 'chat' ? 'bg-[#ffb531] text-[#1a1100]' : 'text-slate-600 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                      courseSubTab === 'chat' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <MessageSquare className="w-3.5 h-3.5" />
+                    <MessageSquare className="w-4 h-4" />
                     Student Discussion Chat
                   </button>
                 </div>
@@ -946,42 +946,42 @@ export default function AdminPortalPage() {
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[720px]">
-                          <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
+                        <table className="w-full text-left text-xs sm:text-sm border border-slate-200 rounded-2xl overflow-hidden min-w-[720px]">
+                          <thead className="bg-slate-100 text-slate-900 font-extrabold uppercase tracking-wider border-b border-slate-200 text-xs sm:text-sm">
                             <tr>
-                              <th className="p-3">Student Name</th>
-                              <th className="p-3">Mobile</th>
-                              <th className="p-3">Login Email</th>
-                              <th className="p-3">Generated Password</th>
-                              <th className="p-3">CV / Resume</th>
-                              <th className="p-3">Status</th>
-                              <th className="p-3 text-right">Actions</th>
+                              <th className="p-3.5">Student Name</th>
+                              <th className="p-3.5">Mobile</th>
+                              <th className="p-3.5">Login Email</th>
+                              <th className="p-3.5">Generated Password</th>
+                              <th className="p-3.5">CV / Resume</th>
+                              <th className="p-3.5">Status</th>
+                              <th className="p-3.5 text-right">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200 bg-slate-50">
+                          <tbody className="divide-y divide-slate-200 bg-white">
                             {courseStudents.map((st) => (
-                              <tr key={st._id} className="hover:bg-white">
-                                <td className="p-3 font-bold text-slate-900">{st.name}</td>
-                                <td className="p-3 font-mono text-slate-600">{st.phone}</td>
-                                <td className="p-3 font-mono text-blue-700">{st.email}</td>
-                                <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
+                              <tr key={st._id} className="hover:bg-slate-50/80 transition">
+                                <td className="p-3.5 font-black text-slate-950 text-sm sm:text-base">{st.name}</td>
+                                <td className="p-3.5 font-mono font-semibold text-slate-700 text-xs sm:text-sm">{st.phone}</td>
+                                <td className="p-3.5 font-mono font-bold text-blue-700 text-xs sm:text-sm">{st.email}</td>
+                                <td className="p-3.5 font-mono font-black text-amber-950 bg-amber-50/80 px-3 py-1.5 rounded-lg border border-amber-200 text-xs sm:text-sm">
                                   {st.plainPasswordForAdmin || 'Hidden (Hashed)'}
                                 </td>
-                                <td className="p-3">
+                                <td className="p-3.5">
                                   {st.cv?.updatedAt ? (
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-2">
                                       <button
                                         onClick={() => {
                                           setViewingStudentCv(st);
                                           setAdminCvFeedback(st.cv?.adminFeedback || '');
                                           setAdminCvStatus(st.cv?.status || 'reviewed');
                                         }}
-                                        className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-[11px] inline-flex items-center gap-1 transition shadow-xs"
+                                        className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs inline-flex items-center gap-1.5 transition shadow-xs"
                                         title="Click to view CV and submit feedback"
                                       >
                                         <FileText className="w-3.5 h-3.5" /> View CV
                                       </button>
-                                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                      <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase ${
                                         st.cv.status === 'reviewed'
                                           ? 'bg-emerald-100 text-emerald-800'
                                           : st.cv.status === 'needs_revision'
@@ -992,39 +992,39 @@ export default function AdminPortalPage() {
                                       </span>
                                     </div>
                                   ) : (
-                                    <span className="text-[11px] text-slate-400 italic">No CV</span>
+                                    <span className="text-xs text-slate-400 italic font-medium">No CV</span>
                                   )}
                                 </td>
-                                <td className="p-3">
+                                <td className="p-3.5">
                                   <span
-                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    className={`px-2.5 py-1 rounded-full text-xs font-black uppercase ${
                                       st.status === 'active'
-                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                         : st.status === 'blocked'
-                                        ? 'bg-red-500/20 text-red-400 border border-red-300/30'
-                                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                        ? 'bg-red-100 text-red-800 border border-red-300'
+                                        : 'bg-amber-100 text-amber-800 border border-amber-300'
                                     }`}
                                   >
                                     {st.status.toUpperCase()}
                                   </span>
                                   {st.blockReason && (
-                                    <span className="block text-[10px] text-red-400 mt-0.5 max-w-xs truncate">
+                                    <span className="block text-xs font-medium text-red-600 mt-1 max-w-xs truncate">
                                       Reason: {st.blockReason}
                                     </span>
                                   )}
                                 </td>
-                                <td className="p-3 text-right">
+                                <td className="p-3.5 text-right">
                                   {st.status === 'blocked' ? (
                                     <button
                                       onClick={() => handleUnblockUser(st._id)}
-                                      className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[11px] font-bold transition"
+                                      className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-extrabold transition shadow-xs"
                                     >
                                       Unblock
                                     </button>
                                   ) : (
                                     <button
                                       onClick={() => setBlockingUser(st)}
-                                      className="px-3 py-1 bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded text-[11px] font-bold transition"
+                                      className="px-3.5 py-1.5 bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded-lg text-xs font-extrabold transition"
                                     >
                                       Block Student
                                     </button>
@@ -1354,61 +1354,61 @@ export default function AdminPortalPage() {
             /* OVERVIEW & ALL COURSES LIST */
             <div className="space-y-8 animate-in fade-in duration-200">
               {/* Top Metric Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-slate-600">Total Enrolled Students</span>
-                <p className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
-                  <Users className="w-6 h-6 text-blue-700" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-2 shadow-xs">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">Total Enrolled Students</span>
+                <p className="text-3xl sm:text-4xl font-black text-slate-950 flex items-center gap-2.5">
+                  <Users className="w-7 h-7 text-blue-700" />
                   {stats?.totalStudents || 0}
                 </p>
-                <span className="text-[11px] text-emerald-400">Verified learners across batches</span>
+                <span className="text-xs sm:text-sm font-semibold text-emerald-600 block">Verified learners across batches</span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-slate-600">Total Verified Revenue</span>
-                <p className="text-3xl font-extrabold text-[#ffb531] flex items-center gap-2">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-2 shadow-xs">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">Total Verified Revenue</span>
+                <p className="text-3xl sm:text-4xl font-black text-amber-600 flex items-center gap-2.5">
                   BDT {(stats?.totalRevenue || 0).toLocaleString()}
                 </p>
-                <span className="text-[11px] text-slate-600">From confirmed bKash/Nagad payments</span>
+                <span className="text-xs sm:text-sm font-semibold text-slate-600 block">From confirmed bKash/Nagad payments</span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-slate-600">Pending Verification</span>
-                <p className="text-3xl font-extrabold text-amber-400 flex items-center gap-2">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-2 shadow-xs">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">Pending Verification</span>
+                <p className="text-3xl sm:text-4xl font-black text-amber-500 flex items-center gap-2.5">
                   {stats?.pendingEnrollments || 0}
                 </p>
-                <span className="text-[11px] text-blue-700">TrxID submissions awaiting approval</span>
+                <span className="text-xs sm:text-sm font-semibold text-blue-700 block">TrxID submissions awaiting approval</span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-slate-600">Active Courses</span>
-                <p className="text-3xl font-extrabold text-[#50c878] flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-[#50c878]" />
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-2 shadow-xs">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">Active Courses</span>
+                <p className="text-3xl sm:text-4xl font-black text-emerald-600 flex items-center gap-2.5">
+                  <BookOpen className="w-7 h-7 text-emerald-600" />
                   {coursesList.length}
                 </p>
-                <span className="text-[11px] text-slate-600">Published on academy catalog</span>
+                <span className="text-xs sm:text-sm font-semibold text-slate-600 block">Published on academy catalog</span>
               </div>
             </div>
 
             {/* COURSE BUTTONS SECTION (Requirement 1: 'end jei koita course create koreche seigular button hisabe thakbe') */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 space-y-5 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Course Management Buttons</h2>
-                  <p className="text-xs text-slate-600">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-950">Course Management Buttons</h2>
+                  <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
                     Click any course button below to open its dedicated hub (add videos, schedule live classes, view enrolled students &amp; login credentials, or chat).
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCreateCourseModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-md shrink-0 transition"
+                  className="px-5 py-3 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-black text-xs sm:text-sm flex items-center gap-2 shadow-md shrink-0 transition hover:scale-105"
                 >
                   <PlusCircle className="w-4 h-4" /> Create New Course
                 </button>
               </div>
 
               {/* The Course Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
                 {coursesList.map((c) => {
                   const isSelected = selectedCourseId === c._id;
 
@@ -1416,28 +1416,28 @@ export default function AdminPortalPage() {
                     <button
                       key={c._id}
                       onClick={() => loadCourseHub(c._id)}
-                      className={`text-left p-4 rounded-xl border transition flex flex-col justify-between gap-3 ${
+                      className={`text-left p-5 rounded-2xl border-2 transition flex flex-col justify-between gap-4 ${
                         isSelected
-                          ? 'bg-slate-100 border-[#ffb531] shadow-lg shadow-[#ffb531]/10'
-                          : 'bg-white border-slate-200 hover:border-blue-500/40 hover:bg-slate-50'
+                          ? 'bg-slate-50 border-[#ffb531] shadow-xl shadow-[#ffb531]/10'
+                          : 'bg-white border-slate-200 hover:border-blue-500/50 hover:bg-slate-50 shadow-xs'
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between text-[11px] mb-1">
-                          <span className="text-[#ffb531] font-bold">BDT {c.price.toLocaleString()}</span>
-                          <span className="text-blue-700 font-medium">{c.durationDays} Days</span>
+                        <div className="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+                          <span className="text-amber-600 font-black">BDT {c.price.toLocaleString()}</span>
+                          <span className="text-blue-700 font-extrabold">{c.durationDays} Days</span>
                         </div>
-                        <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{c.title}</h3>
+                        <h3 className="text-base sm:text-lg font-black text-slate-950 line-clamp-1">{c.title}</h3>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-slate-600 pt-2 border-t border-slate-200">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3 text-emerald-400" /> {c.studentCount} Students
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-slate-700 font-semibold pt-3 border-t border-slate-200">
+                        <span className="flex items-center gap-1.5 font-bold">
+                          <Users className="w-4 h-4 text-emerald-600" /> {c.studentCount} Students
                         </span>
                         {c.pendingCount > 0 && (
-                          <span className="text-[#ffb531] font-bold">({c.pendingCount} Pending)</span>
+                          <span className="text-amber-600 font-black">({c.pendingCount} Pending)</span>
                         )}
-                        <span className={`text-[10px] font-bold ${isSelected ? 'text-[#ffb531]' : 'text-blue-700'}`}>
+                        <span className={`text-xs font-black ${isSelected ? 'text-amber-600' : 'text-blue-700'}`}>
                           {isSelected ? '● Active Hub' : 'Manage Course →'}
                         </span>
                       </div>
@@ -1468,68 +1468,68 @@ export default function AdminPortalPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[850px]">
-                  <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
+                <table className="w-full text-left text-xs sm:text-sm border border-slate-200 rounded-2xl overflow-hidden min-w-[850px]">
+                  <thead className="bg-slate-100 text-slate-900 font-extrabold uppercase tracking-wider border-b border-slate-200 text-xs sm:text-sm">
                     <tr>
-                      <th className="p-3">Applicant Name</th>
-                      <th className="p-3">Contact</th>
-                      <th className="p-3">Course</th>
-                      <th className="p-3">Method</th>
-                      <th className="p-3">Sender Mobile</th>
-                      <th className="p-3">Transaction ID (TrxID)</th>
-                      <th className="p-3">Amount</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Action</th>
+                      <th className="p-3.5">Applicant Name</th>
+                      <th className="p-3.5">Contact</th>
+                      <th className="p-3.5">Course</th>
+                      <th className="p-3.5">Method</th>
+                      <th className="p-3.5">Sender Mobile</th>
+                      <th className="p-3.5">Transaction ID (TrxID)</th>
+                      <th className="p-3.5">Amount</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-slate-50">
+                  <tbody className="divide-y divide-slate-200 bg-white">
                     {enrollments.map((en) => (
-                      <tr key={en._id} className="hover:bg-white">
-                        <td className="p-3 font-bold text-slate-900">
+                      <tr key={en._id} className="hover:bg-slate-50/80 transition">
+                        <td className="p-3.5 font-black text-slate-950 text-sm sm:text-base">
                           {en.studentName}
-                          <span className="block text-[10px] text-slate-600">{en.studentAddress}</span>
+                          <span className="block text-xs font-semibold text-slate-500 mt-0.5">{en.studentAddress}</span>
                         </td>
-                        <td className="p-3">
-                          <span className="block font-mono text-slate-600">{en.studentPhone}</span>
-                          <span className="block text-blue-700">{en.studentEmail}</span>
+                        <td className="p-3.5">
+                          <span className="block font-mono font-semibold text-slate-700 text-xs sm:text-sm">{en.studentPhone}</span>
+                          <span className="block font-mono font-bold text-blue-700 text-xs sm:text-sm">{en.studentEmail}</span>
                         </td>
-                        <td className="p-3 font-semibold text-slate-900 max-w-xs">{en.courseTitle}</td>
-                        <td className="p-3 font-medium text-slate-600">{en.paymentMethod}</td>
-                        <td className="p-3 font-mono text-slate-900">{en.senderNumber}</td>
-                        <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
+                        <td className="p-3.5 font-bold text-slate-900 max-w-xs text-xs sm:text-sm">{en.courseTitle}</td>
+                        <td className="p-3.5 font-extrabold text-slate-800 text-xs sm:text-sm">{en.paymentMethod}</td>
+                        <td className="p-3.5 font-mono font-bold text-slate-900 text-xs sm:text-sm">{en.senderNumber}</td>
+                        <td className="p-3.5 font-mono font-black text-amber-950 bg-amber-50/80 px-3 py-1.5 rounded-lg border border-amber-200 text-xs sm:text-sm">
                           {en.transactionId}
                         </td>
-                        <td className="p-3 font-bold text-emerald-400">BDT {en.amount.toLocaleString()}</td>
-                        <td className="p-3">
+                        <td className="p-3.5 font-black text-emerald-700 text-sm sm:text-base">BDT {en.amount.toLocaleString()}</td>
+                        <td className="p-3.5">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            className={`px-2.5 py-1 rounded-full text-xs font-black uppercase ${
                               en.status === 'approved'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : en.status === 'rejected'
-                                ? 'bg-red-500/20 text-red-400 border border-red-300/30'
-                                : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                ? 'bg-red-100 text-red-800 border border-red-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
                             }`}
                           >
                             {en.status.toUpperCase()}
                           </span>
                           {en.generatedPassword && (
-                            <span className="block text-[10px] text-slate-600 font-mono mt-0.5">
+                            <span className="block text-xs text-slate-600 font-mono font-bold mt-1">
                               Pass: {en.generatedPassword}
                             </span>
                           )}
                         </td>
-                        <td className="p-3 text-right">
+                        <td className="p-3.5 text-right">
                           {en.status === 'pending' && (
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleApproveEnrollment(en._id)}
-                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition"
+                                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm shadow-md transition"
                               >
                                 Approve &amp; Send Email
                               </button>
                               <button
                                 onClick={() => handleRejectEnrollment(en._id)}
-                                className="px-2.5 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs transition"
+                                className="px-3.5 py-2 rounded-xl border border-red-300 text-red-700 hover:bg-red-50 text-xs sm:text-sm font-bold transition"
                               >
                                 Reject
                               </button>
@@ -1552,7 +1552,7 @@ export default function AdminPortalPage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-950 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-blue-700" /> Student CVs &amp; Job Placement Submissions
                 </h2>
                 <p className="text-xs text-slate-600">
@@ -1631,37 +1631,37 @@ export default function AdminPortalPage() {
 
               return (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[760px]">
-                    <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
+                  <table className="w-full text-left text-xs sm:text-sm border border-slate-200 rounded-2xl overflow-hidden min-w-[760px]">
+                    <thead className="bg-slate-100 text-slate-900 font-extrabold uppercase tracking-wider border-b border-slate-200 text-xs sm:text-sm">
                       <tr>
-                        <th className="p-3">Student &amp; Contact</th>
-                        <th className="p-3">Target Job Track</th>
-                        <th className="p-3">Enrolled Courses</th>
-                        <th className="p-3">Submitted CV File / URL</th>
-                        <th className="p-3">Submission Date</th>
-                        <th className="p-3">Review Status</th>
-                        <th className="p-3 text-right">Actions</th>
+                        <th className="p-3.5">Student &amp; Contact</th>
+                        <th className="p-3.5">Target Job Track</th>
+                        <th className="p-3.5">Enrolled Courses</th>
+                        <th className="p-3.5">Submitted CV File / URL</th>
+                        <th className="p-3.5">Submission Date</th>
+                        <th className="p-3.5">Review Status</th>
+                        <th className="p-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 bg-slate-50">
+                    <tbody className="divide-y divide-slate-200 bg-white">
                       {filteredCvs.map((s) => (
-                        <tr key={s._id} className="hover:bg-white">
-                          <td className="p-3">
-                            <span className="font-bold text-slate-900 block">{s.name}</span>
-                            <span className="font-mono text-slate-600 block text-[11px]">{s.phone}</span>
-                            <span className="font-mono text-blue-700 block text-[11px]">{s.email}</span>
+                        <tr key={s._id} className="hover:bg-slate-50/80 transition">
+                          <td className="p-3.5">
+                            <span className="font-black text-slate-950 block text-sm sm:text-base">{s.name}</span>
+                            <span className="font-mono font-semibold text-slate-700 block text-xs sm:text-sm mt-0.5">{s.phone}</span>
+                            <span className="font-mono font-bold text-blue-700 block text-xs sm:text-sm">{s.email}</span>
                           </td>
 
-                          <td className="p-3 font-semibold text-slate-800">
+                          <td className="p-3.5 font-bold text-slate-900 text-xs sm:text-sm">
                             {s.cv?.targetJobTitle || 'Civil Engineer'}
                           </td>
 
-                          <td className="p-3 max-w-xs">
-                            <div className="flex flex-wrap gap-1">
+                          <td className="p-3.5 max-w-xs">
+                            <div className="flex flex-wrap gap-1.5">
                               {s.enrolledCourses?.map((ec: any, idx: number) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-medium truncate max-w-[150px]"
+                                  className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold truncate max-w-[160px]"
                                   title={ec.course?.title}
                                 >
                                   {ec.course?.title || 'Enrolled'}
@@ -1670,30 +1670,30 @@ export default function AdminPortalPage() {
                             </div>
                           </td>
 
-                          <td className="p-3">
+                          <td className="p-3.5">
                             {s.cv?.fileData ? (
                               <a
                                 href={s.cv.fileData}
                                 download={s.cv.fileName || `${s.name}_CV.pdf`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold transition"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-extrabold text-xs sm:text-sm transition shadow-xs"
                               >
-                                <Download className="w-3.5 h-3.5" /> Download ({s.cv.fileName || 'CV.pdf'})
+                                <Download className="w-4 h-4 text-emerald-600" /> Download ({s.cv.fileName || 'CV.pdf'})
                               </a>
                             ) : s.cv?.fileUrl ? (
                               <a
                                 href={s.cv.fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold transition"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-700 font-extrabold text-xs sm:text-sm transition shadow-xs"
                               >
-                                <ExternalLink className="w-3.5 h-3.5" /> Open Google Drive / Link
+                                <ExternalLink className="w-4 h-4 text-blue-600" /> Open Drive Link
                               </a>
                             ) : (
-                              <span className="text-slate-400 italic">No file attached</span>
+                              <span className="text-xs text-slate-400 italic font-medium">No file attached</span>
                             )}
                           </td>
 
-                          <td className="p-3 text-slate-600 whitespace-nowrap">
+                          <td className="p-3.5 text-slate-700 font-medium whitespace-nowrap text-xs sm:text-sm">
                             {s.cv?.updatedAt
                               ? new Date(s.cv.updatedAt).toLocaleDateString(undefined, {
                                   year: 'numeric',
@@ -1703,28 +1703,28 @@ export default function AdminPortalPage() {
                               : 'N/A'}
                           </td>
 
-                          <td className="p-3">
+                          <td className="p-3.5">
                             <span
-                              className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase ${
+                              className={`px-2.5 py-1 rounded-full font-black text-xs uppercase ${
                                 s.cv?.status === 'reviewed'
-                                  ? 'bg-emerald-100 text-emerald-800'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                   : s.cv?.status === 'needs_revision'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-blue-100 text-blue-800'
+                                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                  : 'bg-blue-100 text-blue-800 border border-blue-300'
                               }`}
                             >
                               {s.cv?.status || 'Submitted'}
                             </span>
                           </td>
 
-                          <td className="p-3 text-right">
+                          <td className="p-3.5 text-right">
                             <button
                               onClick={() => {
                                 setViewingStudentCv(s);
                                 setAdminCvFeedback(s.cv?.adminFeedback || '');
                                 setAdminCvStatus(s.cv?.status || 'reviewed');
                               }}
-                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black transition shadow-xs text-[11px]"
+                              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black transition shadow-sm text-xs sm:text-sm"
                             >
                               Review &amp; Feedback
                             </button>
@@ -1763,7 +1763,7 @@ export default function AdminPortalPage() {
 
             {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
-              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
+              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
                 👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
               </h3>
               
@@ -1971,7 +1971,7 @@ export default function AdminPortalPage() {
 
             {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2.5">
+              <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2 border-b border-slate-200 pb-3">
                 🌐 Academy Branding &amp; Hero Headline Content
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -2019,7 +2019,7 @@ export default function AdminPortalPage() {
 
             {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
+              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
                 📞 Official Helpline &amp; WhatsApp Numbers
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -2072,7 +2072,7 @@ export default function AdminPortalPage() {
 
             {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 border-b border-slate-200 pb-2.5">
+              <h3 className="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2 border-b border-slate-200 pb-3">
                 💳 bKash, Nagad &amp; Rocket Payment Numbers
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -2130,7 +2130,7 @@ export default function AdminPortalPage() {
             <div className="flex justify-end pt-4 border-t border-slate-200">
               <button
                 type="submit"
-                className="px-8 py-3 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-xl transition"
+                className="px-8 py-3.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-black text-sm sm:text-base flex items-center gap-2 shadow-xl transition hover:scale-105"
               >
                 <Save className="w-4 h-4" /> Save All Changes
               </button>
@@ -2149,7 +2149,7 @@ export default function AdminPortalPage() {
                 <span className="text-xs text-[#ffb531] font-bold uppercase tracking-wider block">
                   Security Authentication
                 </span>
-                <h2 className="text-lg font-bold text-slate-900 mt-1">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-950 mt-1">
                   Change Administrator Password via Email Verification (OTP)
                 </h2>
                 <p className="text-xs text-slate-600">
@@ -2371,7 +2371,7 @@ export default function AdminPortalPage() {
       {showCreateCourseModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Create New Engineering Course</h3>
+            <h3 className="text-xl font-black text-slate-950">Create New Engineering Course</h3>
             <form onSubmit={handleCreateCourseSubmit} className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-600 mb-1">Course Title *</label>
@@ -2537,8 +2537,8 @@ export default function AdminPortalPage() {
           <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <UserPlus className="w-4 h-4 text-amber-400" /> Manually Add Student to Course
+                <h3 className="text-lg font-black text-slate-950 flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-amber-500" /> Manually Add Student to Course
                 </h3>
                 <p className="text-xs text-blue-700 font-semibold mt-0.5 truncate max-w-sm">
                   {selectedCourseData.title}
@@ -2663,8 +2663,8 @@ export default function AdminPortalPage() {
           <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in-95 duration-200 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-700" /> Review Student CV / Resume
+                <h3 className="text-lg font-black text-slate-950 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-700" /> Review Student CV / Resume
                 </h3>
                 <p className="text-slate-500 mt-0.5">
                   Candidate: <strong className="text-slate-900">{viewingStudentCv.name}</strong> ({viewingStudentCv.email})
