@@ -122,23 +122,23 @@ export default function Navbar({ settings }: NavbarProps) {
                 {user.role === 'admin' ? (
                   <Link
                     href="/admin"
-                    className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition shrink-0"
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    <span className="hidden xs:inline">Admin</span> Portal
+                    <span>Admin Portal</span>
                   </Link>
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/25 transition"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/25 transition shrink-0"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span className="hidden xs:inline">My</span> Dashboard
+                    <span>My Dashboard</span>
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+                  className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition shrink-0"
                   title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
@@ -148,14 +148,14 @@ export default function Navbar({ settings }: NavbarProps) {
               <>
                 <Link
                   href="/login"
-                  className="hidden xs:inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-2xs shrink-0"
                 >
                   <LogIn className="w-4 h-4 text-blue-600" />
                   <span>Login</span>
                 </Link>
                 <a
                   href="/#courses"
-                  className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 transition duration-150 hover:scale-105"
+                  className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 transition duration-150 hover:scale-105 shrink-0"
                 >
                   Explore Courses
                 </a>
