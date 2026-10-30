@@ -49,6 +49,7 @@ export default function AdminPortalPage() {
   const [adminCvFeedback, setAdminCvFeedback] = useState('');
   const [adminCvStatus, setAdminCvStatus] = useState<'submitted' | 'reviewed' | 'needs_revision'>('reviewed');
   const [savingCvFeedback, setSavingCvFeedback] = useState(false);
+  const [savingSection, setSavingSection] = useState<string | null>(null);
 
   // Active view
   const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security'>('overview');
@@ -515,21 +516,30 @@ export default function AdminPortalPage() {
     reader.readAsDataURL(file);
   };
 
-  // 10. Update Site Settings
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 10. Update Site Settings (Individual Section or Master Save)
+  const handleSaveSection = async (sectionKey: string, sectionTitle: string) => {
     if (!siteSettings) return;
 
+    setSavingSection(sectionKey);
     const res = await apiRequest('/admin/settings', {
       method: 'PUT',
       body: JSON.stringify(siteSettings),
     });
+    setSavingSection(null);
 
     if (res.success) {
-      showAlert('Site settings and payment numbers updated successfully!');
+      showAlert(`✅ ${sectionTitle} updated and published live!`);
+      if (res.data?.settings) {
+        setSiteSettings(res.data.settings);
+      }
     } else {
-      showAlert('Error updating settings.', 'error');
+      showAlert(`❌ Error saving ${sectionTitle}. Please check connection.`, 'error');
     }
+  };
+
+  const handleSaveSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    await handleSaveSection('all', 'All settings & payment numbers');
   };
 
   // 10. Manual Expired Cleanup Trigger
@@ -1743,29 +1753,43 @@ export default function AdminPortalPage() {
             TAB 3: SITE SETTINGS & PAYMENT NUMBERS
         ======================================================== */}
         {activeMainTab === 'settings' && siteSettings && (
-          <form onSubmit={handleSaveSettings} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-8">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-amber-400" /> Homepage Content, Instructor Profile &amp; Gateway Settings
+                <h2 className="text-xl sm:text-2xl font-black text-slate-950 flex items-center gap-2">
+                  <Globe className="w-6 h-6 text-amber-500" /> Homepage Content, Instructor Profile &amp; Gateway Settings
                 </h2>
-                <p className="text-xs text-slate-600">
-                  Change instructor photo, names, headings, experience, phone numbers, and bKash/Nagad accounts. Updates appear live across the site immediately.
+                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+                  You can edit and save each section independently below, or click master save to save all changes at once.
                 </p>
               </div>
               <button
-                type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-lg transition shrink-0"
+                type="button"
+                onClick={() => handleSaveSection('all', 'All settings & payment numbers')}
+                disabled={savingSection === 'all'}
+                className="px-6 py-3 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg transition shrink-0 hover:scale-105 disabled:opacity-50"
               >
-                <Save className="w-4 h-4" /> Save All Settings
+                <Save className="w-4 h-4" />
+                <span>{savingSection === 'all' ? 'Saving All...' : 'Save All Settings (Master)'}</span>
               </button>
             </div>
 
             {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
-              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
-                👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2">
+                  👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('instructor', 'Instructor Profile')}
+                  disabled={savingSection === 'instructor'}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'instructor' ? 'Saving...' : 'Save Instructor Profile'}</span>
+                </button>
+              </div>
               
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Photo Preview and File Uploader */}
@@ -1915,116 +1939,188 @@ export default function AdminPortalPage() {
                   />
                 </div>
               </div>
+
+              <div className="flex justify-end pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('instructor', 'Instructor Profile')}
+                  disabled={savingSection === 'instructor'}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'instructor' ? 'Saving Profile...' : 'Save Instructor Profile'}</span>
+                </button>
+              </div>
             </div>
 
             {/* SECTION 2: HOMEPAGE STATS COUNTERS & TOP BADGE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                📊 Homepage Badges &amp; Stat Numbers
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-blue-700 flex items-center gap-2">
+                  📊 Homepage Badges &amp; Stat Numbers
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('stats', 'Stats & Badges')}
+                  disabled={savingSection === 'stats'}
+                  className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'stats' ? 'Saving...' : 'Save Stats & Badges'}</span>
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Total Courses Count</label>
+                  <label className="block text-slate-700 mb-1 font-bold">Total Courses Count</label>
                   <input
                     type="text"
                     value={siteSettings.statsCourses || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsCourses: e.target.value })}
                     placeholder="6+"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Experience Stat</label>
+                  <label className="block text-slate-700 mb-1 font-bold">Experience Stat</label>
                   <input
                     type="text"
                     value={siteSettings.statsExperience || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsExperience: e.target.value })}
                     placeholder="10+ Yrs"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Mentor Institution</label>
+                  <label className="block text-slate-700 mb-1 font-bold">Mentor Institution</label>
                   <input
                     type="text"
                     value={siteSettings.statsMentorTag || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, statsMentorTag: e.target.value })}
                     placeholder="BUET"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none font-bold text-center"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none font-bold text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Top Hero Badge Text</label>
+                  <label className="block text-slate-700 mb-1 font-bold">Top Hero Badge Text</label>
                   <input
                     type="text"
                     value={siteSettings.heroBadgeText || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroBadgeText: e.target.value })}
                     placeholder="Bangladesh's #1 Practical Civil Engineering Academy"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none font-medium"
                   />
                 </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('stats', 'Stats & Badges')}
+                  disabled={savingSection === 'stats'}
+                  className="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'stats' ? 'Saving Stats...' : 'Save Stats & Badges'}</span>
+                </button>
               </div>
             </div>
 
             {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2 border-b border-slate-200 pb-3">
-                🌐 Academy Branding &amp; Hero Headline Content
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2">
+                  🌐 Academy Branding &amp; Hero Headline Content
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('branding', 'Branding & Headlines')}
+                  disabled={savingSection === 'branding'}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'branding' ? 'Saving...' : 'Save Branding & Headlines'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Academy / Platform Name</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Academy / Platform Name</label>
                   <input
                     type="text"
                     value={siteSettings.siteName || 'Blueprint Learning Academy'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Tagline Sub-banner Note</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Hero Tagline Sub-banner Note</label>
                   <input
                     type="text"
                     value={siteSettings.heroBengaliNote || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroBengaliNote: e.target.value })}
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Main Headline Title</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Hero Main Headline Title</label>
                   <input
                     type="text"
                     value={siteSettings.heroTitle || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Subtitle Description</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Hero Subtitle Description</label>
                   <textarea
                     rows={2}
                     value={siteSettings.heroSubtitle || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   ></textarea>
                 </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('branding', 'Branding & Headlines')}
+                  disabled={savingSection === 'branding'}
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'branding' ? 'Saving Branding...' : 'Save Branding & Headlines'}</span>
+                </button>
               </div>
             </div>
 
             {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
-                📞 Official Helpline &amp; WhatsApp Numbers
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2">
+                  📞 Official Helpline &amp; WhatsApp Numbers
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('contact', 'Helpline & WhatsApp')}
+                  disabled={savingSection === 'contact'}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'contact' ? 'Saving...' : 'Save Helpline & Contact'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">
+                  <label className="block text-slate-700 mb-1.5 font-bold">
                     Contact Helpline Phone *
                   </label>
                   <input
@@ -2033,13 +2129,13 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactPhone || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
-                  <span className="text-[10px] text-blue-700">Appears in header, footer &amp; direct calling</span>
+                  <span className="text-[11px] text-blue-700 font-semibold mt-1 block">Appears in header, footer &amp; direct calling</span>
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">
+                  <label className="block text-slate-700 mb-1.5 font-bold">
                     WhatsApp Number (with country code e.g. 880) *
                   </label>
                   <input
@@ -2048,13 +2144,13 @@ export default function AdminPortalPage() {
                     value={siteSettings.whatsappNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
                     placeholder="88013XXXXXXXX"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
-                  <span className="text-[10px] text-emerald-400">Used for direct WhatsApp chat button links</span>
+                  <span className="text-[11px] text-emerald-600 font-semibold mt-1 block">Used for direct WhatsApp chat button links</span>
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">
+                  <label className="block text-slate-700 mb-1.5 font-bold">
                     Official Support Email *
                   </label>
                   <input
@@ -2063,79 +2159,123 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactEmail || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
                     placeholder="info@blueprintlearningacademy.com"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
-                  <span className="text-[10px] text-blue-700">Displayed in contact links &amp; email notifications</span>
+                  <span className="text-[11px] text-blue-700 font-semibold mt-1 block">Displayed in contact links &amp; email notifications</span>
                 </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('contact', 'Helpline & WhatsApp')}
+                  disabled={savingSection === 'contact'}
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'contact' ? 'Saving Contact...' : 'Save Helpline & Contact'}</span>
+                </button>
               </div>
             </div>
 
             {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <h3 className="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2 border-b border-slate-200 pb-3">
-                💳 bKash, Nagad &amp; Rocket Payment Numbers
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2">
+                  💳 bKash, Nagad &amp; Rocket Payment Numbers
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('payment', 'Payment Gateway Numbers')}
+                  disabled={savingSection === 'payment'}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'payment' ? 'Saving...' : 'Save Payment Numbers'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">bKash Number *</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">bKash Number *</label>
                   <input
                     type="text"
                     required
                     value={siteSettings.bkashNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-emerald-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
                   <input
                     type="text"
                     value={siteSettings.bkashType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] text-slate-600"
+                    className="w-full mt-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-600 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Nagad Number *</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Nagad Number *</label>
                   <input
                     type="text"
                     required
                     value={siteSettings.nagadNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-emerald-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
                   <input
                     type="text"
                     value={siteSettings.nagadType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] text-slate-600"
+                    className="w-full mt-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-600 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Rocket Number</label>
+                  <label className="block text-slate-700 mb-1.5 font-bold">Rocket Number</label>
                   <input
                     type="text"
                     value={siteSettings.rocketNumber || ''}
                     onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
                     placeholder="013XXXXXXXX-X"
-                    className="w-full bg-white border border-slate-200 focus:border-[#ffb531] rounded-lg px-3 py-2 text-slate-900 outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-emerald-600 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
                   />
+                  <span className="text-[11px] text-slate-400 mt-2 block">Optional alternative payment account</span>
                 </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('payment', 'Payment Gateway Numbers')}
+                  disabled={savingSection === 'payment'}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'payment' ? 'Saving Numbers...' : 'Save Payment Numbers'}</span>
+                </button>
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-200">
+            {/* MASTER SAVE BUTTON AT BOTTOM */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
+              <span className="text-xs sm:text-sm text-slate-500 font-medium">
+                Want to publish all updated sections simultaneously? Use Master Save.
+              </span>
               <button
-                type="submit"
-                className="px-8 py-3.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-black text-sm sm:text-base flex items-center gap-2 shadow-xl transition hover:scale-105"
+                type="button"
+                onClick={() => handleSaveSection('all', 'All settings & payment numbers')}
+                disabled={savingSection === 'all'}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-xl transition hover:scale-105 disabled:opacity-50"
               >
-                <Save className="w-4 h-4" /> Save All Changes
+                <Save className="w-4 h-4" />
+                <span>{savingSection === 'all' ? 'Saving All...' : 'Save All Changes (Master Save)'}</span>
               </button>
             </div>
-          </form>
+          </div>
         )}
 
         {/* ========================================================
