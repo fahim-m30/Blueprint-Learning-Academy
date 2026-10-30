@@ -712,19 +712,41 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
 const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
   const currentYear = new Date().getFullYear();
 
+  const textContent = `Hello ${name},
+
+We received a request to verify or reset your Blueprint Learning Academy account password (${email}).
+
+Your 6-Digit Verification Code (OTP) is:
+----------------------------------------
+${otp}
+----------------------------------------
+This verification code is valid for 10 minutes only.
+
+SECURITY NOTICE:
+• Never share this code with anyone. Blueprint staff or instructors will never ask for your verification code.
+• If you did not request this password reset, please ignore this email. Your account password remains unchanged.
+
+Regards,
+Blueprint Learning Academy Security Portal
+Helpline: +880 1313-916161
+Website: https://blueprint-learning-academy.vercel.app
+`;
+
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Verification Code - Blueprint Learning Academy</title>
+  <title>Password Reset Verification Code: ${otp} - Blueprint Learning Academy</title>
   <style>
     body {
       margin: 0;
       padding: 0;
       background-color: #f1f5f9;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #334155;
+      -webkit-font-smoothing: antialiased;
     }
     .wrapper {
       width: 100%;
@@ -742,16 +764,17 @@ const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
     }
     .header-banner {
       background: linear-gradient(135deg, #091224 0%, #0f274a 55%, #1e3a8a 100%);
-      padding: 32px 24px 24px;
+      padding: 34px 24px 26px;
       text-align: center;
     }
     .logo-container {
-      width: 76px;
-      height: 76px;
+      width: 80px;
+      height: 80px;
       margin: 0 auto 12px;
       border-radius: 50%;
       border: 3px solid #ffb531;
       background-color: #ffffff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
       overflow: hidden;
       display: inline-block;
     }
@@ -762,55 +785,168 @@ const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
       display: block;
       border-radius: 50%;
     }
-    .otp-box {
-      background-color: #0b1528;
-      border: 2px dashed #ffb531;
-      border-radius: 14px;
-      padding: 22px;
-      text-align: center;
-      margin: 24px 0;
-      font-size: 36px;
+    .brand-title {
+      margin: 0;
+      color: #ffffff;
+      font-size: 23px;
       font-weight: 900;
-      letter-spacing: 10px;
+      letter-spacing: -0.02em;
+    }
+    .brand-accent {
       color: #ffb531;
+    }
+    .brand-subtitle {
+      margin: 6px 0 0;
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .content-body {
+      padding: 32px 30px;
+    }
+    .security-badge {
+      display: inline-block;
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-bottom: 16px;
+    }
+    .heading {
+      margin: 0 0 12px;
+      color: #0f172a;
+      font-size: 21px;
+      font-weight: 900;
+    }
+    .intro-text {
+      margin: 0 0 24px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .otp-vault {
+      background-color: #0b1528;
+      border: 2px solid #ffb531;
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 25px rgba(11, 21, 40, 0.15);
+    }
+    .otp-label {
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+    .otp-digits {
       font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 12px;
+      color: #ffb531;
+      padding-left: 12px;
+      margin: 6px 0 12px;
+    }
+    .otp-validity {
+      color: #38bdf8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .notice-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .notice-item {
+      margin-bottom: 6px;
+    }
+    .notice-item:last-child {
+      margin-bottom: 0;
+    }
+    .footer {
+      background-color: #091224;
+      padding: 22px 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.6;
+      border-top: 1px solid #1e293b;
+    }
+    .footer a {
+      color: #ffb531;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
+  <!-- Preheader preview text for email clients -->
+  <div style="display:none;font-size:1px;color:#333333;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    Your password reset verification code is ${otp}. Valid for 10 minutes.
+  </div>
+
   <div class="wrapper">
     <div class="container">
+      <!-- HEADER -->
       <div class="header-banner">
         <div class="logo-container">
-          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="76" height="76" />
+          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="80" height="80" />
         </div>
-        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
-          Blueprint <span style="color: #ffb531;">Learning Academy</span>
-        </h1>
-        <p style="color: #93c5fd; margin: 6px 0 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
-          Administrator Security Verification
-        </p>
+        <h1 class="brand-title">Blueprint <span class="brand-accent">Learning Academy</span></h1>
+        <p class="brand-subtitle">Security &amp; Account Verification</p>
       </div>
 
-      <div style="padding: 32px 30px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 900;">
-          Password Reset Verification
-        </h2>
-        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+      <!-- BODY -->
+      <div class="content-body">
+        <div class="security-badge">
+          🔒 Password Reset Request
+        </div>
+
+        <h2 class="heading">Verification Code</h2>
+        <p class="intro-text">
           Hello <strong>${name}</strong>,<br>
-          A verification request was made for your administrator account. Please use the one-time code below to proceed:
+          We received a request to reset the password for your Blueprint Learning Academy account (<strong style="color: #0f172a;">${email}</strong>). Please use the single-use verification code below to authorize this change:
         </p>
 
-        <div class="otp-box">${otp}</div>
+        <!-- OTP Vault Card -->
+        <div class="otp-vault">
+          <div class="otp-label">One-Time Verification Code (OTP)</div>
+          <div class="otp-digits">${otp}</div>
+          <div class="otp-validity">⏱ Valid for 10 minutes only • Single use</div>
+        </div>
 
-        <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">
-          • This code is confidential and will expire in 10 minutes.<br>
-          • If you did not request this code, no action is needed.
-        </p>
+        <!-- Security Advisory -->
+        <div class="notice-card">
+          <div class="notice-item">
+            ⚠️ <strong>Security Advisory:</strong> Never share this code with anyone. Blueprint instructors and administration will never ask for your verification code.
+          </div>
+          <div class="notice-item">
+            🛡 <strong>Didn't make this request?</strong> If you did not request a password reset, you can safely disregard this email. Your account password remains unchanged.
+          </div>
+        </div>
       </div>
 
-      <div style="background-color: #091224; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
-        © ${currentYear} Blueprint Learning Academy.
+      <!-- FOOTER -->
+      <div class="footer">
+        <strong style="color: #f1f5f9;">Blueprint Learning Academy</strong><br>
+        Engineering Career Development for Civil Engineers in Bangladesh<br>
+        Helpline: <a href="tel:+8801313916161">+880 1313-916161</a> | Website: <a href="https://blueprint-learning-academy.vercel.app">blueprint-learning-academy.vercel.app</a><br>
+        <span style="font-size: 11px; color: #64748b; margin-top: 6px; display: inline-block;">
+          © ${currentYear} Blueprint Learning Academy. All rights reserved.
+        </span>
       </div>
     </div>
   </div>
@@ -820,8 +956,9 @@ const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
 
   return await dispatchMail({
     to: email,
-    subject: `Your Verification Code: ${otp} - Blueprint Learning Academy`,
+    subject: `Password Reset Verification Code: ${otp} - Blueprint Learning Academy`,
     html: htmlContent,
+    text: textContent,
   });
 };
 
