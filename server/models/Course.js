@@ -80,7 +80,7 @@ const courseSchema = new mongoose.Schema({
     default: 'https://chat.whatsapp.com/sample',
   },
   instructor: {
-    name: { type: String, default: 'Md Abdul Mazid' },
+    name: { type: String, default: 'Engr. Md Abdul Mazid' },
     designation: { type: String, default: 'Senior Civil Engineer (BUET), 10+ Years Experience' },
     bio: { type: String, default: 'Practicing engineer with over a decade of hands-on real estate project execution experience across Bangladesh.' },
   },

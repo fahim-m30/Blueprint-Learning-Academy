@@ -140,8 +140,8 @@ export default function HomePage() {
                 {/* Photo Container */}
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-slate-200/90 shadow-2xl shadow-blue-950/10 bg-white group">
                   <img
-                    src="/instructor.jpg"
-                    alt="Md Abdul Mazid, Civil Engineer and Lead Instructor at Blueprint Learning Academy"
+                    src="/instructor.jpg?v=2"
+                    alt="Engr. Md Abdul Mazid, Civil Engineer and Lead Instructor at Blueprint Learning Academy"
                     className="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
                   />
                   {/* Subtle dark gradient overlay at bottom */}
@@ -150,7 +150,7 @@ export default function HomePage() {
                   {/* Floating Bio Card on Image */}
                   <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200/80 text-slate-950 p-3.5 sm:p-4 rounded-2xl shadow-xl flex items-center justify-between">
                     <div>
-                      <span className="block font-black text-sm sm:text-base">Md Abdul Mazid</span>
+                      <span className="block font-black text-sm sm:text-base">Engr. Md Abdul Mazid</span>
                       <span className="block text-[11px] sm:text-xs text-blue-700 font-extrabold mt-0.5">
                         B.Sc. in Civil Engineering (BUET)
                       </span>
@@ -380,14 +380,14 @@ export default function HomePage() {
                 <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-blue-500/20 via-amber-500/15 to-indigo-500/20 opacity-80 blur-2xl"></div>
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-slate-200/90 shadow-2xl bg-white group">
                   <img
-                    src="/instructor.jpg"
-                    alt="Md Abdul Mazid, civil engineer and founder of Blueprint Learning Academy"
+                    src="/instructor.jpg?v=2"
+                    alt="Engr. Md Abdul Mazid, civil engineer and founder of Blueprint Learning Academy"
                     className="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200/80 text-slate-950 font-black text-sm sm:text-base py-3 px-4 rounded-xl shadow-lg flex items-center justify-between">
                     <div>
-                      <span>Md Abdul Mazid</span>
+                      <span>Engr. Md Abdul Mazid</span>
                       <span className="block text-[11px] text-slate-500 font-semibold">Lead Instructor &amp; Mentor</span>
                     </div>
                     <span className="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
@@ -413,7 +413,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience
+                Engr. Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience
                 leading residential, commercial, and high-rise developer construction projects in Dhaka.
                 He founded Blueprint Learning Academy to bridge the massive gap between academic university textbooks
                 and what Bangladeshi developer companies and site consultants actually demand.

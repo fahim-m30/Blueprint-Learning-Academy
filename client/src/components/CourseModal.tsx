@@ -87,14 +87,17 @@ export default function CourseModal({ course, isOpen, onClose, onEnroll }: Cours
           <div className="border border-slate-200 bg-slate-50 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-amber-400 shadow-md shrink-0">
               <img
-                src="/instructor.jpg"
-                alt="Md Abdul Mazid"
+                src="/instructor.jpg?v=2"
+                alt="Engr. Md Abdul Mazid"
                 className="w-full h-full object-cover object-top"
               />
             </div>
             <div className="min-w-0">
               <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
-                {course.instructor?.name || 'Md Abdul Mazid'} <span className="text-amber-500 text-xs">★</span>
+                {course.instructor?.name
+                  ? (course.instructor.name.startsWith('Engr.') ? course.instructor.name : `Engr. ${course.instructor.name}`)
+                  : 'Engr. Md Abdul Mazid'}{' '}
+                <span className="text-amber-500 text-xs">★</span>
               </h4>
               <p className="text-[11px] sm:text-xs text-blue-700 font-semibold truncate">{course.instructor?.designation || 'Senior Civil Engineer (BUET)'}</p>
               <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2">

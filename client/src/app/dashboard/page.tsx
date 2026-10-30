@@ -582,7 +582,7 @@ export default function StudentDashboardPage() {
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                       Course Instructor &amp; Support Discussion
                     </h3>
-                    <p className="text-[10px] sm:text-[11px] text-slate-500">Direct line with Md Abdul Mazid &amp; Course Admin</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500">Direct line with Engr. Md Abdul Mazid &amp; Course Admin</p>
                   </div>
                   <span className="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-blue-200">
                     Batch Active

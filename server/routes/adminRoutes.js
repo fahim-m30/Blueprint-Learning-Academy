@@ -286,7 +286,7 @@ router.post('/courses', async (req, res) => {
       regularPrice: Number(regularPrice) || Number(price) * 2,
       whatsappGroupLink: whatsappGroupLink || 'https://chat.whatsapp.com/sample',
       instructor: instructor || {
-        name: 'Md Abdul Mazid',
+        name: 'Engr. Md Abdul Mazid',
         designation: 'Senior Civil Engineer (BUET)',
       },
       syllabus: syllabus || [],

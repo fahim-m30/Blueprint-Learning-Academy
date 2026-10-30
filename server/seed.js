@@ -21,7 +21,7 @@ const coursesData = [
     regularPrice: 1999,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-interview-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
@@ -80,7 +80,7 @@ const coursesData = [
     regularPrice: 1399,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-software-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
@@ -133,7 +133,7 @@ const coursesData = [
     regularPrice: 4999,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-projecteng-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
@@ -190,7 +190,7 @@ const coursesData = [
     regularPrice: 2599,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-estimation-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
@@ -220,7 +220,7 @@ const coursesData = [
     regularPrice: 5999,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-planning-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
@@ -250,7 +250,7 @@ const coursesData = [
     regularPrice: 2999,
     whatsappGroupLink: 'https://chat.whatsapp.com/sample-qc-batch',
     instructor: {
-      name: 'Md Abdul Mazid',
+      name: 'Engr. Md Abdul Mazid',
       designation: 'Senior Civil Engineer (BUET), 10+ Years Experience',
       bio: 'BUET alumnus with extensive leadership in residential, commercial, and high-rise developer projects in Dhaka.',
     },
