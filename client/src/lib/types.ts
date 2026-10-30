@@ -91,6 +91,17 @@ export interface SiteSettings {
   paymentInstructions: string;
 }
 
+export interface StudentCV {
+  fileUrl?: string;
+  fileName?: string;
+  fileData?: string;
+  targetJobTitle?: string;
+  note?: string;
+  updatedAt?: string;
+  adminFeedback?: string;
+  status?: 'submitted' | 'reviewed' | 'needs_revision';
+}
+
 export interface User {
   _id: string;
   name: string;
@@ -101,6 +112,7 @@ export interface User {
   status: 'active' | 'paused' | 'blocked';
   blockReason?: string;
   plainPasswordForAdmin?: string;
+  cv?: StudentCV;
   enrolledCourses?: Array<{
     course: Course;
     enrolledAt: string;

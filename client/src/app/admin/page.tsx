@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
-import { Course, Enrollment, SiteSettings } from '@/lib/types';
+import { Course, Enrollment, SiteSettings, StudentCV } from '@/lib/types';
 import {
   ShieldCheck,
   ArrowLeft,
@@ -24,6 +24,10 @@ import {
   Save,
   RefreshCw,
   Globe,
+  FileText,
+  Download,
+  Search,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -36,8 +40,18 @@ export default function AdminPortalPage() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
 
+  // Student CVs Management state
+  const [allStudentCvs, setAllStudentCvs] = useState<any[]>([]);
+  const [cvLoading, setCvLoading] = useState(false);
+  const [cvSearchQuery, setCvSearchQuery] = useState('');
+  const [cvStatusFilter, setCvStatusFilter] = useState<'all' | 'submitted' | 'reviewed' | 'needs_revision'>('all');
+  const [viewingStudentCv, setViewingStudentCv] = useState<any | null>(null);
+  const [adminCvFeedback, setAdminCvFeedback] = useState('');
+  const [adminCvStatus, setAdminCvStatus] = useState<'submitted' | 'reviewed' | 'needs_revision'>('reviewed');
+  const [savingCvFeedback, setSavingCvFeedback] = useState(false);
+
   // Active view
-  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'settings' | 'security'>('overview');
+  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security'>('overview');
 
   // Admin Team & Password Verification States
   const [adminsList, setAdminsList] = useState<any[]>([]);
@@ -135,11 +149,12 @@ export default function AdminPortalPage() {
 
   const loadAdminData = async () => {
     setLoading(true);
-    const [overviewRes, enrollRes, settingsRes, adminsRes] = await Promise.all([
+    const [overviewRes, enrollRes, settingsRes, adminsRes, cvsRes] = await Promise.all([
       apiRequest('/admin/overview'),
       apiRequest('/admin/enrollments'),
       apiRequest('/admin/settings'),
       apiRequest('/admin/admins'),
+      apiRequest('/admin/cvs'),
     ]);
 
     if (overviewRes.success && overviewRes.data) {
@@ -163,7 +178,44 @@ export default function AdminPortalPage() {
       setAdminsList(adminsRes.data.admins);
     }
 
+    if (cvsRes.success && cvsRes.data?.students) {
+      setAllStudentCvs(cvsRes.data.students);
+    }
+
     setLoading(false);
+  };
+
+  const loadStudentCvs = async () => {
+    setCvLoading(true);
+    const res = await apiRequest('/admin/cvs');
+    if (res.success && res.data?.students) {
+      setAllStudentCvs(res.data.students);
+    }
+    setCvLoading(false);
+  };
+
+  const handleSaveCvFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!viewingStudentCv) return;
+
+    setSavingCvFeedback(true);
+    const res = await apiRequest(`/admin/cvs/${viewingStudentCv._id}/feedback`, {
+      method: 'POST',
+      body: JSON.stringify({
+        feedback: adminCvFeedback.trim(),
+        status: adminCvStatus,
+      }),
+    });
+    setSavingCvFeedback(false);
+
+    if (res.success) {
+      showAlert('CV feedback and review status updated successfully!');
+      setViewingStudentCv(null);
+      loadStudentCvs();
+      if (selectedCourseId) loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Error updating CV feedback.', 'error');
+    }
   };
 
   const loadCourseHub = async (courseId: string) => {
@@ -678,6 +730,26 @@ export default function AdminPortalPage() {
           </button>
 
           <button
+            onClick={() => {
+              setActiveMainTab('cvs');
+              setSelectedCourseId(null);
+              loadStudentCvs();
+            }}
+            className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 ${
+              activeMainTab === 'cvs'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-600 hover:bg-white'
+            }`}
+          >
+            📄 Student CVs &amp; Resumes
+            {allStudentCvs.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-xs">
+                {allStudentCvs.length}
+              </span>
+            )}
+          </button>
+
+          <button
             onClick={() => setActiveMainTab('settings')}
             className={`py-2.5 px-4 text-xs font-bold rounded-lg transition whitespace-nowrap ${
               activeMainTab === 'settings'
@@ -848,13 +920,14 @@ export default function AdminPortalPage() {
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[640px]">
+                        <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[720px]">
                           <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
                             <tr>
                               <th className="p-3">Student Name</th>
                               <th className="p-3">Mobile</th>
                               <th className="p-3">Login Email</th>
                               <th className="p-3">Generated Password</th>
+                              <th className="p-3">CV / Resume</th>
                               <th className="p-3">Status</th>
                               <th className="p-3 text-right">Actions</th>
                             </tr>
@@ -867,6 +940,34 @@ export default function AdminPortalPage() {
                                 <td className="p-3 font-mono text-blue-700">{st.email}</td>
                                 <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
                                   {st.plainPasswordForAdmin || 'Hidden (Hashed)'}
+                                </td>
+                                <td className="p-3">
+                                  {st.cv?.updatedAt ? (
+                                    <div className="flex items-center gap-1.5">
+                                      <button
+                                        onClick={() => {
+                                          setViewingStudentCv(st);
+                                          setAdminCvFeedback(st.cv?.adminFeedback || '');
+                                          setAdminCvStatus(st.cv?.status || 'reviewed');
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-[11px] inline-flex items-center gap-1 transition shadow-xs"
+                                        title="Click to view CV and submit feedback"
+                                      >
+                                        <FileText className="w-3.5 h-3.5" /> View CV
+                                      </button>
+                                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                        st.cv.status === 'reviewed'
+                                          ? 'bg-emerald-100 text-emerald-800'
+                                          : st.cv.status === 'needs_revision'
+                                          ? 'bg-amber-100 text-amber-800'
+                                          : 'bg-blue-100 text-blue-800'
+                                      }`}>
+                                        {st.cv.status || 'Sent'}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-[11px] text-slate-400 italic">No CV</span>
+                                  )}
                                 </td>
                                 <td className="p-3">
                                   <span
@@ -1415,6 +1516,200 @@ export default function AdminPortalPage() {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB: STUDENT CVS & RESUME PLACEMENTS
+        ======================================================== */}
+        {activeMainTab === 'cvs' && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-700" /> Student CVs &amp; Job Placement Submissions
+                </h2>
+                <p className="text-xs text-slate-600">
+                  Review student resumes, download PDFs, open Google Drive links, and provide instructor feedback or developer placement recommendations.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={loadStudentCvs}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${cvLoading ? 'animate-spin' : ''}`} /> Refresh
+                </button>
+              </div>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={cvSearchQuery}
+                  onChange={(e) => setCvSearchQuery(e.target.value)}
+                  placeholder="Search by student name, email, or job role..."
+                  className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-slate-900 outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                <span className="text-slate-500 font-semibold shrink-0 mr-1">Status:</span>
+                {(['all', 'submitted', 'reviewed', 'needs_revision'] as const).map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setCvStatusFilter(st)}
+                    className={`px-3 py-1 rounded-lg font-bold text-[11px] capitalize transition ${
+                      cvStatusFilter === st
+                        ? 'bg-blue-700 text-white shadow-xs'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {st === 'needs_revision' ? 'Needs Revision' : st}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* CVs Table */}
+            {(() => {
+              const filteredCvs = allStudentCvs.filter((s) => {
+                const query = cvSearchQuery.toLowerCase();
+                const matchesQuery =
+                  !query ||
+                  s.name?.toLowerCase().includes(query) ||
+                  s.email?.toLowerCase().includes(query) ||
+                  s.phone?.includes(query) ||
+                  s.cv?.targetJobTitle?.toLowerCase().includes(query) ||
+                  s.cv?.fileName?.toLowerCase().includes(query);
+
+                const matchesStatus =
+                  cvStatusFilter === 'all' || (s.cv?.status || 'submitted') === cvStatusFilter;
+
+                return matchesQuery && matchesStatus;
+              });
+
+              if (filteredCvs.length === 0) {
+                return (
+                  <div className="p-12 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
+                    <FileText className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-50" />
+                    No student CVs match the selected criteria.
+                  </div>
+                );
+              }
+
+              return (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden min-w-[760px]">
+                    <thead className="bg-white text-blue-700 font-semibold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Student &amp; Contact</th>
+                        <th className="p-3">Target Job Track</th>
+                        <th className="p-3">Enrolled Courses</th>
+                        <th className="p-3">Submitted CV File / URL</th>
+                        <th className="p-3">Submission Date</th>
+                        <th className="p-3">Review Status</th>
+                        <th className="p-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-slate-50">
+                      {filteredCvs.map((s) => (
+                        <tr key={s._id} className="hover:bg-white">
+                          <td className="p-3">
+                            <span className="font-bold text-slate-900 block">{s.name}</span>
+                            <span className="font-mono text-slate-600 block text-[11px]">{s.phone}</span>
+                            <span className="font-mono text-blue-700 block text-[11px]">{s.email}</span>
+                          </td>
+
+                          <td className="p-3 font-semibold text-slate-800">
+                            {s.cv?.targetJobTitle || 'Civil Engineer'}
+                          </td>
+
+                          <td className="p-3 max-w-xs">
+                            <div className="flex flex-wrap gap-1">
+                              {s.enrolledCourses?.map((ec: any, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-medium truncate max-w-[150px]"
+                                  title={ec.course?.title}
+                                >
+                                  {ec.course?.title || 'Enrolled'}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+
+                          <td className="p-3">
+                            {s.cv?.fileData ? (
+                              <a
+                                href={s.cv.fileData}
+                                download={s.cv.fileName || `${s.name}_CV.pdf`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold transition"
+                              >
+                                <Download className="w-3.5 h-3.5" /> Download ({s.cv.fileName || 'CV.pdf'})
+                              </a>
+                            ) : s.cv?.fileUrl ? (
+                              <a
+                                href={s.cv.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold transition"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" /> Open Google Drive / Link
+                              </a>
+                            ) : (
+                              <span className="text-slate-400 italic">No file attached</span>
+                            )}
+                          </td>
+
+                          <td className="p-3 text-slate-600 whitespace-nowrap">
+                            {s.cv?.updatedAt
+                              ? new Date(s.cv.updatedAt).toLocaleDateString(undefined, {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : 'N/A'}
+                          </td>
+
+                          <td className="p-3">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase ${
+                                s.cv?.status === 'reviewed'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : s.cv?.status === 'needs_revision'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
+                              {s.cv?.status || 'Submitted'}
+                            </span>
+                          </td>
+
+                          <td className="p-3 text-right">
+                            <button
+                              onClick={() => {
+                                setViewingStudentCv(s);
+                                setAdminCvFeedback(s.cv?.adminFeedback || '');
+                                setAdminCvStatus(s.cv?.status || 'reviewed');
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black transition shadow-xs text-[11px]"
+                            >
+                              Review &amp; Feedback
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -2329,6 +2624,139 @@ export default function AdminPortalPage() {
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-md shadow-amber-500/20 transition disabled:opacity-50"
                 >
                   {addingStudent ? 'Enrolling Student...' : 'Confirm & Enroll Student'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* STUDENT CV REVIEW MODAL */}
+      {viewingStudentCv && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in-95 duration-200 text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-700" /> Review Student CV / Resume
+                </h3>
+                <p className="text-slate-500 mt-0.5">
+                  Candidate: <strong className="text-slate-900">{viewingStudentCv.name}</strong> ({viewingStudentCv.email})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingStudentCv(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Candidate Summary */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-slate-500 block">Mobile Phone:</span>
+                  <span className="font-mono font-bold text-slate-900">{viewingStudentCv.phone}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Target Job Track:</span>
+                  <span className="font-bold text-blue-700">{viewingStudentCv.cv?.targetJobTitle || 'Civil Engineer'}</span>
+                </div>
+              </div>
+
+              {viewingStudentCv.cv?.note && (
+                <div className="pt-2 border-t border-slate-200">
+                  <span className="text-slate-500 block font-semibold mb-0.5">Candidate Career Note:</span>
+                  <p className="text-slate-700 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-200">
+                    {viewingStudentCv.cv.note}
+                  </p>
+                </div>
+              )}
+
+              {/* Download / Open File Button */}
+              <div className="pt-2 flex gap-2">
+                {viewingStudentCv.cv?.fileData ? (
+                  <a
+                    href={viewingStudentCv.cv.fileData}
+                    download={viewingStudentCv.cv.fileName || `${viewingStudentCv.name}_CV.pdf`}
+                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition"
+                  >
+                    <Download className="w-4 h-4" /> Download CV File ({viewingStudentCv.cv.fileName || 'PDF'})
+                  </a>
+                ) : viewingStudentCv.cv?.fileUrl ? (
+                  <a
+                    href={viewingStudentCv.cv.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2 px-3 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition"
+                  >
+                    <ExternalLink className="w-4 h-4" /> Open Submitted Google Drive Link
+                  </a>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Admin Feedback & Status Form */}
+            <form onSubmit={handleSaveCvFeedback} className="space-y-3.5 pt-1">
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Review Status
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'submitted', label: 'Under Review' },
+                    { id: 'reviewed', label: 'Approved / Ready' },
+                    { id: 'needs_revision', label: 'Needs Revision' },
+                  ].map((item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setAdminCvStatus(item.id as any)}
+                      className={`py-2 px-2.5 rounded-lg text-center font-bold transition border ${
+                        adminCvStatus === item.id
+                          ? 'bg-blue-700 text-white border-blue-700 shadow-xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Instructor &amp; Recruiter Feedback / Recommendations
+                </label>
+                <textarea
+                  rows={3}
+                  value={adminCvFeedback}
+                  onChange={(e) => setAdminCvFeedback(e.target.value)}
+                  placeholder="e.g. Excellent site casting experience. Recommended for interview shortlist at ABC Developer Ltd..."
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 rounded-xl p-2.5 text-slate-900 outline-none"
+                ></textarea>
+                <span className="text-[10px] text-slate-400 mt-0.5 block">
+                  This note is directly visible to the student in their student dashboard.
+                </span>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setViewingStudentCv(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingCvFeedback}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-md shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {savingCvFeedback ? 'Saving...' : 'Save Feedback & Status'}
                 </button>
               </div>
             </form>

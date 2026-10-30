@@ -69,6 +69,7 @@ router.get('/dashboard', async (req, res) => {
         email: user.email,
         phone: user.phone,
         status: user.status,
+        cv: user.cv || null,
       },
       enrolledCourses: enrolledWithDuration,
     });
@@ -220,6 +221,46 @@ router.post('/course/:courseId/chat', async (req, res) => {
     res.status(201).json({ success: true, message: newMsg });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error sending message.' });
+  }
+});
+
+/**
+ * POST /api/student/cv
+ * Upload or update student CV
+ */
+router.post('/cv', async (req, res) => {
+  try {
+    const { fileUrl, fileName, fileData, targetJobTitle, note } = req.body;
+    if (!fileUrl && !fileData) {
+      return res.status(400).json({ success: false, message: 'Please provide a CV document file or Google Drive URL.' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    user.cv = {
+      fileUrl: fileUrl ? fileUrl.trim() : (user.cv?.fileUrl || ''),
+      fileName: fileName ? fileName.trim() : (user.cv?.fileName || 'Student_CV.pdf'),
+      fileData: fileData || (user.cv?.fileData || ''),
+      targetJobTitle: targetJobTitle ? targetJobTitle.trim() : (user.cv?.targetJobTitle || ''),
+      note: note ? note.trim() : (user.cv?.note || ''),
+      updatedAt: new Date(),
+      adminFeedback: user.cv?.adminFeedback || '',
+      status: 'submitted',
+    };
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'CV submitted successfully! Our instructor and placement team will review it.',
+      cv: user.cv,
+    });
+  } catch (err) {
+    console.error('Submit CV error:', err);
+    res.status(500).json({ success: false, message: 'Failed to submit CV.' });
   }
 });
 

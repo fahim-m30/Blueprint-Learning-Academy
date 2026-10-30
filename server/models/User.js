@@ -53,6 +53,16 @@ const userSchema = new mongoose.Schema({
   resetPasswordOtpExpires: {
     type: Date,
   },
+  cv: {
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
+    fileData: { type: String, default: '' },
+    targetJobTitle: { type: String, default: '' },
+    note: { type: String, default: '' },
+    updatedAt: { type: Date },
+    adminFeedback: { type: String, default: '' },
+    status: { type: String, enum: ['submitted', 'reviewed', 'needs_revision'], default: 'submitted' },
+  },
   enrolledCourses: [
     {
       course: {

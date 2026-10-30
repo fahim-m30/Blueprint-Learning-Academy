@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
-import { Course, TaskSubmission, ChatMessage } from '@/lib/types';
+import { Course, TaskSubmission, ChatMessage, StudentCV } from '@/lib/types';
 import {
   Clock,
   Video,
@@ -17,6 +17,11 @@ import {
   CheckCircle,
   ChevronRight,
   MessageCircle,
+  FileText,
+  Upload,
+  Download,
+  CheckCircle2,
+  Briefcase,
 } from 'lucide-react';
 
 export default function StudentDashboardPage() {
@@ -29,7 +34,7 @@ export default function StudentDashboardPage() {
   const [mySubmissions, setMySubmissions] = useState<TaskSubmission[]>([]);
 
   // Active tab in course
-  const [activeTab, setActiveTab] = useState<'videos' | 'live' | 'tasks' | 'chat'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'live' | 'tasks' | 'chat' | 'cv'>('videos');
 
   // Task submission form state
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -37,6 +42,16 @@ export default function StudentDashboardPage() {
   const [submissionLink, setSubmissionLink] = useState('');
   const [submittingTask, setSubmittingTask] = useState(false);
   const [taskMsg, setTaskMsg] = useState('');
+
+  // CV submission state
+  const [studentCv, setStudentCv] = useState<StudentCV | null>(null);
+  const [cvFileUrl, setCvFileUrl] = useState('');
+  const [cvFileName, setCvFileName] = useState('');
+  const [cvFileData, setCvFileData] = useState('');
+  const [cvTargetJobTitle, setCvTargetJobTitle] = useState('');
+  const [cvNote, setCvNote] = useState('');
+  const [submittingCv, setSubmittingCv] = useState(false);
+  const [cvMsg, setCvMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -72,6 +87,15 @@ export default function StudentDashboardPage() {
     const res = await apiRequest('/student/dashboard');
     if (res.success && res.data) {
       setStudentInfo(res.data.student);
+      if (res.data.student?.cv) {
+        setStudentCv(res.data.student.cv);
+        setCvFileUrl(res.data.student.cv.fileUrl || '');
+        setCvFileName(res.data.student.cv.fileName || '');
+        setCvFileData(res.data.student.cv.fileData || '');
+        setCvTargetJobTitle(res.data.student.cv.targetJobTitle || '');
+        setCvNote(res.data.student.cv.note || '');
+      }
+
       const courses = res.data.enrolledCourses || [];
       setEnrolledList(courses);
 
@@ -149,6 +173,59 @@ export default function StudentDashboardPage() {
     if (res.success && res.data?.message) {
       setChatMessages((prev) => [...prev, res.data.message]);
       setChatInput('');
+    }
+  };
+
+  const handleCvFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      setCvMsg({ text: 'File size must be under 8MB.', isError: true });
+      return;
+    }
+
+    setCvFileName(file.name);
+    setCvMsg(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setCvFileData(event.target.result as string);
+        setCvMsg({ text: `File "${file.name}" ready to submit. Click the submit button to save.`, isError: false });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCvSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cvFileData && !cvFileUrl.trim()) {
+      setCvMsg({ text: 'Please upload a PDF/document or provide a Google Drive URL.', isError: true });
+      return;
+    }
+
+    setSubmittingCv(true);
+    setCvMsg(null);
+
+    const res = await apiRequest('/student/cv', {
+      method: 'POST',
+      body: JSON.stringify({
+        fileUrl: cvFileUrl.trim(),
+        fileName: cvFileName.trim() || 'Resume.pdf',
+        fileData: cvFileData,
+        targetJobTitle: cvTargetJobTitle.trim(),
+        note: cvNote.trim(),
+      }),
+    });
+
+    setSubmittingCv(false);
+
+    if (res.success && res.data?.cv) {
+      setStudentCv(res.data.cv);
+      setCvMsg({ text: 'CV successfully submitted for instructor and recruiter review!', isError: false });
+    } else {
+      setCvMsg({ text: res.message || 'Error submitting CV. Please try again.', isError: true });
     }
   };
 
@@ -338,6 +415,21 @@ export default function StudentDashboardPage() {
               >
                 <MessageSquare className="w-4 h-4 shrink-0" />
                 Instructor Chat
+              </button>
+
+              <button
+                onClick={() => setActiveTab('cv')}
+                className={`py-2.5 sm:py-3 px-3.5 sm:px-5 text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap ${
+                  activeTab === 'cv'
+                    ? 'border-blue-600 text-blue-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <FileText className="w-4 h-4 shrink-0" />
+                My CV &amp; Career Placement
+                {studentCv?.updatedAt && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                )}
               </button>
             </div>
 
@@ -656,6 +748,227 @@ export default function StudentDashboardPage() {
                     <Send className="w-3.5 h-3.5" /> <span className="hidden xs:inline">Send</span>
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* TAB 5: CV & RESUME PLACEMENT */}
+            {activeTab === 'cv' && (
+              <div className="space-y-6">
+                {/* Header Card */}
+                <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-lg relative overflow-hidden">
+                  <div className="relative z-10 max-w-2xl space-y-2">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30 inline-block mb-1">
+                      Direct Developer &amp; Consultant Placement
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+                      Submit Your CV / Resume for Instructor &amp; Recruiter Review
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                      Engr. Md Abdul Mazid and our developer company network review student resumes to directly assist with site engineering, estimation, and project management job interview selections.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left Column: Current Submitted Status */}
+                  <div className="lg:col-span-1 space-y-4">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <FileText className="w-4 h-4 text-blue-700" /> Current CV Status
+                      </h3>
+
+                      {studentCv?.updatedAt ? (
+                        <div className="space-y-3.5 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-500">Review Status:</span>
+                            <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${
+                              studentCv.status === 'reviewed'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+                                : studentCv.status === 'needs_revision'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-300'
+                                : 'bg-blue-50 text-blue-700 border border-blue-300'
+                            }`}>
+                              {studentCv.status || 'Submitted'}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-slate-500 block mb-0.5">Target Job Role:</span>
+                            <span className="font-bold text-slate-900">
+                              {studentCv.targetJobTitle || 'Civil / Site / Project Engineer'}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-slate-500 block mb-0.5">File Submitted:</span>
+                            <span className="font-semibold text-slate-800 block truncate">
+                              {studentCv.fileName || 'Resume.pdf'}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-slate-500 block mb-0.5">Last Updated:</span>
+                            <span className="font-medium text-slate-600">
+                              {new Date(studentCv.updatedAt).toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </span>
+                          </div>
+
+                          {/* Direct View / Download Button */}
+                          <div className="pt-2">
+                            {studentCv.fileData ? (
+                              <a
+                                href={studentCv.fileData}
+                                download={studentCv.fileName || 'My_CV.pdf'}
+                                className="w-full py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+                              >
+                                <Download className="w-4 h-4" /> Download / View My CV
+                              </a>
+                            ) : studentCv.fileUrl ? (
+                              <a
+                                href={studentCv.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+                              >
+                                <ExternalLink className="w-4 h-4" /> Open Submitted Link
+                              </a>
+                            ) : null}
+                          </div>
+
+                          {/* Instructor Feedback If Any */}
+                          {studentCv.adminFeedback && (
+                            <div className="mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-1 text-xs">
+                              <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                                💬 Instructor Review Feedback
+                              </span>
+                              <p className="text-amber-800 leading-relaxed">
+                                {studentCv.adminFeedback}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 space-y-2 text-xs text-slate-500">
+                          <p>You have not submitted a CV yet.</p>
+                          <p className="text-[11px] text-slate-400">
+                            Upload your resume using the form to get recruiter recommendations and instructor feedback.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Upload / Update Form */}
+                  <div className="lg:col-span-2">
+                    <form onSubmit={handleCvSubmit} className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                          {studentCv?.updatedAt ? 'Update Your Submitted CV' : 'Upload & Submit Your CV'}
+                        </h3>
+                        <span className="text-[11px] text-blue-700 font-semibold">PDF / DOC / DOCX</span>
+                      </div>
+
+                      {cvMsg && (
+                        <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
+                          cvMsg.isError ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        }`}>
+                          {cvMsg.text}
+                        </div>
+                      )}
+
+                      <div className="space-y-4 text-xs">
+                        {/* Target Job Title */}
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Target Job Role / Career Track *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={cvTargetJobTitle}
+                            onChange={(e) => setCvTargetJobTitle(e.target.value)}
+                            placeholder="e.g. Site Engineer, Project Engineer, BOQ Specialist, QA/QC Inspector"
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                          />
+                        </div>
+
+                        {/* File Upload (Option A) */}
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Upload CV Document (PDF / DOC / DOCX - Max 8MB)
+                          </label>
+                          <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center bg-slate-50/60 transition group cursor-pointer relative">
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={handleCvFileUpload}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center group-hover:scale-110 transition">
+                                <Upload className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <span className="font-bold text-slate-800 block text-xs">
+                                  {cvFileName ? `Selected: ${cvFileName}` : 'Click or Drag & Drop CV file here'}
+                                </span>
+                                <span className="text-[10px] text-slate-400 block mt-0.5">
+                                  Supported formats: PDF, DOCX (Maximum file size 8MB)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Cloud URL (Option B) */}
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Or Provide Google Drive / Cloud Link
+                          </label>
+                          <input
+                            type="url"
+                            value={cvFileUrl}
+                            onChange={(e) => setCvFileUrl(e.target.value)}
+                            placeholder="https://drive.google.com/file/d/..."
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                          />
+                          <span className="text-[10px] text-slate-400 mt-1 block">
+                            Ensure link sharing is set to "Anyone with the link can view".
+                          </span>
+                        </div>
+
+                        {/* Note to Instructor */}
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Career Summary / Note for the Placement Team
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={cvNote}
+                            onChange={(e) => setCvNote(e.target.value)}
+                            placeholder="Briefly state your graduation year, university, site experience (if any), and preferred company types (developer, contractor, consultancy)..."
+                            className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none"
+                          ></textarea>
+                        </div>
+
+                        <div className="pt-2 flex justify-end">
+                          <button
+                            type="submit"
+                            disabled={submittingCv}
+                            className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            {submittingCv ? 'Submitting CV...' : studentCv?.updatedAt ? 'Update My CV' : 'Submit CV for Review'}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               </div>
             )}
           </div>

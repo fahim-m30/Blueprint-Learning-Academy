@@ -315,7 +315,7 @@ router.get('/courses/:id', async (req, res) => {
     // Get all students enrolled in this course, WITH credentials visible to admin
     const students = await User.find({
       'enrolledCourses.course': course._id,
-    }).select('name email phone address plainPasswordForAdmin status blockReason enrolledCourses createdAt');
+    }).select('name email phone address plainPasswordForAdmin status blockReason enrolledCourses createdAt cv');
 
     // Get all task submissions for this course
     const taskSubmissions = await TaskSubmission.find({ course: course._id }).sort({ submittedAt: -1 });
@@ -873,6 +873,57 @@ router.delete('/admins/:id', async (req, res) => {
     res.json({ success: true, message: 'Administrator removed successfully.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error removing administrator.' });
+  }
+});
+
+/**
+ * GET /api/admin/cvs
+ * List all students who have submitted their CV
+ */
+router.get('/cvs', async (req, res) => {
+  try {
+    const students = await User.find({
+      role: 'student',
+      $or: [
+        { 'cv.fileUrl': { $exists: true, $ne: '' } },
+        { 'cv.fileData': { $exists: true, $ne: '' } },
+      ],
+    })
+      .populate('enrolledCourses.course', 'title category')
+      .select('name email phone address cv enrolledCourses createdAt status')
+      .sort({ 'cv.updatedAt': -1 });
+
+    res.json({ success: true, students });
+  } catch (err) {
+    console.error('Fetch student CVs error:', err);
+    res.status(500).json({ success: false, message: 'Error retrieving student CVs.' });
+  }
+});
+
+/**
+ * POST /api/admin/cvs/:studentId/feedback
+ * Submit instructor review feedback for a student's CV
+ */
+router.post('/cvs/:studentId/feedback', async (req, res) => {
+  try {
+    const { feedback, status } = req.body;
+    const user = await User.findById(req.params.studentId);
+    if (!user || user.role !== 'student') {
+      return res.status(404).json({ success: false, message: 'Student not found.' });
+    }
+
+    if (!user.cv) {
+      user.cv = {};
+    }
+
+    if (feedback !== undefined) user.cv.adminFeedback = feedback;
+    if (status) user.cv.status = status;
+
+    await user.save();
+    res.json({ success: true, message: 'CV review feedback saved successfully.', cv: user.cv });
+  } catch (err) {
+    console.error('Update CV feedback error:', err);
+    res.status(500).json({ success: false, message: 'Error updating CV feedback.' });
   }
 });
 
