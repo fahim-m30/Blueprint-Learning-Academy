@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, setAuthToken, setCurrentUser, getAuthToken, getCurrentUser } from '@/lib/api';
-import { Lock, Mail, ArrowRight, ShieldAlert, KeyRound, CheckCircle, X, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldAlert, KeyRound, CheckCircle, X, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetOtp, setResetOtp] = useState('');
   const [newPass, setNewPass] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [modalFeedback, setModalFeedback] = useState<{ text: string; isError: boolean } | null>(null);
@@ -205,13 +207,26 @@ export default function LoginPage() {
                   <Lock className="w-5 h-5 text-amber-500" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-50/80 border border-slate-300 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl pl-12 pr-4 py-3.5 text-sm sm:text-base text-slate-900 placeholder-slate-400 outline-none transition font-medium"
+                  className="w-full bg-slate-50/80 border border-slate-300 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl pl-12 pr-12 py-3.5 text-sm sm:text-base text-slate-900 placeholder-slate-400 outline-none transition font-medium"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-700 transition"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-slate-600" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-slate-500" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -318,15 +333,30 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">New Password (Min 6 chars) *</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={newPass}
-                    onChange={(e) => setNewPass(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={newPass}
+                      onChange={(e) => setNewPass(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl pl-3.5 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 transition"
+                      title={showNewPassword ? "Hide password" : "Show password"}
+                      aria-label={showNewPassword ? "Hide password" : "Show password"}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="w-4 h-4 text-slate-600" />
+                      ) : (
+                        <Eye className="w-4 h-4 text-slate-500" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="pt-2 flex items-center gap-2">
                   <button
