@@ -287,6 +287,7 @@ export default function AdminPortalPage() {
 
   // 1. Enrollment Approval
   const handleApproveEnrollment = async (enrollmentId: string) => {
+    showAlert('Approving enrollment and dispatching email...');
     const res = await apiRequest(`/admin/enrollments/${enrollmentId}/approve`, {
       method: 'POST',
     });
@@ -295,6 +296,18 @@ export default function AdminPortalPage() {
       loadAdminData();
     } else {
       showAlert(res.message || 'Error approving enrollment.', 'error');
+    }
+  };
+
+  const handleResendCredentialsEmail = async (enrollmentId: string) => {
+    showAlert('Dispatching credentials email to student...');
+    const res = await apiRequest(`/admin/enrollments/${enrollmentId}/resend-email`, {
+      method: 'POST',
+    });
+    if (res.success) {
+      showAlert(res.message || 'Credentials email resent successfully!');
+    } else {
+      showAlert(res.message || 'Failed to resend email.', 'error');
     }
   };
 
@@ -1639,7 +1652,7 @@ export default function AdminPortalPage() {
                           )}
                         </td>
                         <td className="p-3.5 text-right">
-                          {en.status === 'pending' && (
+                          {en.status === 'pending' ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleApproveEnrollment(en._id)}
@@ -1654,7 +1667,17 @@ export default function AdminPortalPage() {
                                 Reject
                               </button>
                             </div>
-                          )}
+                          ) : en.status === 'approved' ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleResendCredentialsEmail(en._id)}
+                                className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                                title="Resend Welcome & Login Credentials Email"
+                              >
+                                <Mail className="w-3.5 h-3.5" /> Resend Email
+                              </button>
+                            </div>
+                          ) : null}
                         </td>
                       </tr>
                     ))}

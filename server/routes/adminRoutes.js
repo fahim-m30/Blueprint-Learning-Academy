@@ -183,7 +183,7 @@ router.post('/enrollments/:id/approve', async (req, res) => {
 
     // Send professional email to the student
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
-    await sendEnrollmentApprovedEmail({
+    const emailResult = await sendEnrollmentApprovedEmail({
       studentName: enrollment.studentName,
       studentEmail: enrollment.studentEmail,
       courseTitle: course.title,
@@ -192,13 +192,18 @@ router.post('/enrollments/:id/approve', async (req, res) => {
       whatsappGroupLink: course.whatsappGroupLink,
     });
 
+    const emailNote = emailResult.success
+      ? `Email dispatched to ${enrollment.studentEmail} via ${emailResult.provider || 'SMTP'}.`
+      : `Note: Email delivery failed (${emailResult.error || 'Check mail config'}). You can resend anytime.`;
+
     res.json({
       success: true,
-      message: `Enrollment confirmed! Credentials generated and email sent to ${enrollment.studentEmail}.`,
+      message: `Enrollment confirmed! ${emailNote}`,
       credentials: {
         email: enrollment.studentEmail,
         password: rawPassword,
       },
+      emailResult,
       enrollment,
     });
   } catch (err) {
@@ -210,6 +215,48 @@ router.post('/enrollments/:id/approve', async (req, res) => {
 /**
  * POST /api/admin/enrollments/:id/reject
  */
+
+/**
+ * POST /api/admin/enrollments/:id/resend-email
+ * Resend student welcome credentials email with 1 click
+ */
+router.post('/enrollments/:id/resend-email', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const enrollment = await Enrollment.findById(id).populate('course');
+    if (!enrollment) return res.status(404).json({ success: false, message: 'Enrollment not found.' });
+
+    const course = enrollment.course;
+    const studentUser = await User.findOne({ email: enrollment.studentEmail });
+    const password = enrollment.generatedPassword || studentUser?.plainPasswordForAdmin || 'BLP-LEARN2026';
+
+    const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
+    const emailResult = await sendEnrollmentApprovedEmail({
+      studentName: enrollment.studentName,
+      studentEmail: enrollment.studentEmail,
+      courseTitle: course ? course.title : 'Blueprint Course Access',
+      generatedPassword: password,
+      loginUrl,
+      whatsappGroupLink: course?.whatsappGroupLink || '',
+    });
+
+    if (emailResult.success) {
+      res.json({
+        success: true,
+        message: `Credentials email resent successfully to ${enrollment.studentEmail} via ${emailResult.provider || 'SMTP'}!`,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Failed to deliver email: ${emailResult.error || 'Check mail settings'}`,
+      });
+    }
+  } catch (err) {
+    console.error('Resend email error:', err);
+    res.status(500).json({ success: false, message: 'Error resending email.' });
+  }
+});
+
 router.post('/enrollments/:id/reject', async (req, res) => {
   try {
     const { id } = req.params;
