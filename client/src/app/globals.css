@@ -3,31 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --bg: #080d1a;
-  --panel: #0f182c;
-  --panel-hover: #15223e;
-  --line: #1c2b48;
-  --line-active: #38bdf8;
-  --amber: #f59e0b;
-  --amber-light: #fbbf24;
-  --cyan: #38bdf8;
-  --blue: #2563eb;
-  --text: #f8fafc;
-  --mute: #94a3b8;
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --blue-primary: #1d4ed8;
+  --blue-accent: #2563eb;
+  --amber-primary: #d97706;
+  --amber-accent: #f59e0b;
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.12) 0%, transparent 60%),
-    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(37, 99, 235, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
   background-size: 100% 100%, 32px 32px, 32px 32px;
   min-height: 100vh;
 }
@@ -38,14 +36,14 @@ body {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #080d1a;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;
+  background: #2563eb;
 }
 
 /* Animation for horizontal scrolling courses */

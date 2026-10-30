@@ -15,13 +15,13 @@ export default function Footer({ settings }: FooterProps) {
   const email = settings?.contactEmail || 'info@blueprintlearningacademy.com';
 
   return (
-    <footer className="border-t border-[#1c2b48] bg-[#050914] text-slate-300 py-10 sm:py-14 px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24">
+    <footer className="border-t border-slate-800 bg-[#0b132b] text-slate-300 py-10 sm:py-14 px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
         {/* Brand */}
         <div className="sm:col-span-2 space-y-3.5">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-sky-500 to-amber-400 opacity-50 blur-sm"></div>
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-blue-500 to-amber-400 opacity-50 blur-sm"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
@@ -36,7 +36,7 @@ export default function Footer({ settings }: FooterProps) {
                   </>
                 )}
               </span>
-              <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-sky-400 font-extrabold truncate mt-0.5">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-blue-400 font-extrabold truncate mt-0.5">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>
@@ -46,7 +46,7 @@ export default function Footer({ settings }: FooterProps) {
             Real drawings, actual BOQ, site QA/QC, and technical interview success.
           </p>
           <div className="pt-1">
-            <p className="text-xs text-sky-400 font-semibold bg-sky-950/40 border border-sky-800/40 inline-block px-3 py-1 rounded-lg">
+            <p className="text-xs text-blue-300 font-semibold bg-blue-950/60 border border-blue-800/40 inline-block px-3 py-1 rounded-lg">
               সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function Footer({ settings }: FooterProps) {
 
         {/* Quick Links */}
         <div>
-          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-[#1c2b48] pb-1.5 inline-block">
+          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-slate-700/80 pb-1.5 inline-block">
             Quick Navigation
           </h4>
           <ul className="space-y-2 text-xs sm:text-sm text-slate-400">
@@ -68,7 +68,7 @@ export default function Footer({ settings }: FooterProps) {
 
         {/* Contact Help */}
         <div>
-          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-[#1c2b48] pb-1.5 inline-block">
+          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-slate-700/80 pb-1.5 inline-block">
             Support &amp; Helpline
           </h4>
           <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
@@ -87,8 +87,8 @@ export default function Footer({ settings }: FooterProps) {
               </a>
             </li>
             <li className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
-                <Mail className="w-4 h-4 text-sky-400" />
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <Mail className="w-4 h-4 text-blue-400" />
               </div>
               <a href={`mailto:${email}`} className="hover:text-white font-medium truncate min-w-0">{email}</a>
             </li>
@@ -96,7 +96,7 @@ export default function Footer({ settings }: FooterProps) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-[#1c2b48] mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-slate-500 gap-3 text-center sm:text-left">
+      <div className="max-w-7xl mx-auto border-t border-slate-800/80 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-slate-500 gap-3 text-center sm:text-left">
         <p>© {currentYear} {settings?.siteName || 'Blueprint Learning Academy'}. All rights reserved.</p>
         <p>Built with Next.js, Express &amp; MongoDB for Civil Engineers in Bangladesh.</p>
       </div>

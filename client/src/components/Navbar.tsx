@@ -28,16 +28,16 @@ export default function Navbar({ settings }: NavbarProps) {
   const whatsapp = settings?.whatsappNumber || '8801313893838';
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#080d1a]/95 backdrop-blur-xl border-b border-[#1c2b48] shadow-2xl shadow-black/40">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 shadow-sm">
       {/* Top micro contact banner */}
-      <div className="bg-[#050811] border-b border-[#1c2b48]/60 py-1.5 px-3 sm:px-6 text-[11px] sm:text-xs text-slate-400">
+      <div className="bg-[#0f172a] text-slate-300 py-1.5 px-3 sm:px-6 text-[11px] sm:text-xs border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 sm:gap-4 truncate">
             <a href={`tel:${phone}`} className="flex items-center gap-1.5 hover:text-white transition shrink-0">
               <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{phone}</span>
             </a>
-            <span className="text-slate-700 hidden xs:inline">|</span>
+            <span className="text-slate-600 hidden xs:inline">|</span>
             <a
               href={`https://wa.me/${whatsapp}`}
               target="_blank"
@@ -50,12 +50,12 @@ export default function Navbar({ settings }: NavbarProps) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <span className="text-sky-400 font-semibold hidden md:inline-flex items-center gap-1.5">
+            <span className="text-blue-300 font-semibold hidden md:inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Live Batches Open
             </span>
             {user ? (
-              <span className="text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-950/60 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-500/30 text-[10px] sm:text-xs">
+              <span className="text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/80 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-500/30 text-[10px] sm:text-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                 <span className="truncate max-w-[100px] sm:max-w-[150px]">{user.name}</span>
               </span>
@@ -70,43 +70,43 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20 lg:h-24 py-2">
+        <div className="flex items-center justify-between h-18 sm:h-20 lg:h-22 py-2">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 lg:gap-4 group min-w-0">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-sky-500 to-amber-400 opacity-60 blur-md group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-blue-600 opacity-40 blur-md group-hover:opacity-80 transition duration-300"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="relative w-11 h-11 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain rounded-full ring-2 ring-amber-400 shadow-xl shadow-amber-500/20 bg-white p-0.5 sm:p-1 transition duration-300 group-hover:scale-105"
+                className="relative w-11 h-11 sm:w-14 sm:h-14 lg:w-15 lg:h-15 object-contain rounded-full ring-2 ring-blue-600/20 shadow-md bg-white p-0.5 sm:p-1 transition duration-300 group-hover:scale-105"
               />
             </div>
             <div className="min-w-0">
-              <span className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white block leading-tight truncate">
+              <span className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-900 block leading-tight truncate">
                 {settings?.siteName || (
                   <>
-                    Blueprint <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent">Learning Academy</span>
+                    Blueprint <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 bg-clip-text text-transparent">Learning Academy</span>
                   </>
                 )}
               </span>
-              <span className="block text-[9px] xs:text-[10px] sm:text-[11px] lg:text-xs tracking-wider uppercase text-sky-400 font-extrabold truncate mt-0.5">
+              <span className="block text-[9px] xs:text-[10px] sm:text-[11px] lg:text-xs tracking-wider uppercase text-blue-700 font-extrabold truncate mt-0.5">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-300">
-            <a href="/#courses" className="hover:text-amber-400 transition-colors">
+          <div className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
+            <a href="/#courses" className="hover:text-blue-700 transition-colors">
               Courses
             </a>
-            <a href="/#about" className="hover:text-amber-400 transition-colors">
+            <a href="/#about" className="hover:text-blue-700 transition-colors">
               Instructor
             </a>
-            <a href="/#payment" className="hover:text-amber-400 transition-colors">
+            <a href="/#payment" className="hover:text-blue-700 transition-colors">
               How to Pay
             </a>
-            <a href="/#faq" className="hover:text-amber-400 transition-colors">
+            <a href="/#faq" className="hover:text-blue-700 transition-colors">
               FAQ
             </a>
           </div>
@@ -118,7 +118,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 {user.role === 'admin' ? (
                   <Link
                     href="/admin"
-                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden xs:inline">Admin</span> Portal
@@ -126,7 +126,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/25 transition"
                   >
                     <LayoutDashboard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden xs:inline">My</span> Dashboard
@@ -134,7 +134,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 )}
                 <button
                   onClick={handleLogout}
-                  className="p-2 sm:p-2.5 rounded-xl border border-slate-700 bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/60 transition"
+                  className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
                   title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
@@ -144,14 +144,14 @@ export default function Navbar({ settings }: NavbarProps) {
               <>
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-700/80 bg-slate-800/60 hover:bg-slate-700 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold transition duration-150"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-xs sm:text-sm font-bold transition duration-150"
                 >
-                  <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400" />
+                  <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
                   <span>Login</span>
                 </Link>
                 <a
                   href="/#courses"
-                  className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition duration-150"
+                  className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 transition duration-150"
                 >
                   Enroll Now
                 </a>
@@ -161,10 +161,10 @@ export default function Navbar({ settings }: NavbarProps) {
             {/* Mobile Menu Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 sm:p-2.5 rounded-xl border border-slate-700/80 bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+              className="lg:hidden p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5 text-amber-400" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-blue-700" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -172,55 +172,55 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Mobile Menu Dropdown Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0a0f1d] border-b border-[#1c2b48] shadow-2xl px-4 py-5 animate-in slide-in-from-top-3 duration-200 space-y-4">
+        <div className="lg:hidden bg-white border-b border-slate-200 shadow-xl px-4 py-5 animate-in slide-in-from-top-3 duration-200 space-y-4">
           <div className="flex flex-col space-y-1">
             <a
               href="/#courses"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/70 font-semibold text-sm transition"
+              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50/60 font-semibold text-sm transition"
             >
               <span>Explore Courses</span>
-              <ChevronRight className="w-4 h-4 text-amber-400" />
+              <ChevronRight className="w-4 h-4 text-blue-600" />
             </a>
             <a
               href="/#about"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/70 font-semibold text-sm transition"
+              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50/60 font-semibold text-sm transition"
             >
               <span>Lead Instructor</span>
-              <ChevronRight className="w-4 h-4 text-sky-400" />
+              <ChevronRight className="w-4 h-4 text-blue-600" />
             </a>
             <a
               href="/#payment"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/70 font-semibold text-sm transition"
+              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50/60 font-semibold text-sm transition"
             >
               <span>Payment &amp; bKash Guide</span>
-              <ChevronRight className="w-4 h-4 text-pink-400" />
+              <ChevronRight className="w-4 h-4 text-pink-600" />
             </a>
             <a
               href="/#faq"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/70 font-semibold text-sm transition"
+              className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50/60 font-semibold text-sm transition"
             >
               <span>Frequently Asked Questions</span>
-              <ChevronRight className="w-4 h-4 text-emerald-400" />
+              <ChevronRight className="w-4 h-4 text-emerald-600" />
             </a>
           </div>
 
-          <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
+          <div className="pt-3 border-t border-slate-100 space-y-2.5">
             <a
               href={`https://wa.me/${whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-bold text-xs"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold text-xs"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400" /> WhatsApp Direct Helpline
+              <MessageCircle className="w-4 h-4 text-emerald-600" /> WhatsApp Direct Helpline
             </a>
             <a
               href="/#courses"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20"
             >
               Enroll in a Course Now
             </a>
