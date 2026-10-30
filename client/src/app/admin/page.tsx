@@ -119,6 +119,20 @@ export default function AdminPortalPage() {
     loadAdminData();
   }, [router]);
 
+  // Trap back navigation so admin stays firmly in the admin portal
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const loadAdminData = async () => {
     setLoading(true);
     const [overviewRes, enrollRes, settingsRes, adminsRes] = await Promise.all([
@@ -552,7 +566,7 @@ export default function AdminPortalPage() {
 
   const handleLogout = () => {
     removeAuthToken();
-    router.push('/login');
+    window.location.replace('/login');
   };
 
   if (loading) {

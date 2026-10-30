@@ -53,6 +53,20 @@ export default function StudentDashboardPage() {
     loadDashboard();
   }, [router]);
 
+  // Trap back navigation so user stays firmly in the dashboard
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const loadDashboard = async () => {
     setLoading(true);
     const res = await apiRequest('/student/dashboard');
@@ -140,7 +154,7 @@ export default function StudentDashboardPage() {
 
   const handleLogout = () => {
     removeAuthToken();
-    router.push('/login');
+    window.location.replace('/login');
   };
 
   const activeEnrolledItem = enrolledList.find((e) => e.course?._id === selectedCourseId);

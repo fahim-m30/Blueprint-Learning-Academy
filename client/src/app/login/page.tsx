@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiRequest, setAuthToken, setCurrentUser } from '@/lib/api';
+import { apiRequest, setAuthToken, setCurrentUser, getAuthToken, getCurrentUser } from '@/lib/api';
 import { Lock, Mail, ArrowRight, ShieldAlert, KeyRound, CheckCircle, X, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
@@ -12,6 +12,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // If already logged in, redirect straight to the appropriate dashboard
+  useEffect(() => {
+    const token = getAuthToken();
+    const user = getCurrentUser();
+    if (token && user) {
+      if (user.role === 'admin') {
+        window.location.replace('/admin');
+      } else {
+        window.location.replace('/dashboard');
+      }
+    }
+  }, []);
 
   // Forgot password OTP modal
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -44,9 +57,9 @@ export default function LoginPage() {
       setCurrentUser(res.data.user);
 
       if (res.data.user.role === 'admin') {
-        router.push('/admin');
+        window.location.replace('/admin');
       } else {
-        router.push('/dashboard');
+        window.location.replace('/dashboard');
       }
     } else {
       setErrorMsg(res.message || 'Invalid email or password. Please try again.');
