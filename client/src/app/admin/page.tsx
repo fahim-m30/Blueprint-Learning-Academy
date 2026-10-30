@@ -701,7 +701,21 @@ export default function AdminPortalPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddStudentName('');
+                        setAddStudentEmail('');
+                        setAddStudentPhone('');
+                        setAddStudentAddress('');
+                        setAddStudentPassword('BLP-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+                        setShowAddStudentModal(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition hover:scale-105"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" /> + Add Student (নতুন স্টুডেন্ট যুক্ত করুন)
+                    </button>
                     <button
                       onClick={() => handleDeleteCourse(selectedCourseData._id)}
                       className="px-3.5 py-2 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-500 text-red-200 text-xs font-bold flex items-center gap-1.5 transition"
