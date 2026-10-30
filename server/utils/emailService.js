@@ -1,11 +1,13 @@
 const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 const SiteSettings = require('../models/SiteSettings');
 
 /**
- * Universal Mail Dispatcher with Automatic Fallback (Brevo -> Gmail)
- * Guaranteed to deliver even if Brevo blocks cloud/dynamic IPs.
+ * Universal Mail Dispatcher with Dual Delivery Engine (Brevo SMTP -> Direct Gmail Fallback)
+ * Works seamlessly across cloud hosting (Render), localhost, and local networks.
  */
-const dispatchMail = async ({ to, subject, html, text }) => {
+const dispatchMail = async ({ to, subject, html, text, attachments = [] }) => {
   let settings = null;
   try {
     settings = await SiteSettings.findOne({});
@@ -22,6 +24,19 @@ const dispatchMail = async ({ to, subject, html, text }) => {
   const smtpUser = settings?.smtpUser || process.env.SMTP_USER;
   const smtpPass = settings?.smtpPass || process.env.SMTP_PASS;
   const smtpSecure = (settings?.smtpSecure === true) || (process.env.SMTP_SECURE === 'true');
+
+  // Prepare logo attachment for inline CID display
+  const finalAttachments = [...attachments];
+  try {
+    const logoPath = path.resolve(__dirname, '../../client/public/logo.png');
+    if (fs.existsSync(logoPath) && !finalAttachments.some(a => a.cid === 'blueprint-logo')) {
+      finalAttachments.push({
+        filename: 'logo.png',
+        path: logoPath,
+        cid: 'blueprint-logo',
+      });
+    }
+  } catch {}
 
   // Attempt 1: Brevo SMTP (if configured)
   if (smtpHost && smtpUser && smtpPass) {
@@ -45,6 +60,7 @@ const dispatchMail = async ({ to, subject, html, text }) => {
         subject,
         html,
         text: text || '',
+        attachments: finalAttachments,
       });
 
       console.log('✅ Email Sent via Brevo SMTP Successfully:', sendResult.messageId);
@@ -72,6 +88,7 @@ const dispatchMail = async ({ to, subject, html, text }) => {
         subject,
         html,
         text: text || '',
+        attachments: finalAttachments,
       });
 
       console.log('✅ Email Sent via Gmail Successfully:', sendResult.messageId);
@@ -82,13 +99,13 @@ const dispatchMail = async ({ to, subject, html, text }) => {
     }
   }
 
-  console.log('\n==========================================================');
-  console.log('📧 [EMAIL LOGGED (NO SMTP/GMAIL AVAILABLE)]:');
-  console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
-  console.log('==========================================================\n');
   return { success: false, simulated: true, error: 'No active email provider' };
 };
+
+/**
+ * Public hosted logo URL fallback
+ */
+const PUBLIC_LOGO_URL = 'https://blueprint-learning-academy.vercel.app/logo.png?v=8';
 
 /**
  * Send Enrollment Confirmation & Generated Credentials Email
@@ -101,81 +118,353 @@ const sendEnrollmentApprovedEmail = async ({
   loginUrl,
   whatsappGroupLink,
 }) => {
+  const currentYear = new Date().getFullYear();
+
   const htmlContent = `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Enrollment Confirmed - Blueprint Learning Academy</title>
-    <style>
-      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
-      .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1px solid #2e4666; border-radius: 14px; overflow: hidden; }
-      .header { background: #0b1624; border-bottom: 2px solid #ffb531; padding: 25px; text-align: center; }
-      .header h1 { margin: 0; color: #f3f7fc; font-size: 24px; font-weight: 800; }
-      .header span { color: #ffb531; }
-      .content { padding: 30px; line-height: 1.6; }
-      .highlight-box { background: #08111d; border: 1.5px solid #3a7bb8; border-radius: 10px; padding: 20px; margin: 20px 0; }
-      .btn { display: inline-block; background-color: #ffb531; color: #1a1100; text-decoration: none; font-weight: 700; padding: 12px 26px; border-radius: 8px; margin-top: 15px; }
-      .btn-whatsapp { display: inline-block; background-color: #25d366; color: #ffffff; text-decoration: none; font-weight: 700; padding: 10px 20px; border-radius: 8px; margin-top: 10px; }
-      .footer { background: #0b1624; padding: 20px; text-align: center; color: #bccadb; font-size: 13px; border-top: 1px solid #2e4666; }
-    </style>
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to ${courseTitle} - Blueprint Learning Academy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #334155;
+      -webkit-font-smoothing: antialiased;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    .wrapper {
+      width: 100%;
+      table-layout: fixed;
+      background-color: #f1f5f9;
+      padding: 30px 10px 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08), 0 5px 15px rgba(15, 23, 42, 0.03);
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #091224 0%, #0f274a 55%, #1e3a8a 100%);
+      padding: 36px 24px 28px;
+      text-align: center;
+      position: relative;
+    }
+    .logo-container {
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      border: 3px solid #ffb531;
+      background-color: #ffffff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      display: inline-block;
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+    .brand-title {
+      margin: 0;
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .brand-accent {
+      color: #ffb531;
+    }
+    .brand-subtitle {
+      margin: 6px 0 0;
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .content-body {
+      padding: 32px 30px;
+    }
+    .status-badge {
+      display: inline-block;
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-bottom: 16px;
+    }
+    .welcome-title {
+      margin: 0 0 12px;
+      color: #0f172a;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+    .welcome-text {
+      margin: 0 0 20px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .course-card {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1.5px solid #cbd5e1;
+      border-left: 5px solid #1d4ed8;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .course-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #1d4ed8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .course-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0;
+    }
+    .credentials-vault {
+      background-color: #0b1528;
+      border: 1.5px solid #1e3a8a;
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 26px;
+      box-shadow: 0 12px 24px rgba(11, 21, 40, 0.15);
+    }
+    .vault-header {
+      font-size: 11px;
+      font-weight: 800;
+      color: #ffb531;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .cred-row {
+      margin-bottom: 12px;
+    }
+    .cred-label {
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .cred-value-box {
+      background-color: #0f1d35;
+      border: 1px solid #254070;
+      border-radius: 10px;
+      padding: 9px 14px;
+      color: #ffffff;
+      font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      font-size: 15px;
+      font-weight: 800;
+      word-break: break-all;
+    }
+    .cred-password {
+      color: #ffb531;
+      border-color: #b45309;
+      background-color: #1c1917;
+      letter-spacing: 0.08em;
+    }
+    .btn-login {
+      display: inline-block;
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 15px 34px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+      text-align: center;
+      margin: 6px 0 24px;
+      letter-spacing: -0.01em;
+    }
+    .whatsapp-card {
+      background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 1.5px solid #86efac;
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .whatsapp-title {
+      color: #15803d;
+      font-size: 14px;
+      font-weight: 900;
+      margin: 0 0 6px;
+    }
+    .whatsapp-desc {
+      color: #166534;
+      font-size: 12px;
+      margin: 0 0 14px;
+      line-height: 1.5;
+    }
+    .btn-whatsapp {
+      display: inline-block;
+      background-color: #22c55e;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 10px 22px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    .guidelines-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .guidelines-title {
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    .footer {
+      background-color: #091224;
+      padding: 24px 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.6;
+      border-top: 1px solid #1e293b;
+    }
+    .footer a {
+      color: #ffb531;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
     <div class="container">
-      <div class="header">
-        <h1>Blueprint Learning <span>Academy</span></h1>
-        <p style="color: #7fb8ea; margin: 5px 0 0 0; font-size: 14px;">Real Estate & Construction Career Education</p>
+      <!-- HEADER BANNER -->
+      <div class="header-banner">
+        <div class="logo-container">
+          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="86" height="86" />
+        </div>
+        <h1 class="brand-title">Blueprint <span class="brand-accent">Learning Academy</span></h1>
+        <p class="brand-subtitle">Bangladesh's #1 Practical Civil Engineering Academy</p>
       </div>
-      <div class="content">
-        <h2 style="color: #50c878; margin-top: 0;">🎉 Congratulations, ${studentName}!</h2>
-        <p>Your enrollment in <strong>${courseTitle}</strong> has been verified and confirmed by the academy.</p>
-        <p>We are delighted to welcome you to our professional learning batch. Below are your secure login credentials to access the Student Portal:</p>
 
-        <div class="highlight-box">
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="color: #bccadb; padding: 8px 0; font-weight: 600;">Student Portal URL:</td>
-              <td style="color: #7fb8ea; padding: 8px 0; text-align: right;"><a href="${loginUrl}" style="color: #7fb8ea;">${loginUrl}</a></td>
-            </tr>
-            <tr>
-              <td style="color: #bccadb; padding: 8px 0; font-weight: 600;">Login Email:</td>
-              <td style="color: #f3f7fc; padding: 8px 0; text-align: right; font-weight: bold;">${studentEmail}</td>
-            </tr>
-            <tr>
-              <td style="color: #bccadb; padding: 8px 0; font-weight: 600;">Auto-Generated Password:</td>
-              <td style="color: #ffb531; padding: 8px 0; text-align: right; font-family: monospace; font-size: 17px; font-weight: bold;">${generatedPassword}</td>
-            </tr>
-          </table>
+      <!-- MAIN CONTENT -->
+      <div class="content-body">
+        <div class="status-badge">
+          ✓ Enrollment &amp; Payment Verified
         </div>
 
-        <div style="text-align: center; margin: 25px 0;">
-          <a href="${loginUrl}" class="btn">Login to Your Student Dashboard</a>
+        <h2 class="welcome-title">Welcome to the Batch, ${studentName}!</h2>
+        <p class="welcome-text">
+          Congratulations on taking a decisive step towards accelerating your engineering career. Your enrollment has been verified and your student account is now fully active.
+        </p>
+
+        <!-- Course Summary -->
+        <div class="course-card">
+          <div class="course-label">Your Enrolled Course</div>
+          <h3 class="course-name">${courseTitle}</h3>
         </div>
 
+        <!-- Credentials Vault -->
+        <div class="credentials-vault">
+          <div class="vault-header">
+            🔐 Student Portal Access Credentials
+          </div>
+
+          <div class="cred-row">
+            <div class="cred-label">Login Email Address:</div>
+            <div class="cred-value-box">${studentEmail}</div>
+          </div>
+
+          <div class="cred-row">
+            <div class="cred-label">Auto-Generated Password:</div>
+            <div class="cred-value-box cred-password">${generatedPassword}</div>
+          </div>
+
+          <div style="margin-top: 10px; color: #94a3b8; font-size: 11px; line-height: 1.5;">
+            * You can change this password anytime from your profile settings after logging in.
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center;">
+          <a href="${loginUrl}" class="btn-login" target="_blank">
+            👉 Login to Student Dashboard
+          </a>
+        </div>
+
+        <!-- WhatsApp Batch Group (if configured) -->
         ${
           whatsappGroupLink
             ? `
-        <div style="background: rgba(37,211,102,0.1); border: 1px solid #25d366; border-radius: 8px; padding: 15px; text-align: center; margin: 20px 0;">
-          <p style="margin: 0 0 10px 0; color: #f3f7fc; font-weight: 600;">Join your course WhatsApp Batch Group directly:</p>
-          <a href="${whatsappGroupLink}" class="btn-whatsapp">Join WhatsApp Group</a>
-        </div>`
+        <div class="whatsapp-card">
+          <h4 class="whatsapp-title">💬 Official Batch WhatsApp Group</h4>
+          <p class="whatsapp-desc">
+            Connect directly with your instructor and batchmates for live Google Meet links, class reminders, and daily discussions.
+          </p>
+          <a href="${whatsappGroupLink}" class="btn-whatsapp" target="_blank">
+            Join WhatsApp Batch Group →
+          </a>
+        </div>
+        `
             : ''
         }
 
-        <p style="color: #bccadb; font-size: 14px;">
-          <strong>Important Instructions:</strong><br>
-          • In your dashboard, you will find class video recordings, live class Google Meet schedule, downloadable resources, and notice board.<br>
-          • You can change your password anytime after logging in.<br>
-          • If you have any inquiries, you can directly chat with the instructor inside the course dashboard.
-        </p>
+        <!-- Guidelines -->
+        <div class="guidelines-box">
+          <div class="guidelines-title">What's Waiting Inside Your Portal:</div>
+          • <strong>Video Lectures:</strong> Watch recorded site training videos and BOQ modules anytime.<br>
+          • <strong>Live Classes:</strong> Google Meet links and schedule updated in your dashboard.<br>
+          • <strong>Notice Board:</strong> Academy holiday notices and batch updates are posted directly.<br>
+          • <strong>Student Discussion:</strong> Dedicated instructor chat room for your questions.
+        </div>
       </div>
+
+      <!-- FOOTER -->
       <div class="footer">
-        © ${new Date().getFullYear()} Blueprint Learning Academy. All rights reserved.<br>
-        Direct Helpline / WhatsApp: +8801313893838
+        <strong style="color: #ffffff;">Blueprint Learning Academy</strong><br>
+        Practical Engineering &amp; Real Estate Career Development<br>
+        Direct Helpline &amp; WhatsApp: <a href="https://wa.me/8801313916161">+880 1313-916161</a> | <a href="https://wa.me/8801313893838">+880 1313-893838</a><br>
+        <span style="font-size: 11px; color: #64748b; margin-top: 8px; display: block;">
+          © ${currentYear} Blueprint Learning Academy. All rights reserved. Dhaka, Bangladesh.
+        </span>
       </div>
     </div>
-  </body>
-  </html>
+  </div>
+</body>
+</html>
   `;
 
   return await dispatchMail({
@@ -189,47 +478,134 @@ const sendEnrollmentApprovedEmail = async ({
  * Send Account Block Notification with Admin's Reason
  */
 const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) => {
+  const currentYear = new Date().getFullYear();
+
   const htmlContent = `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Account Status Notice - Blueprint Learning Academy</title>
-    <style>
-      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
-      .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1px solid #2e4666; border-radius: 14px; overflow: hidden; }
-      .header { background: #0b1624; border-bottom: 2px solid #e53e3e; padding: 25px; text-align: center; }
-      .header h1 { margin: 0; color: #f3f7fc; font-size: 24px; font-weight: 800; }
-      .content { padding: 30px; line-height: 1.6; }
-      .reason-box { background: rgba(229, 62, 62, 0.1); border-left: 4px solid #e53e3e; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
-      .footer { background: #0b1624; padding: 20px; text-align: center; color: #bccadb; font-size: 13px; border-top: 1px solid #2e4666; }
-    </style>
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Status Notice - Blueprint Learning Academy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #334155;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f1f5f9;
+      padding: 30px 10px 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 55%, #991b1b 100%);
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .logo-container {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      border: 3px solid #fca5a5;
+      background-color: #ffffff;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+    .content-body {
+      padding: 32px 30px;
+    }
+    .reason-card {
+      background-color: #fef2f2;
+      border: 1.5px solid #fecaca;
+      border-left: 5px solid #dc2626;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .footer {
+      background-color: #091224;
+      padding: 24px 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
     <div class="container">
-      <div class="header">
-        <h1>Blueprint Learning <span>Academy</span></h1>
-        <p style="color: #fc8181; margin: 5px 0 0 0; font-size: 14px;">Important Account Notice</p>
+      <div class="header-banner">
+        <div class="logo-container">
+          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="82" height="82" />
+        </div>
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
+          Blueprint <span style="color: #fca5a5;">Learning Academy</span>
+        </h1>
+        <p style="color: #fecaca; margin: 6px 0 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+          Important Student Account Notice
+        </p>
       </div>
-      <div class="content">
-        <h2 style="color: #fc8181; margin-top: 0;">Account Access Notice</h2>
-        <p>Dear ${studentName},</p>
-        <p>Your access to the Blueprint Learning Academy student dashboard has been temporarily paused or restricted by the academy administration.</p>
-        
-        <div class="reason-box">
-          <p style="margin: 0; font-weight: bold; color: #fc8181;">Reason provided by Administration:</p>
-          <p style="margin: 8px 0 0 0; color: #f3f7fc; font-style: italic;">"${reason}"</p>
+
+      <div class="content-body">
+        <h2 style="color: #991b1b; margin-top: 0; font-size: 20px; font-weight: 900;">
+          Account Access Update
+        </h2>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          Dear <strong>${studentName}</strong>,
+        </p>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          Your student dashboard access has been temporarily restricted by the academy administration.
+        </p>
+
+        <div class="reason-card">
+          <div style="font-size: 11px; font-weight: 800; color: #991b1b; text-transform: uppercase; margin-bottom: 4px;">
+            Official Reason Provided:
+          </div>
+          <div style="font-size: 14px; color: #7f1d1d; font-weight: 600; line-height: 1.5;">
+            "${reason}"
+          </div>
         </div>
 
-        <p>If you believe this is a misunderstanding, or if you need to resolve your payment or account status, please contact our support desk directly via WhatsApp.</p>
+        <p style="color: #475569; font-size: 13px; line-height: 1.6;">
+          If you believe this is an error or wish to clear your payment/account status, please reach out to our support desk directly via WhatsApp.
+        </p>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <a href="https://wa.me/8801313916161" style="display: inline-block; background-color: #22c55e; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 12px 28px; border-radius: 10px;" target="_blank">
+            Contact Support on WhatsApp
+          </a>
+        </div>
       </div>
+
       <div class="footer">
-        © ${new Date().getFullYear()} Blueprint Learning Academy. All rights reserved.<br>
-        Helpline / WhatsApp: +8801313893838
+        <strong style="color: #ffffff;">Blueprint Learning Academy</strong><br>
+        Direct Helpline: +880 1313-916161 | +880 1313-893838<br>
+        © ${currentYear} Blueprint Learning Academy.
       </div>
     </div>
-  </body>
-  </html>
+  </div>
+</body>
+</html>
   `;
 
   return await dispatchMail({
@@ -243,41 +619,112 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
  * Send Password Reset OTP Email
  */
 const sendPasswordResetOtpEmail = async ({ name, email, otp }) => {
+  const currentYear = new Date().getFullYear();
+
   const htmlContent = `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Password Verification Code - Blueprint Learning Academy</title>
-    <style>
-      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #060a11; color: #f3f7fc; margin: 0; padding: 20px; }
-      .container { max-width: 600px; margin: 0 auto; background: #101c2e; border: 1px solid #2e4666; border-radius: 14px; overflow: hidden; }
-      .header { background: #0b1624; border-bottom: 2px solid #ffb531; padding: 25px; text-align: center; }
-      .otp-box { background: #08111d; border: 2px dashed #ffb531; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #ffb531; font-family: monospace; }
-      .footer { background: #0b1624; padding: 20px; text-align: center; color: #bccadb; font-size: 13px; border-top: 1px solid #2e4666; }
-    </style>
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Verification Code - Blueprint Learning Academy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f1f5f9;
+      padding: 30px 10px 40px;
+    }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #091224 0%, #0f274a 55%, #1e3a8a 100%);
+      padding: 32px 24px 24px;
+      text-align: center;
+    }
+    .logo-container {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      border: 3px solid #ffb531;
+      background-color: #ffffff;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+    .otp-box {
+      background-color: #0b1528;
+      border: 2px dashed #ffb531;
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      margin: 24px 0;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      color: #ffb531;
+      font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
     <div class="container">
-      <div class="header">
-        <h1 style="margin:0; color:#f3f7fc;">Blueprint Learning <span style="color:#ffb531;">Academy</span></h1>
-        <p style="color: #7fb8ea; margin: 5px 0 0 0; font-size: 14px;">Administrator Security Verification</p>
+      <div class="header-banner">
+        <div class="logo-container">
+          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="76" height="76" />
+        </div>
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
+          Blueprint <span style="color: #ffb531;">Learning Academy</span>
+        </h1>
+        <p style="color: #93c5fd; margin: 6px 0 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+          Administrator Security Verification
+        </p>
       </div>
-      <div class="content" style="padding: 30px;">
-        <h2 style="color: #f3f7fc; margin-top: 0;">Password Reset Request</h2>
-        <p>Hello ${name},</p>
-        <p>A request was made to verify or reset your administrator password. Please use the 6-digit one-time verification code below:</p>
-        
+
+      <div style="padding: 32px 30px;">
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 900;">
+          Password Reset Verification
+        </h2>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          Hello <strong>${name}</strong>,<br>
+          A verification request was made for your administrator account. Please use the one-time code below to proceed:
+        </p>
+
         <div class="otp-box">${otp}</div>
 
-        <p style="color: #bccadb; font-size: 13px;">This code is valid for 10 minutes. If you did not request this verification, please secure your email account immediately.</p>
+        <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">
+          • This code is confidential and will expire in 10 minutes.<br>
+          • If you did not request this code, no action is needed.
+        </p>
       </div>
-      <div class="footer">
-        © ${new Date().getFullYear()} Blueprint Learning Academy.
+
+      <div style="background-color: #091224; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
+        © ${currentYear} Blueprint Learning Academy.
       </div>
     </div>
-  </body>
-  </html>
+  </div>
+</body>
+</html>
   `;
 
   return await dispatchMail({
