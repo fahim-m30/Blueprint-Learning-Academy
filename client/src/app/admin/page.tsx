@@ -23,6 +23,7 @@ import {
   Send,
   Save,
   RefreshCw,
+  Globe,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -401,7 +402,28 @@ export default function AdminPortalPage() {
     }
   };
 
-  // 9. Update Site Settings
+  // 9. Upload & Convert Instructor Photo to Base64 Data URL
+  const handleInstructorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !siteSettings) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('Image file size must be less than 5MB.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setSiteSettings({
+          ...siteSettings,
+          instructorImage: event.target.result as string,
+        });
+        showAlert('Instructor photo loaded! Remember to click "Save All Changes" to publish.', 'success');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 10. Update Site Settings
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!siteSettings) return;
@@ -1389,9 +1411,11 @@ export default function AdminPortalPage() {
           <form onSubmit={handleSaveSettings} className="bg-[#0f182c] border border-slate-800 rounded-2xl p-6 space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
-                <h2 className="text-lg font-bold text-white">Website Information &amp; Payment Gateway Settings</h2>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-amber-400" /> Homepage Content, Instructor Profile &amp; Gateway Settings
+                </h2>
                 <p className="text-xs text-[#bccadb]">
-                  Any changes made here will immediately update on the homepage, payment screen, student portal, and footers.
+                  Change instructor photo, names, headings, experience, phone numbers, and bKash/Nagad accounts. Updates appear live across the site immediately.
                 </p>
               </div>
               <button
@@ -1402,10 +1426,266 @@ export default function AdminPortalPage() {
               </button>
             </div>
 
-            {/* SECTION 1: CONTACT, PHONE, WHATSAPP, EMAIL */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-[#1a2c42] pb-2">
-                📞 Official Contact &amp; Support Helpline (Homepage &amp; Footer)
+            {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
+            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-5">
+              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications (ইন্সট্রাক্টর প্রোফাইল ও ছবি)
+              </h3>
+              
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                {/* Photo Preview and File Uploader */}
+                <div className="w-full md:w-auto flex flex-col items-center gap-3 p-4 bg-[#0f182c] border border-slate-700/80 rounded-2xl shrink-0">
+                  <span className="text-[11px] font-bold text-[#bccadb] uppercase tracking-wider">Instructor Photo</span>
+                  <div className="relative w-28 h-36 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-xl bg-slate-900 group">
+                    <img
+                      src={siteSettings.instructorImage || '/instructor.jpg?v=2'}
+                      alt="Instructor preview"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                  
+                  <label className="cursor-pointer w-full text-center px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-md">
+                    📁 Change Photo (ছবি আপলোড)
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInstructorImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[10px] text-slate-400 text-center max-w-[150px]">
+                    Upload JPG/PNG from your PC or phone (Max 5MB)
+                  </span>
+                </div>
+
+                {/* Details Form Grid */}
+                <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Instructor Full Name (ইন্সট্রাক্টরের পুরো নাম) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={siteSettings.instructorName || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorName: e.target.value })}
+                      placeholder="Engr. Md Abdul Mazid"
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Degree &amp; University (ডিগ্রি ও বিশ্ববিদ্যালয়) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={siteSettings.instructorDegree || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorDegree: e.target.value })}
+                      placeholder="B.Sc. in Civil Engineering (BUET)"
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Full Experience Label (অভিজ্ঞতা শিরোনাম)
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.instructorExp || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorExp: e.target.value })}
+                      placeholder="10+ Years On Real Projects in Bangladesh"
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Short Experience Badge (ছোট ব্যাজ)
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.instructorShortExp || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorShortExp: e.target.value })}
+                      placeholder="10+ Yrs Exp"
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2.5 text-white outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Instructor Image URL (বা ছবির সরাসরি লিংক)
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.instructorImage || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorImage: e.target.value })}
+                      placeholder="/instructor.jpg?v=2 or https://..."
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none text-[11px] font-mono"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-[#bccadb] mb-1 font-semibold">
+                      Detailed Bio / Mission Paragraph (শিক্ষকের বিস্তারিত বিবরণ)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={siteSettings.instructorBio || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, instructorBio: e.target.value })}
+                      placeholder="Engr. Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience..."
+                      className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none leading-relaxed"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* Two Feature Highlights */}
+              <div className="border-t border-slate-800/80 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-3 bg-[#0f182c] border border-slate-800 rounded-xl space-y-2">
+                  <label className="block text-amber-400 font-bold">Feature 1: Title &amp; Description (ফিচার ১)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.feature1Title || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, feature1Title: e.target.value })}
+                    placeholder="Real Developer Drawings"
+                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.feature1Desc || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, feature1Desc: e.target.value })}
+                    placeholder="Learn using actual architectural, structural, and MEP drawings..."
+                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[#bccadb] outline-none text-[11px]"
+                  />
+                </div>
+
+                <div className="p-3 bg-[#0f182c] border border-slate-800 rounded-xl space-y-2">
+                  <label className="block text-emerald-400 font-bold">Feature 2: Title &amp; Description (ফিচার ২)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.feature2Title || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, feature2Title: e.target.value })}
+                    placeholder="Live Site Situations"
+                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.feature2Desc || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, feature2Desc: e.target.value })}
+                    placeholder="Master casting SOPs, rebar BBS optimization..."
+                    className="w-full bg-[#08111d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[#bccadb] outline-none text-[11px]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 2: HOMEPAGE STATS COUNTERS & TOP BADGE */}
+            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-sky-400 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                📊 Homepage Badges &amp; Stat Numbers (পরিসংখ্যান ও টপ ব্যাজ)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Total Courses Count (কোর্স সংখ্যা)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.statsCourses || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, statsCourses: e.target.value })}
+                    placeholder="6+"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Experience Stat (অভিজ্ঞতা)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.statsExperience || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, statsExperience: e.target.value })}
+                    placeholder="10+ Yrs"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Mentor Institution (প্রতিষ্ঠান)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.statsMentorTag || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, statsMentorTag: e.target.value })}
+                    placeholder="BUET"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none font-bold text-center"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Top Hero Badge Text</label>
+                  <input
+                    type="text"
+                    value={siteSettings.heroBadgeText || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroBadgeText: e.target.value })}
+                    placeholder="Bangladesh's #1 Practical Civil Engineering Academy"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
+            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                🌐 Academy Branding, Hero Title &amp; Bengali Note (মূল শিরোনাম)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Academy / Platform Name</label>
+                  <input
+                    type="text"
+                    value={siteSettings.siteName || 'Blueprint Learning Academy'}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Bengali Tagline Note (বাংলা ব্যানার)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.heroBengaliNote || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroBengaliNote: e.target.value })}
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Main Headline Title (প্রধান হেডলাইন)</label>
+                  <input
+                    type="text"
+                    value={siteSettings.heroTitle}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Subtitle Description (উপ-বিবরণ)</label>
+                  <textarea
+                    rows={2}
+                    value={siteSettings.heroSubtitle || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
+            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                📞 Official Helpline &amp; WhatsApp Numbers (ফোন নম্বর ও সাপোর্ট)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
@@ -1418,7 +1698,7 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactPhone}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
                   <span className="text-[10px] text-[#7fb8ea]">Appears in header, footer &amp; direct calling</span>
                 </div>
@@ -1433,7 +1713,7 @@ export default function AdminPortalPage() {
                     value={siteSettings.whatsappNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
                     placeholder="88013XXXXXXXX"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
                   <span className="text-[10px] text-emerald-400">Used for direct WhatsApp chat button links</span>
                 </div>
@@ -1448,17 +1728,17 @@ export default function AdminPortalPage() {
                     value={siteSettings.contactEmail}
                     onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
                     placeholder="info@blueprintlearningacademy.com"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
                   <span className="text-[10px] text-[#7fb8ea]">Displayed in contact links &amp; email notifications</span>
                 </div>
               </div>
             </div>
 
-            {/* SECTION 2: BKASH & NAGAD PAYMENT GATEWAY */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-[#7fb8ea] flex items-center gap-2 border-b border-[#1a2c42] pb-2">
-                💳 bKash, Nagad &amp; Rocket Payment Numbers (Student Enrollment)
+            {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
+            <div className="bg-[#08111d] border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                💳 bKash, Nagad &amp; Rocket Payment Numbers (পেমেন্ট নম্বরসমূহ)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
@@ -1469,14 +1749,14 @@ export default function AdminPortalPage() {
                     value={siteSettings.bkashNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.bkashType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, bkashType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-[#08111d] border border-[#1a2c42] rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                    className="w-full mt-1.5 bg-[#0f182c] border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
                   />
                 </div>
 
@@ -1488,14 +1768,14 @@ export default function AdminPortalPage() {
                     value={siteSettings.nagadNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadNumber: e.target.value })}
                     placeholder="013XXXXXXXX"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
                   <input
                     type="text"
                     value={siteSettings.nagadType || 'Personal (Send Money)'}
                     onChange={(e) => setSiteSettings({ ...siteSettings, nagadType: e.target.value })}
                     placeholder="Type e.g. Personal (Send Money)"
-                    className="w-full mt-1.5 bg-[#08111d] border border-[#1a2c42] rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
+                    className="w-full mt-1.5 bg-[#0f182c] border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-[#bccadb]"
                   />
                 </div>
 
@@ -1506,56 +1786,8 @@ export default function AdminPortalPage() {
                     value={siteSettings.rocketNumber}
                     onChange={(e) => setSiteSettings({ ...siteSettings, rocketNumber: e.target.value })}
                     placeholder="013XXXXXXXX-X"
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
+                    className="w-full bg-[#0f182c] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
                   />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-[#1a2c42] pb-2">
-                🌐 Academy Branding &amp; Content Customization
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Academy / Website Name</label>
-                  <input
-                    type="text"
-                    value={siteSettings.siteName || 'Blueprint Learning Academy'}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Bengali Tagline</label>
-                  <input
-                    type="text"
-                    value={siteSettings.heroBengaliNote || ''}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, heroBengaliNote: e.target.value })}
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Main Headline Title</label>
-                  <input
-                    type="text"
-                    value={siteSettings.heroTitle}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, heroTitle: e.target.value })}
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-[#bccadb] mb-1 font-semibold">Hero Subtitle Description</label>
-                  <textarea
-                    rows={2}
-                    value={siteSettings.heroSubtitle || ''}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
-                    className="w-full bg-[#08111d] border border-slate-800 focus:border-[#ffb531] rounded-lg px-3 py-2 text-white outline-none"
-                  ></textarea>
                 </div>
               </div>
             </div>

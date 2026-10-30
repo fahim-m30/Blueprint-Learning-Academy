@@ -63,9 +63,23 @@ export interface Course {
 export interface SiteSettings {
   siteName: string;
   tagline: string;
+  heroBadgeText?: string;
   heroTitle: string;
   heroSubtitle: string;
   heroBengaliNote: string;
+  instructorName?: string;
+  instructorDegree?: string;
+  instructorExp?: string;
+  instructorShortExp?: string;
+  instructorImage?: string;
+  instructorBio?: string;
+  feature1Title?: string;
+  feature1Desc?: string;
+  feature2Title?: string;
+  feature2Desc?: string;
+  statsCourses?: string;
+  statsExperience?: string;
+  statsMentorTag?: string;
   contactPhone: string;
   whatsappNumber: string;
   contactEmail: string;
