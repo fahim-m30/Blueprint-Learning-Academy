@@ -292,14 +292,18 @@ export default function AdminPortalPage() {
       method: 'POST',
     });
     if (res.success) {
-      showAlert(res.message || 'Enrollment approved and email sent successfully!');
-      const anyRes = res as any;
-      if (anyRes.emailResult && !anyRes.emailResult.success && en) {
-        // Backend indicated email needed relay - dispatch immediately via Vercel HTTPS relay
-        handleResendCredentialsEmail({
+      const responseData = (res.data || res) as any;
+      const backendEmailDispatched = responseData?.emailResult?.success;
+
+      // Always guarantee email is sent on the very FIRST click:
+      if (!backendEmailDispatched && en) {
+        await handleResendCredentialsEmail({
           ...en,
-          generatedPassword: anyRes.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
+          studentId: responseData?.credentials?.studentId || en.studentId,
+          generatedPassword: responseData?.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
         });
+      } else {
+        showAlert(res.message || 'Enrollment approved and email sent successfully!');
       }
       loadAdminData();
     } else {
@@ -383,7 +387,7 @@ export default function AdminPortalPage() {
         body: JSON.stringify({
           secret: 'blueprint_academy_email_secret_key_2026',
           to: en.studentEmail,
-          subject: `🎉 Enrollment Confirmation & Student Access - Blueprint Learning Academy`,
+          subject: `Course Enrollment Confirmation: ${courseTitle} - Student ID & Login Credentials`,
           html,
           text: `Welcome ${en.studentName}! Your course access for ${courseTitle} is active. Student ID: ${en.studentId || ''}, Email: ${en.studentEmail}, Password: ${password}, Login URL: ${loginUrl}?email=${encodeURIComponent(en.studentEmail)}&from=email`,
           config: {

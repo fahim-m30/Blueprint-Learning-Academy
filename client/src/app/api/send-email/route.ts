@@ -40,6 +40,11 @@ export async function POST(req: NextRequest) {
           subject,
           html,
           text: text || '',
+          headers: {
+            'X-Priority': '1',
+            'Importance': 'high',
+            'X-MSMail-Priority': 'High',
+          },
         });
 
         console.log('✅ [Vercel Relay] Email sent via Gmail successfully:', info.messageId);
@@ -76,6 +81,11 @@ export async function POST(req: NextRequest) {
         subject,
         html,
         text: text || '',
+        headers: {
+          'X-Priority': '1',
+          'Importance': 'high',
+          'X-MSMail-Priority': 'High',
+        },
       });
 
       console.log('✅ [Vercel Relay] Email sent via SMTP successfully:', smtpInfo.messageId);

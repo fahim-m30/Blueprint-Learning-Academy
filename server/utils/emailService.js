@@ -560,7 +560,7 @@ const sendEnrollmentApprovedEmail = async ({
 
   return await dispatchMail({
     to: studentEmail,
-    subject: `Welcome to ${courseTitle} - Your Access Credentials`,
+    subject: `Course Enrollment Confirmation: ${courseTitle} - Student ID & Login Credentials`,
     html: htmlContent,
   });
 };
