@@ -26,7 +26,45 @@ const dispatchMail = async ({ to, subject, html, text, attachments = [] }) => {
   const smtpPass = settings?.smtpPass || process.env.SMTP_PASS;
   const smtpSecure = (settings?.smtpSecure === true) || (process.env.SMTP_SECURE === 'true');
 
-  // Attempt 1: Brevo HTTPS REST API (Port 443 - 100% unblocked on Render Cloud)
+  // Attempt 1: Vercel HTTPS Relay (Port 443 - Bypasses all Render cloud SMTP port blocking)
+  const relayUrl = process.env.EMAIL_RELAY_URL || (process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/api/send-email` : 'https://blueprint-learning-academy.vercel.app/api/send-email');
+  try {
+    const relayRes = await fetch(relayUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        secret: 'blueprint_academy_email_secret_key_2026',
+        to,
+        subject,
+        html,
+        text: text || '',
+        from: emailFrom,
+        config: {
+          gmailUser,
+          gmailPass,
+          smtpHost,
+          smtpPort,
+          smtpUser,
+          smtpPass,
+        },
+      }),
+      signal: AbortSignal.timeout(12000),
+    });
+
+    const relayData = await relayRes.json();
+    if (relayRes.ok && relayData.success) {
+      console.log('✅ Email Dispatched via Vercel HTTPS Relay Successfully:', relayData.messageId);
+      return { success: true, provider: relayData.provider || 'vercel-relay', messageId: relayData.messageId };
+    } else {
+      console.warn('⚠️ Vercel Relay response not ok, attempting local fallback:', relayData);
+    }
+  } catch (relayErr) {
+    console.warn('⚠️ Vercel Relay call failed, falling back to local providers:', relayErr.message);
+  }
+
+  // Attempt 2: Brevo HTTPS REST API (Port 443 - 100% unblocked on Render Cloud)
   if (brevoApiKey) {
     try {
       const payload = {
