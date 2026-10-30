@@ -71,15 +71,15 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-28 sm:h-36 lg:h-40 py-3 sm:py-4">
+        <div className="flex items-center justify-between h-32 sm:h-40 lg:h-44 py-3 sm:py-4">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-3.5 sm:gap-5 group min-w-0">
             <div className="relative shrink-0">
               <div className="absolute -inset-2.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-50 blur-xl group-hover:opacity-85 transition duration-300"></div>
               <img
-                src="/logo.png?v=7"
+                src="/logo.png?v=8"
                 alt="Blueprint Learning Academy"
-                className="relative w-24 h-24 xs:w-28 xs:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 object-contain rounded-full shadow-2xl shadow-blue-950/30 transition duration-300 group-hover:scale-105"
+                className="relative w-28 h-28 xs:w-32 xs:h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 object-contain rounded-full shadow-2xl shadow-blue-950/30 transition duration-300 group-hover:scale-105"
               />
             </div>
             <div className="min-w-0">

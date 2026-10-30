@@ -29,6 +29,10 @@ import {
   Search,
   CheckCircle2,
   Mail,
+  Bell,
+  Pin,
+  PinOff,
+  Clock,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -77,7 +81,19 @@ export default function AdminPortalPage() {
   const [courseStudents, setCourseStudents] = useState<any[]>([]);
   const [courseSubmissions, setCourseSubmissions] = useState<any[]>([]);
   const [courseChat, setCourseChat] = useState<any[]>([]);
-  const [courseSubTab, setCourseSubTab] = useState<'students' | 'videos' | 'live' | 'tasks' | 'chat'>('students');
+  const [courseSubTab, setCourseSubTab] = useState<'students' | 'videos' | 'live' | 'tasks' | 'notices' | 'chat'>('students');
+
+  // Notice Form & Batch info state inside Course Hub
+  const [noticeTitle, setNoticeTitle] = useState('');
+  const [noticeContent, setNoticeContent] = useState('');
+  const [noticeCategory, setNoticeCategory] = useState<'batch_start' | 'vacation' | 'special'>('batch_start');
+  const [noticeDate, setNoticeDate] = useState('');
+  const [noticeIsPinned, setNoticeIsPinned] = useState(true);
+  const [submittingNotice, setSubmittingNotice] = useState(false);
+
+  const [batchStartDateInput, setBatchStartDateInput] = useState('');
+  const [batchScheduleInput, setBatchScheduleInput] = useState('');
+  const [savingBatchInfo, setSavingBatchInfo] = useState(false);
 
   // Form states for Course additions
   const [newVideoTitle, setNewVideoTitle] = useState('');
@@ -450,6 +466,84 @@ export default function AdminPortalPage() {
       loadCourseHub(selectedCourseId);
     } else {
       showAlert(res.message || 'Failed to add student.', 'error');
+    }
+  };
+
+  // Course Hub Notice & Batch Info Handlers
+  const handlePublishNotice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseId) return;
+    if (!noticeTitle.trim() || !noticeContent.trim()) {
+      showAlert('Notice title and content are required.', 'error');
+      return;
+    }
+    setSubmittingNotice(true);
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: noticeTitle.trim(),
+        content: noticeContent.trim(),
+        category: noticeCategory,
+        date: noticeDate.trim(),
+        isPinned: noticeIsPinned,
+      }),
+    });
+    setSubmittingNotice(false);
+    if (res.success) {
+      showAlert('Notice published successfully to Course Hub & Landing Page Notice Board!');
+      setNoticeTitle('');
+      setNoticeContent('');
+      setNoticeDate('');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Failed to publish notice.', 'error');
+    }
+  };
+
+  const handleDeleteNotice = async (noticeId: string) => {
+    if (!selectedCourseId) return;
+    if (!confirm('Are you sure you want to delete this notice?')) return;
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices/${noticeId}`, {
+      method: 'DELETE',
+    });
+    if (res.success) {
+      showAlert('Notice deleted successfully.');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Failed to delete notice.', 'error');
+    }
+  };
+
+  const handleTogglePinNotice = async (noticeId: string) => {
+    if (!selectedCourseId) return;
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices/${noticeId}/pin`, {
+      method: 'PUT',
+    });
+    if (res.success) {
+      showAlert('Notice pin status toggled successfully.');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Failed to toggle notice pin status.', 'error');
+    }
+  };
+
+  const handleUpdateBatchInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseId) return;
+    setSavingBatchInfo(true);
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/batch-info`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        batchStartDate: batchStartDateInput.trim(),
+        batchSchedule: batchScheduleInput.trim(),
+      }),
+    });
+    setSavingBatchInfo(false);
+    if (res.success) {
+      showAlert('Batch start date and weekly class schedule updated successfully!');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Failed to update batch schedule.', 'error');
     }
   };
 

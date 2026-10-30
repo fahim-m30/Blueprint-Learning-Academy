@@ -22,6 +22,8 @@ import {
   Download,
   CheckCircle2,
   Briefcase,
+  Bell,
+  Pin,
 } from 'lucide-react';
 
 export default function StudentDashboardPage() {
@@ -34,7 +36,7 @@ export default function StudentDashboardPage() {
   const [mySubmissions, setMySubmissions] = useState<TaskSubmission[]>([]);
 
   // Active tab in course
-  const [activeTab, setActiveTab] = useState<'videos' | 'live' | 'tasks' | 'chat' | 'cv'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'live' | 'tasks' | 'chat' | 'cv' | 'notices'>('videos');
 
   // Task submission form state
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);

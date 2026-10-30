@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import CourseModal from '@/components/CourseModal';
 import EnrollmentModal from '@/components/EnrollmentModal';
 import { apiRequest } from '@/lib/api';
-import { Course, SiteSettings } from '@/lib/types';
+import { Course, SiteSettings, CourseNotice } from '@/lib/types';
 import { DEFAULT_COURSES, DEFAULT_SETTINGS } from '@/lib/initialData';
 import {
   Clock,
@@ -31,6 +31,13 @@ import {
   GraduationCap,
   HardHat,
   Star,
+  Bell,
+  Pin,
+  Calendar,
+  Rocket,
+  Palmtree,
+  Megaphone,
+  CalendarDays,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -42,6 +49,11 @@ export default function HomePage() {
   // Modal states
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
   const [selectedCourseForEnroll, setSelectedCourseForEnroll] = useState<Course | null>(null);
+
+  // Live Notice Board states
+  const [noticeCategoryFilter, setNoticeCategoryFilter] = useState<'all' | 'batch_start' | 'vacation' | 'special_notice'>('all');
+  const [noticeCourseFilter, setNoticeCourseFilter] = useState<string>('all');
+  const [notices, setNotices] = useState<CourseNotice[]>([]);
 
   useEffect(() => {
     // 1. Immediately hydrate from localStorage if previous fresh data was cached
@@ -62,9 +74,10 @@ export default function HomePage() {
 
     // 2. Fetch fresh updates in the background (Stale-While-Revalidate pattern)
     async function loadData() {
-      const [coursesRes, settingsRes] = await Promise.all([
+      const [coursesRes, settingsRes, noticesRes] = await Promise.all([
         apiRequest<{ courses: Course[] }>('/public/courses'),
         apiRequest<{ settings: SiteSettings }>('/public/settings'),
+        apiRequest<{ notices: CourseNotice[] }>('/public/notices'),
       ]);
 
       if (coursesRes.success && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
@@ -79,6 +92,9 @@ export default function HomePage() {
           localStorage.setItem('bpa_cached_settings', JSON.stringify(settingsRes.data.settings));
         } catch {}
       }
+      if (noticesRes.success && noticesRes.data?.notices) {
+        setNotices(noticesRes.data.notices);
+      }
     }
     loadData();
   }, []);
@@ -88,6 +104,38 @@ export default function HomePage() {
     setCopiedNumber(text);
     setTimeout(() => setCopiedNumber(null), 2500);
   };
+
+  // Derive all active notices from public API or from course data
+  const allAvailableNotices: CourseNotice[] =
+    notices.length > 0
+      ? notices
+      : courses.flatMap((c) => {
+          const list: CourseNotice[] = (c.notices || []).map((n) => ({
+            ...n,
+            courseId: c._id,
+            courseTitle: c.title,
+            courseSlug: c.slug,
+          }));
+          if (c.batchStartDate && !list.some((n) => n.category === 'batch_start')) {
+            list.push({
+              _id: `auto-${c._id}`,
+              title: `Batch Enrollment Open - Starts ${c.batchStartDate}`,
+              content: `Official live classes start from ${c.batchStartDate}. Weekly schedule: ${c.batchSchedule || 'Fri & Sat 8:30 PM'}. Limited mentorship seats.`,
+              category: 'batch_start',
+              date: c.batchStartDate,
+              isPinned: true,
+              createdAt: c.createdAt || new Date().toISOString(),
+              courseId: c._id,
+              courseTitle: c.title,
+              courseSlug: c.slug,
+            });
+          }
+          return list;
+        });
+
+  const filteredNotices = allAvailableNotices
+    .filter((n) => noticeCategoryFilter === 'all' || n.category === noticeCategoryFilter)
+    .filter((n) => noticeCourseFilter === 'all' || n.courseId === noticeCourseFilter);
 
   const phone = settings?.contactPhone || '01313893838';
   const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
@@ -228,33 +276,192 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================================
-          TOP DEVELOPER EMPLOYERS TRUST TICKER
+          ACADEMY NOTICE BOARD & BATCH SCHEDULES (Interactive Notice Center)
       ========================================================================= */}
-      <section className="py-6 sm:py-8 bg-white border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-          <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-slate-500">
-            Engineered For Hiring Standards of Top Real Estate Developers &amp; Consultancies in Bangladesh
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
-            {[
-              'Shanta Holdings',
-              'Concord Real Estate',
-              'bti (Building Technology & Ideas)',
-              'Navana Real Estate',
-              'Sheltech',
-              'Assurance Developments',
-              'Rangs Properties',
-              'ABC Real Estate',
-              'South Breeze Housing',
-            ].map((company, idx) => (
-              <span
-                key={idx}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition shadow-2xs"
+      <section id="notices" className="py-10 sm:py-14 bg-gradient-to-b from-white via-slate-50/70 to-white border-b border-slate-200/90 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 border-b border-slate-200/80 pb-6">
+            <div className="space-y-2 max-w-2xl text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black uppercase tracking-wider shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <Megaphone className="w-3.5 h-3.5" />
+                Academy Live Notice Board
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+                Batch Start Dates, Holidays &amp; <span className="bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">Official Notices</span>
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+                Check when each course starts, upcoming holiday breaks, and special announcements directly from instructor Engr. Md Abdul Mazid.
+              </p>
+            </div>
+
+            {/* Course Filter Dropdown */}
+            <div className="flex items-center gap-2 self-start md:self-end">
+              <span className="text-xs font-bold text-slate-500 whitespace-nowrap hidden sm:inline">Filter Course:</span>
+              <select
+                value={noticeCourseFilter}
+                onChange={(e) => setNoticeCourseFilter(e.target.value)}
+                className="bg-white border-2 border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-800 outline-none shadow-2xs cursor-pointer"
               >
-                🏢 {company}
-              </span>
-            ))}
+                <option value="all">All Courses ({courses.length})</option>
+                {courses.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {[
+              { id: 'all', label: 'All Notices', count: allAvailableNotices.length },
+              { id: 'batch_start', label: '🚀 Batch Start Dates', count: allAvailableNotices.filter((n) => n.category === 'batch_start').length },
+              { id: 'vacation', label: '🌴 Vacations & Holidays', count: allAvailableNotices.filter((n) => n.category === 'vacation').length },
+              { id: 'special_notice', label: '📢 Special Announcements', count: allAvailableNotices.filter((n) => n.category === 'special_notice').length },
+            ].map((tab) => {
+              const active = noticeCategoryFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setNoticeCategoryFilter(tab.id as any)}
+                  className={`px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition duration-200 ${
+                    active
+                      ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                      active ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Notice Cards Grid */}
+          {filteredNotices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 text-left">
+              {filteredNotices.map((notice, idx) => {
+                const isBatch = notice.category === 'batch_start';
+                const isVacation = notice.category === 'vacation';
+                const isSpecial = notice.category === 'special_notice';
+
+                const targetCourse = courses.find((c) => c._id === notice.courseId);
+
+                return (
+                  <div
+                    key={notice._id || idx}
+                    className={`relative rounded-2xl bg-white border-2 p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                      isBatch
+                        ? 'border-emerald-200 hover:border-emerald-500 shadow-xs'
+                        : isVacation
+                        ? 'border-amber-200 hover:border-amber-500 shadow-xs'
+                        : 'border-blue-200 hover:border-blue-600 shadow-xs'
+                    }`}
+                  >
+                    <div className="space-y-3.5">
+                      {/* Top Badges */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-wide ${
+                            isBatch
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                              : isVacation
+                              ? 'bg-amber-50 text-amber-900 border border-amber-300'
+                              : 'bg-indigo-50 text-indigo-900 border border-indigo-300'
+                          }`}
+                        >
+                          {isBatch && '🚀 Next Batch Start'}
+                          {isVacation && '🌴 Vacation / Holiday'}
+                          {isSpecial && '📢 Special Masterclass'}
+                          {!isBatch && !isVacation && !isSpecial && 'ℹ️ Notice'}
+                        </span>
+
+                        {notice.isPinned && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                            <Pin className="w-3 h-3 fill-amber-500 text-amber-600" /> Pinned
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Course Title Badge */}
+                      {notice.courseTitle && (
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50/70 border border-blue-200/60 px-2.5 py-1 rounded-lg w-fit">
+                          <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate max-w-[260px]">{notice.courseTitle}</span>
+                        </div>
+                      )}
+
+                      {/* Notice Title */}
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                        {notice.title}
+                      </h3>
+
+                      {/* Date Pill if available */}
+                      {notice.date && (
+                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800">
+                          <CalendarDays className="w-4 h-4 text-blue-600 shrink-0" />
+                          <span>{notice.date}</span>
+                        </div>
+                      )}
+
+                      {/* Description Content */}
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                        {notice.content}
+                      </p>
+                    </div>
+
+                    {/* Bottom CTA / Action */}
+                    {targetCourse && (
+                      <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCourseForDetails(targetCourse)}
+                          className="text-xs font-bold text-slate-600 hover:text-blue-700 transition flex items-center gap-1"
+                        >
+                          <span>Syllabus</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCourseForEnroll(targetCourse)}
+                          className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm hover:scale-105 transition"
+                        >
+                          <span>Enroll This Batch</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 px-4 rounded-2xl bg-white border border-slate-200 space-y-3">
+              <Megaphone className="w-10 h-10 text-slate-300 mx-auto" />
+              <h4 className="text-base font-extrabold text-slate-700">No notices found for this filter</h4>
+              <p className="text-xs text-slate-500">Check back soon or select another course/filter above.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setNoticeCategoryFilter('all');
+                  setNoticeCourseFilter('all');
+                }}
+                className="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800"
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

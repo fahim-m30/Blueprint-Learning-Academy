@@ -32,6 +32,19 @@ const taskSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+const noticeSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  category: {
+    type: String,
+    enum: ['batch_start', 'vacation', 'special_notice', 'general'],
+    default: 'batch_start',
+  },
+  date: { type: String, default: '' }, // e.g. "Starts 15 Nov, 2026" or "10-14 Nov (Eid Holiday)"
+  isPinned: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const courseSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -88,6 +101,15 @@ const courseSchema = new mongoose.Schema({
   videos: [videoSchema],
   liveClasses: [liveClassSchema],
   tasks: [taskSchema],
+  notices: [noticeSchema],
+  batchStartDate: {
+    type: String,
+    default: 'Starting Soon',
+  },
+  batchSchedule: {
+    type: String,
+    default: 'Fri & Sat (8:30 PM - 10:30 PM)',
+  },
   isActive: {
     type: Boolean,
     default: true,

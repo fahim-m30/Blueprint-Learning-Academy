@@ -34,6 +34,19 @@ export interface TaskItem {
   createdAt?: string;
 }
 
+export interface CourseNotice {
+  _id: string;
+  title: string;
+  content: string;
+  category: 'batch_start' | 'vacation' | 'special_notice' | 'general';
+  date?: string;
+  isPinned: boolean;
+  createdAt: string;
+  courseId?: string;
+  courseTitle?: string;
+  courseSlug?: string;
+}
+
 export interface Course {
   _id: string;
   title: string;
@@ -55,6 +68,9 @@ export interface Course {
   videos?: VideoItem[];
   liveClasses?: LiveClassItem[];
   tasks?: TaskItem[];
+  notices?: CourseNotice[];
+  batchStartDate?: string;
+  batchSchedule?: string;
   isActive: boolean;
   createdAt: string;
   expiresAt?: string;

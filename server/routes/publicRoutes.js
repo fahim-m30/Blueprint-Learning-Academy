@@ -157,4 +157,56 @@ router.post('/enroll', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/public/notices
+ * Fetch all notices across courses for the Academy Notice Board
+ */
+router.get('/notices', async (req, res) => {
+  try {
+    const courses = await Course.find({ isActive: true })
+      .select('title slug batchStartDate batchSchedule notices createdAt')
+      .lean();
+
+    const allNotices = [];
+    courses.forEach((c) => {
+      if (c.notices && c.notices.length > 0) {
+        c.notices.forEach((n) => {
+          allNotices.push({
+            ...n,
+            courseId: c._id,
+            courseTitle: c.title,
+            courseSlug: c.slug,
+          });
+        });
+      }
+
+      // If course has batchStartDate, ensure a batch announcement exists
+      if (c.batchStartDate && (!c.notices || !c.notices.some((n) => n.category === 'batch_start'))) {
+        allNotices.push({
+          _id: `auto-batch-${c._id}`,
+          title: `New Batch Enrollment Open - Class Starts ${c.batchStartDate}`,
+          content: `Official live orientation and regular classes will start from ${c.batchStartDate}. Weekly schedule: ${c.batchSchedule || 'Fri & Sat 8:30 PM'}. Limited seats available per batch.`,
+          category: 'batch_start',
+          date: c.batchStartDate,
+          isPinned: true,
+          createdAt: c.createdAt || new Date(),
+          courseId: c._id,
+          courseTitle: c.title,
+          courseSlug: c.slug,
+        });
+      }
+    });
+
+    allNotices.sort((a, b) => {
+      if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    res.json({ success: true, notices: allNotices });
+  } catch (err) {
+    console.error('Fetch notices error:', err);
+    res.status(500).json({ success: false, message: 'Error fetching notices.' });
+  }
+});
+
 module.exports = router;

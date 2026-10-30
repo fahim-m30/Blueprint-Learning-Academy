@@ -611,6 +611,100 @@ router.post('/courses/:id/tasks', async (req, res) => {
 });
 
 /**
+ * POST /api/admin/courses/:id/notices
+ * Add a notice (Batch start, vacation, special notice, etc.)
+ */
+router.post('/courses/:id/notices', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, category, date, isPinned } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ success: false, message: 'Please provide notice title and details.' });
+    }
+
+    const course = await Course.findById(id);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+    if (!course.notices) course.notices = [];
+
+    course.notices.unshift({
+      title: title.trim(),
+      content: content.trim(),
+      category: category || 'batch_start',
+      date: date ? date.trim() : '',
+      isPinned: isPinned !== false,
+      createdAt: new Date(),
+    });
+
+    await course.save();
+    res.status(201).json({ success: true, message: 'Notice published to Notice Board successfully.', course });
+  } catch (err) {
+    console.error('Add notice error:', err);
+    res.status(500).json({ success: false, message: 'Error adding notice.' });
+  }
+});
+
+/**
+ * DELETE /api/admin/courses/:id/notices/:noticeId
+ */
+router.delete('/courses/:id/notices/:noticeId', async (req, res) => {
+  try {
+    const { id, noticeId } = req.params;
+    const course = await Course.findById(id);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+    course.notices = (course.notices || []).filter((n) => n._id.toString() !== noticeId);
+    await course.save();
+
+    res.json({ success: true, message: 'Notice deleted successfully.', course });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error deleting notice.' });
+  }
+});
+
+/**
+ * PUT /api/admin/courses/:id/notices/:noticeId/pin
+ */
+router.put('/courses/:id/notices/:noticeId/pin', async (req, res) => {
+  try {
+    const { id, noticeId } = req.params;
+    const course = await Course.findById(id);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+    const notice = (course.notices || []).id(noticeId);
+    if (!notice) return res.status(404).json({ success: false, message: 'Notice not found.' });
+
+    notice.isPinned = !notice.isPinned;
+    await course.save();
+
+    res.json({ success: true, message: `Notice ${notice.isPinned ? 'pinned' : 'unpinned'} successfully.`, course });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error updating notice pin status.' });
+  }
+});
+
+/**
+ * PUT /api/admin/courses/:id/batch-info
+ */
+router.put('/courses/:id/batch-info', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { batchStartDate, batchSchedule } = req.body;
+    const course = await Course.findById(id);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+    if (batchStartDate !== undefined) course.batchStartDate = batchStartDate.trim();
+    if (batchSchedule !== undefined) course.batchSchedule = batchSchedule.trim();
+
+    await course.save();
+    res.json({ success: true, message: 'Course batch schedule updated successfully.', course });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error updating batch schedule.' });
+  }
+});
+
+/**
  * POST /api/admin/users/:userId/status
  * Pause or Block user. If Blocked, enter reason and email is sent immediately.
  */
