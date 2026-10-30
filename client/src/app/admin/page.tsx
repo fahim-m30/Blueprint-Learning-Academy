@@ -718,7 +718,7 @@ export default function AdminPortalPage() {
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 hover:text-slate-900 text-xs font-bold transition shadow-sm self-start group"
                 >
                   <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-1 transition" />
-                  <span>← Back to All Courses (সকল কোর্স তালিকা)</span>
+                  <span>← Back to All Courses</span>
                 </button>
                 <div className="flex items-center gap-2 text-xs">
                   <span className="text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
@@ -733,7 +733,7 @@ export default function AdminPortalPage() {
                     <span className="text-xs text-blue-700 font-semibold uppercase">Currently Managing:</span>
                     <h3 className="text-xl font-extrabold text-slate-900">{selectedCourseData.title}</h3>
                     <p className="text-xs text-slate-600 mt-0.5">
-                      Fee: ৳{selectedCourseData.price} | Duration: {selectedCourseData.durationDays} Days | Classes: {selectedCourseData.totalClasses}
+                      Fee: BDT {selectedCourseData.price} | Duration: {selectedCourseData.durationDays} Days | Classes: {selectedCourseData.totalClasses}
                     </p>
                   </div>
 
@@ -750,7 +750,7 @@ export default function AdminPortalPage() {
                       }}
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition hover:scale-105"
                     >
-                      <UserPlus className="w-3.5 h-3.5" /> + Add Student (নতুন স্টুডেন্ট যুক্ত করুন)
+                      <UserPlus className="w-3.5 h-3.5" /> + Add Student
                     </button>
                     <button
                       onClick={() => handleDeleteCourse(selectedCourseData._id)}
@@ -838,7 +838,7 @@ export default function AdminPortalPage() {
                         }}
                         className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-2 shadow-md shadow-amber-500/20 shrink-0 transition"
                       >
-                        <UserPlus className="w-4 h-4" /> Add New Student (নতুন স্টুডেন্ট যোগ করুন)
+                        <UserPlus className="w-4 h-4" /> Add New Student
                       </button>
                     </div>
 
@@ -1240,7 +1240,7 @@ export default function AdminPortalPage() {
               <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2">
                 <span className="text-xs text-slate-600">Total Verified Revenue</span>
                 <p className="text-3xl font-extrabold text-[#ffb531] flex items-center gap-2">
-                  ৳{(stats?.totalRevenue || 0).toLocaleString()}
+                  BDT {(stats?.totalRevenue || 0).toLocaleString()}
                 </p>
                 <span className="text-[11px] text-slate-600">From confirmed bKash/Nagad payments</span>
               </div>
@@ -1297,7 +1297,7 @@ export default function AdminPortalPage() {
                     >
                       <div>
                         <div className="flex items-center justify-between text-[11px] mb-1">
-                          <span className="text-[#ffb531] font-bold">৳{c.price.toLocaleString()}</span>
+                          <span className="text-[#ffb531] font-bold">BDT {c.price.toLocaleString()}</span>
                           <span className="text-blue-700 font-medium">{c.durationDays} Days</span>
                         </div>
                         <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{c.title}</h3>
@@ -1372,7 +1372,7 @@ export default function AdminPortalPage() {
                         <td className="p-3 font-mono font-bold text-[#ffb531] bg-white px-2 py-1 rounded">
                           {en.transactionId}
                         </td>
-                        <td className="p-3 font-bold text-emerald-400">৳{en.amount.toLocaleString()}</td>
+                        <td className="p-3 font-bold text-emerald-400">BDT {en.amount.toLocaleString()}</td>
                         <td className="p-3">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -1443,7 +1443,7 @@ export default function AdminPortalPage() {
             {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
               <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications (ইন্সট্রাক্টর প্রোফাইল ও ছবি)
+                👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
               </h3>
               
               <div className="flex flex-col md:flex-row items-start gap-6">
@@ -1459,7 +1459,7 @@ export default function AdminPortalPage() {
                   </div>
                   
                   <label className="cursor-pointer w-full text-center px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-md">
-                    📁 Change Photo (ছবি আপলোড)
+                    📁 Change Photo
                     <input
                       type="file"
                       accept="image/*"
@@ -1476,7 +1476,7 @@ export default function AdminPortalPage() {
                 <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Instructor Full Name (ইন্সট্রাক্টরের পুরো নাম) *
+                      Instructor Full Name *
                     </label>
                     <input
                       type="text"
@@ -1490,7 +1490,7 @@ export default function AdminPortalPage() {
 
                   <div>
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Degree &amp; University (ডিগ্রি ও বিশ্ববিদ্যালয়) *
+                      Degree &amp; University *
                     </label>
                     <input
                       type="text"
@@ -1504,7 +1504,7 @@ export default function AdminPortalPage() {
 
                   <div>
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Full Experience Label (অভিজ্ঞতা শিরোনাম)
+                      Full Experience Label
                     </label>
                     <input
                       type="text"
@@ -1517,7 +1517,7 @@ export default function AdminPortalPage() {
 
                   <div>
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Short Experience Badge (ছোট ব্যাজ)
+                      Short Experience Badge
                     </label>
                     <input
                       type="text"
@@ -1530,7 +1530,7 @@ export default function AdminPortalPage() {
 
                   <div className="sm:col-span-2">
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Instructor Image URL (বা ছবির সরাসরি লিংক)
+                      Instructor Image URL
                     </label>
                     <input
                       type="text"
@@ -1543,7 +1543,7 @@ export default function AdminPortalPage() {
 
                   <div className="sm:col-span-2">
                     <label className="block text-slate-600 mb-1 font-semibold">
-                      Detailed Bio / Mission Paragraph (শিক্ষকের বিস্তারিত বিবরণ)
+                      Detailed Bio / Mission Paragraph
                     </label>
                     <textarea
                       rows={3}
@@ -1559,7 +1559,7 @@ export default function AdminPortalPage() {
               {/* Two Feature Highlights */}
               <div className="border-t border-slate-200 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
-                  <label className="block text-amber-400 font-bold">Feature 1: Title &amp; Description (ফিচার ১)</label>
+                  <label className="block text-amber-400 font-bold">Feature 1: Title &amp; Description</label>
                   <input
                     type="text"
                     value={siteSettings.feature1Title || ''}
@@ -1577,7 +1577,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
-                  <label className="block text-emerald-400 font-bold">Feature 2: Title &amp; Description (ফিচার ২)</label>
+                  <label className="block text-emerald-400 font-bold">Feature 2: Title &amp; Description</label>
                   <input
                     type="text"
                     value={siteSettings.feature2Title || ''}
@@ -1599,11 +1599,11 @@ export default function AdminPortalPage() {
             {/* SECTION 2: HOMEPAGE STATS COUNTERS & TOP BADGE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                📊 Homepage Badges &amp; Stat Numbers (পরিসংখ্যান ও টপ ব্যাজ)
+                📊 Homepage Badges &amp; Stat Numbers
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Total Courses Count (কোর্স সংখ্যা)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Total Courses Count</label>
                   <input
                     type="text"
                     value={siteSettings.statsCourses || ''}
@@ -1614,7 +1614,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Experience Stat (অভিজ্ঞতা)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Experience Stat</label>
                   <input
                     type="text"
                     value={siteSettings.statsExperience || ''}
@@ -1625,7 +1625,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Mentor Institution (প্রতিষ্ঠান)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Mentor Institution</label>
                   <input
                     type="text"
                     value={siteSettings.statsMentorTag || ''}
@@ -1651,7 +1651,7 @@ export default function AdminPortalPage() {
             {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                🌐 Academy Branding, Hero Title &amp; Bengali Note (মূল শিরোনাম)
+                🌐 Academy Branding &amp; Hero Headline Content
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
@@ -1665,7 +1665,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Bengali Tagline Note (বাংলা ব্যানার)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Tagline Sub-banner Note</label>
                   <input
                     type="text"
                     value={siteSettings.heroBengaliNote || ''}
@@ -1675,7 +1675,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Main Headline Title (প্রধান হেডলাইন)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Main Headline Title</label>
                   <input
                     type="text"
                     value={siteSettings.heroTitle || ''}
@@ -1685,7 +1685,7 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-slate-600 mb-1 font-semibold">Hero Subtitle Description (উপ-বিবরণ)</label>
+                  <label className="block text-slate-600 mb-1 font-semibold">Hero Subtitle Description</label>
                   <textarea
                     rows={2}
                     value={siteSettings.heroSubtitle || ''}
@@ -1699,12 +1699,12 @@ export default function AdminPortalPage() {
             {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-[#ffb531] flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                📞 Official Helpline &amp; WhatsApp Numbers (ফোন নম্বর ও সাপোর্ট)
+                📞 Official Helpline &amp; WhatsApp Numbers
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
                   <label className="block text-slate-600 mb-1 font-semibold">
-                    Contact Helpline Phone * (ফোন নম্বর)
+                    Contact Helpline Phone *
                   </label>
                   <input
                     type="text"
@@ -1734,7 +1734,7 @@ export default function AdminPortalPage() {
 
                 <div>
                   <label className="block text-slate-600 mb-1 font-semibold">
-                    Official Support Email * (ইমেইল ঠিকানা)
+                    Official Support Email *
                   </label>
                   <input
                     type="email"
@@ -1752,7 +1752,7 @@ export default function AdminPortalPage() {
             {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 border-b border-slate-200 pb-2.5">
-                💳 bKash, Nagad &amp; Rocket Payment Numbers (পেমেন্ট নম্বরসমূহ)
+                💳 bKash, Nagad &amp; Rocket Payment Numbers
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
@@ -1936,7 +1936,7 @@ export default function AdminPortalPage() {
               <form onSubmit={handleAddNewAdmin} className="bg-slate-50 border border-slate-200 p-5 rounded-xl space-y-3 text-xs">
                 <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <PlusCircle className="w-4 h-4 text-[#ffb531]" />
-                  Add New Administrator (নতুন অ্যাডমিন যুক্ত করুন)
+                  Add New Administrator
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div>
@@ -2066,7 +2066,7 @@ export default function AdminPortalPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-600 mb-1">Offer Price (৳) *</label>
+                  <label className="block text-slate-600 mb-1">Offer Price (BDT) *</label>
                   <input
                     type="number"
                     required
@@ -2076,7 +2076,7 @@ export default function AdminPortalPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-1">Regular Price (৳)</label>
+                  <label className="block text-slate-600 mb-1">Regular Price (BDT)</label>
                   <input
                     type="number"
                     value={createRegularPrice}
@@ -2178,7 +2178,7 @@ export default function AdminPortalPage() {
             <form onSubmit={handleBlockUserSubmit} className="space-y-3 text-xs">
               <div>
                 <label className="block text-red-700 mb-1 font-semibold">
-                  Reason for Suspension (কারণ) *
+                  Reason for Suspension *
                 </label>
                 <textarea
                   rows={3}
@@ -2235,7 +2235,7 @@ export default function AdminPortalPage() {
             <form onSubmit={handleAddStudentSubmit} className="space-y-3.5 text-xs">
               <div>
                 <label className="block text-slate-700 mb-1 font-semibold">
-                  Student Full Name (শিক্ষার্থীর পূর্ণ নাম) *
+                  Student Full Name *
                 </label>
                 <input
                   type="text"
@@ -2250,7 +2250,7 @@ export default function AdminPortalPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-700 mb-1 font-semibold">
-                    Mobile Number (মোবাইল নম্বর) *
+                    Mobile Number *
                   </label>
                   <input
                     type="tel"
@@ -2264,7 +2264,7 @@ export default function AdminPortalPage() {
 
                 <div>
                   <label className="block text-slate-700 mb-1 font-semibold">
-                    Login Email (লগইন ইমেইল) *
+                    Login Email *
                   </label>
                   <input
                     type="email"
@@ -2280,7 +2280,7 @@ export default function AdminPortalPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-slate-700 font-semibold">
-                    Login Password (লগইন পাসওয়ার্ড)
+                    Login Password
                   </label>
                   <button
                     type="button"
@@ -2304,7 +2304,7 @@ export default function AdminPortalPage() {
 
               <div>
                 <label className="block text-slate-700 mb-1 font-semibold">
-                  Address / City (ঠিকানা বা শহর - ঐচ্ছিক)
+                  Address / City (Optional)
                 </label>
                 <input
                   type="text"

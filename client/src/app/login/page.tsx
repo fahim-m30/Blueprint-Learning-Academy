@@ -166,7 +166,7 @@ export default function LoginPage() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
-                Email Address / ব্যবহারকারীর ইমেইল *
+                Email Address *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
@@ -186,7 +186,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs sm:text-sm font-bold text-slate-800">
-                  Password / পাসওয়ার্ড *
+                  Password *
                 </label>
                 <button
                   type="button"

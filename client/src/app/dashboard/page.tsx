@@ -526,7 +526,7 @@ export default function StudentDashboardPage() {
                                 <h4 className="text-xs font-bold text-slate-900">Submit Your Assignment</h4>
                                 <div>
                                   <label className="block text-[11px] text-slate-700 mb-1">
-                                    Google Drive / PDF / File URL (গুগল ড্রাইভ বা ফাইল লিংক)
+                                    Google Drive / PDF / File URL
                                   </label>
                                   <input
                                     type="url"
@@ -538,7 +538,7 @@ export default function StudentDashboardPage() {
                                 </div>
                                 <div>
                                   <label className="block text-[11px] text-slate-700 mb-1">
-                                    Notes / Explanation (মন্তব্য বা হিসাবের বিবরণ)
+                                    Notes / Explanation
                                   </label>
                                   <textarea
                                     rows={2}
