@@ -130,6 +130,20 @@ export default function AdminPortalPage() {
       router.push('/login');
       return;
     }
+
+    // Fast hydrate from local cache
+    try {
+      const cached = localStorage.getItem('bpa_admin_cache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (data.stats) setStats(data.stats);
+        if (data.courses) setCoursesList(data.courses);
+        if (data.enrollments) setEnrollments(data.enrollments);
+        if (data.settings) setSiteSettings(data.settings);
+        setLoading(false);
+      }
+    } catch {}
+
     loadAdminData();
   }, [router]);
 
@@ -181,6 +195,18 @@ export default function AdminPortalPage() {
     if (cvsRes.success && cvsRes.data?.students) {
       setAllStudentCvs(cvsRes.data.students);
     }
+
+    try {
+      localStorage.setItem(
+        'bpa_admin_cache',
+        JSON.stringify({
+          stats: overviewRes.data.stats,
+          courses: overviewRes.data.courses,
+          enrollments: enrollRes.data?.enrollments || [],
+          settings: settingsRes.data?.settings || null,
+        })
+      );
+    } catch {}
 
     setLoading(false);
   };

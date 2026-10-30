@@ -65,6 +65,20 @@ export default function StudentDashboardPage() {
       return;
     }
 
+    // Fast hydrate from local cache if previously visited
+    try {
+      const cached = localStorage.getItem('bpa_student_cache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (data.student) setStudentInfo(data.student);
+        if (data.enrolledCourses) setEnrolledList(data.enrolledCourses);
+        if (data.courseDetails) setCourseDetails(data.courseDetails);
+        if (data.selectedCourseId) setSelectedCourseId(data.selectedCourseId);
+        if (data.student?.cv) setStudentCv(data.student.cv);
+        setLoading(false);
+      }
+    } catch {}
+
     loadDashboard();
   }, [router]);
 
@@ -83,7 +97,6 @@ export default function StudentDashboardPage() {
   }, []);
 
   const loadDashboard = async () => {
-    setLoading(true);
     const res = await apiRequest('/student/dashboard');
     if (res.success && res.data) {
       setStudentInfo(res.data.student);
@@ -99,11 +112,24 @@ export default function StudentDashboardPage() {
       const courses = res.data.enrolledCourses || [];
       setEnrolledList(courses);
 
+      let currentCourse = null;
       if (courses.length > 0) {
-        const firstId = courses[0].course._id;
+        const firstId = selectedCourseId || courses[0].course._id;
         setSelectedCourseId(firstId);
-        await loadCourseData(firstId);
+        currentCourse = await loadCourseData(firstId);
       }
+
+      try {
+        localStorage.setItem(
+          'bpa_student_cache',
+          JSON.stringify({
+            student: res.data.student,
+            enrolledCourses: courses,
+            selectedCourseId: selectedCourseId || courses[0]?.course?._id,
+            courseDetails: currentCourse || courseDetails,
+          })
+        );
+      } catch {}
     } else {
       removeAuthToken();
       router.push('/login');
@@ -117,13 +143,16 @@ export default function StudentDashboardPage() {
       apiRequest(`/student/course/${courseId}/chat`),
     ]);
 
+    let loadedCourse = null;
     if (cRes.success && cRes.data?.course) {
       setCourseDetails(cRes.data.course);
+      loadedCourse = cRes.data.course;
       setMySubmissions(cRes.data.mySubmissions || []);
     }
     if (chatRes.success && chatRes.data?.messages) {
       setChatMessages(chatRes.data.messages);
     }
+    return loadedCourse;
   };
 
   const handleSelectCourse = async (courseId: string) => {

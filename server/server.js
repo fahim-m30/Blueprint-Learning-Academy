@@ -68,16 +68,21 @@ mongoose
 
       // Keep-Alive Ping Service to prevent Render Free Tier from sleeping
       const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://blueprint-learning-academy.onrender.com';
-      setInterval(async () => {
+      const https = require('https');
+      const pingServer = () => {
         try {
-          const res = await fetch(`${backendUrl}/api/health`);
-          if (res.ok) {
-            console.log(`⚡ Keep-Alive ping sent to ${backendUrl} at ${new Date().toLocaleTimeString()} - Server Active!`);
-          }
+          https.get(`${backendUrl}/api/health`, (res) => {
+            console.log(`⚡ Keep-Alive ping responded with ${res.statusCode} at ${new Date().toLocaleTimeString()}`);
+          }).on('error', (err) => {
+            console.warn('⚠️ Keep-alive ping warning:', err.message);
+          });
         } catch (pingErr) {
           console.warn('⚠️ Keep-alive ping failed:', pingErr.message);
         }
-      }, 10 * 60 * 1000); // Trigger every 10 minutes (Render sleeps after 15 min inactivity)
+      };
+      setInterval(pingServer, 8 * 60 * 1000); // Trigger every 8 minutes (Render sleeps after 15 min inactivity)
+      // Immediate ping after 30 seconds of startup
+      setTimeout(pingServer, 30000);
     });
   })
   .catch((err) => {

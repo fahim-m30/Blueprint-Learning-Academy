@@ -42,6 +42,7 @@ router.get('/settings', async (req, res) => {
         await settings.save();
       }
     }
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
     res.json({ success: true, settings });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error retrieving site settings.' });
@@ -58,6 +59,7 @@ router.get('/courses', async (req, res) => {
       .select('-videos -tasks')
       .sort({ createdAt: 1 });
 
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
     res.json({ success: true, courses });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error retrieving courses.' });
@@ -81,6 +83,7 @@ router.get('/courses/:idOrSlug', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Course not found.' });
     }
 
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
     res.json({ success: true, course });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error fetching course details.' });

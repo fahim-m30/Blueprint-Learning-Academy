@@ -7,6 +7,7 @@ import CourseModal from '@/components/CourseModal';
 import EnrollmentModal from '@/components/EnrollmentModal';
 import { apiRequest } from '@/lib/api';
 import { Course, SiteSettings } from '@/lib/types';
+import { DEFAULT_COURSES, DEFAULT_SETTINGS } from '@/lib/initialData';
 import {
   Clock,
   BookOpen,
@@ -26,29 +27,50 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<Course[]>(DEFAULT_COURSES);
+  const [settings, setSettings] = useState<SiteSettings | null>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(false);
 
   // Modal states
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
   const [selectedCourseForEnroll, setSelectedCourseForEnroll] = useState<Course | null>(null);
 
   useEffect(() => {
+    // 1. Immediately hydrate from localStorage if previous fresh data was cached
+    try {
+      const cachedCourses = localStorage.getItem('bpa_cached_courses');
+      const cachedSettings = localStorage.getItem('bpa_cached_settings');
+      if (cachedCourses) {
+        const parsed = JSON.parse(cachedCourses);
+        if (Array.isArray(parsed) && parsed.length > 0) setCourses(parsed);
+      }
+      if (cachedSettings) {
+        const parsed = JSON.parse(cachedSettings);
+        if (parsed?.siteName) setSettings(parsed);
+      }
+    } catch (e) {
+      // ignore JSON errors
+    }
+
+    // 2. Fetch fresh updates in the background (Stale-While-Revalidate pattern)
     async function loadData() {
-      setLoading(true);
       const [coursesRes, settingsRes] = await Promise.all([
         apiRequest<{ courses: Course[] }>('/public/courses'),
         apiRequest<{ settings: SiteSettings }>('/public/settings'),
       ]);
 
-      if (coursesRes.success && coursesRes.data?.courses) {
+      if (coursesRes.success && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
         setCourses(coursesRes.data.courses);
+        try {
+          localStorage.setItem('bpa_cached_courses', JSON.stringify(coursesRes.data.courses));
+        } catch {}
       }
       if (settingsRes.success && settingsRes.data?.settings) {
         setSettings(settingsRes.data.settings);
+        try {
+          localStorage.setItem('bpa_cached_settings', JSON.stringify(settingsRes.data.settings));
+        } catch {}
       }
-      setLoading(false);
     }
     loadData();
   }, []);

@@ -35,12 +35,15 @@ export const setCurrentUser = (user: any) => {
 };
 
 /**
- * Fetch wrapper with automatic auth header and error handling
+ * Fetch wrapper with automatic auth header, timeout protection, and fast error handling
  */
 export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; message?: string; error?: any }> {
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 18000) : null;
+
   try {
     const token = getAuthToken();
     const headers: Record<string, string> = {
@@ -55,15 +58,14 @@ export async function apiRequest<T = any>(
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
+      signal: controller ? controller.signal : undefined,
     });
+
+    if (timeoutId) clearTimeout(timeoutId);
 
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      // If token expired or blocked
-      if (response.status === 401 && typeof window !== 'undefined') {
-        // removeAuthToken();
-      }
       return {
         success: false,
         message: result.message || `Request failed with status ${response.status}`,
@@ -77,10 +79,11 @@ export async function apiRequest<T = any>(
       message: result.message,
     };
   } catch (err: any) {
-    console.error('API Request failed:', err);
+    if (timeoutId) clearTimeout(timeoutId);
+    console.warn(`API Request to ${endpoint} warning:`, err?.message || err);
     return {
       success: false,
-      message: err.message || 'Network connection failed. Please check if the server is running.',
+      message: err.name === 'AbortError' ? 'Connection timed out. Loading saved data...' : (err.message || 'Network connection failed.'),
     };
   }
 }
