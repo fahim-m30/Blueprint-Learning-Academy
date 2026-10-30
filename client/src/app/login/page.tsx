@@ -14,15 +14,49 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // If already logged in, redirect straight to the appropriate dashboard
+  const [activeSession, setActiveSession] = useState<{ role: string; email: string } | null>(null);
+
+  // If already logged in, check URL parameters first
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    const logoutParam = params.get('logout');
+    const fromEmail = params.get('from') === 'email';
+
     const token = getAuthToken();
     const user = getCurrentUser();
+
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+
+    // If student clicks link from their email, clear any previous session (e.g. admin test session)
+    if (logoutParam === 'true' || fromEmail) {
+      if (user && emailParam && user.email?.toLowerCase() !== emailParam.toLowerCase()) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setActiveSession(null);
+        return;
+      }
+    }
+
     if (token && user) {
-      if (user.role === 'admin') {
-        window.location.replace('/admin');
-      } else {
-        window.location.replace('/dashboard');
+      if (emailParam && user.email?.toLowerCase() !== emailParam.toLowerCase()) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setActiveSession(null);
+        return;
+      }
+
+      setActiveSession({ role: user.role, email: user.email });
+      // Only auto-redirect if NOT arriving from an email link or login override
+      if (!emailParam && !fromEmail && logoutParam !== 'false') {
+        if (user.role === 'admin') {
+          window.location.replace('/admin');
+        } else {
+          window.location.replace('/dashboard');
+        }
       }
     }
   }, []);
@@ -158,6 +192,28 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="mt-8 bg-white border border-slate-200/90 py-8 sm:py-10 px-6 sm:px-10 shadow-2xl rounded-3xl">
+          {activeSession && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs sm:text-sm flex items-center justify-between gap-3">
+              <div>
+                <span className="font-bold">Signed in as: </span>
+                <span className="font-mono">{activeSession.email}</span> ({activeSession.role})
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  setActiveSession(null);
+                  setEmail('');
+                  setPassword('');
+                }}
+                className="px-3 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-lg transition"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+
           {errorMsg && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in">
               <ShieldAlert className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
@@ -168,18 +224,18 @@ export default function LoginPage() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
-                Email Address *
+                Student ID or Email Address *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Mail className="w-5 h-5 text-blue-600" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
+                  placeholder="e.g. 26020101 or student@example.com"
                   className="w-full bg-slate-50/80 border border-slate-300 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl pl-12 pr-4 py-3.5 text-sm sm:text-base text-slate-900 placeholder-slate-400 outline-none transition font-medium"
                 />
               </div>

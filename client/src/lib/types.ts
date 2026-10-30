@@ -128,6 +128,7 @@ export interface StudentCV {
 
 export interface User {
   _id: string;
+  studentId?: string;
   name: string;
   email: string;
   phone: string;
@@ -147,6 +148,7 @@ export interface User {
 
 export interface Enrollment {
   _id: string;
+  studentId?: string;
   studentName: string;
   studentEmail: string;
   studentPhone: string;

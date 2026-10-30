@@ -14,10 +14,16 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
+      return res.status(400).json({ success: false, message: 'Please provide both Student ID/Email and password.' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const identifier = String(email).trim();
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { studentId: identifier },
+      ],
+    });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials. User does not exist.' });
     }
@@ -41,7 +47,7 @@ router.post('/login', async (req, res) => {
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid password. Please check your credentials.' });
     }
 
     // Generate JWT
@@ -56,6 +62,7 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user._id,
+        studentId: user.studentId || '',
         name: user.name,
         email: user.email,
         phone: user.phone,

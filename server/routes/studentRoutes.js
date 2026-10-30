@@ -65,6 +65,7 @@ router.get('/dashboard', async (req, res) => {
       success: true,
       student: {
         id: user._id,
+        studentId: user.studentId || '',
         name: user.name,
         email: user.email,
         phone: user.phone,

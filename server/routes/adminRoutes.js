@@ -27,6 +27,33 @@ const generatePassword = () => {
 };
 
 /**
+ * Auto-generate serial Student ID:
+ * Format: [Year: 2 digits][Session: 2 digits][Course Code: 2 digits][Serial: 2 digits]
+ * Example: 26020101
+ */
+const generateStudentId = async (course) => {
+  const year = String(new Date().getFullYear()).slice(-2); // '26'
+  const session = String(course?.sessionNumber || '02').padStart(2, '0'); // '02'
+  
+  let courseCode = '01';
+  if (course?.courseCode) {
+    courseCode = String(course.courseCode).padStart(2, '0');
+  } else {
+    const allCourses = await Course.find({}).sort({ createdAt: 1 });
+    const idx = allCourses.findIndex((c) => c._id.toString() === course._id.toString());
+    courseCode = String(idx >= 0 ? idx + 1 : 1).padStart(2, '0');
+  }
+
+  const prefix = `${year}${session}${courseCode}`;
+  const existingCount = await User.countDocuments({
+    studentId: new RegExp(`^${prefix}`),
+  });
+
+  const serial = String(existingCount + 1).padStart(2, '0');
+  return `${prefix}${serial}`;
+};
+
+/**
  * GET /api/admin/overview
  * Top-level stats for admin dashboard
  */
@@ -133,9 +160,18 @@ router.post('/enrollments/:id/approve', async (req, res) => {
     const durationDays = course.durationDays || 30;
     const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
 
+    // Auto-generate serial studentId (e.g. 26020101)
+    let studentId = user?.studentId || enrollment.studentId;
+    if (!studentId) {
+      studentId = await generateStudentId(course);
+    }
+
     if (user) {
-      // Existing user: retain their password or reset if requested
-      rawPassword = user.plainPasswordForAdmin || 'Use existing password';
+      // Existing user: ensure valid password and assigned studentId
+      rawPassword = user.plainPasswordForAdmin || generatePassword();
+      user.studentId = studentId;
+      user.password = rawPassword;
+      user.plainPasswordForAdmin = rawPassword;
 
       // Check if already in enrolledCourses
       const alreadyEnrolled = user.enrolledCourses.some(
@@ -153,15 +189,16 @@ router.post('/enrollments/:id/approve', async (req, res) => {
       user.status = 'active'; // ensure active
       await user.save();
     } else {
-      // New user: generate random password
+      // New user: generate random password & assign studentId
       rawPassword = generatePassword();
       user = await User.create({
         name: enrollment.studentName,
         email: enrollment.studentEmail,
+        studentId: studentId,
         phone: enrollment.studentPhone,
         address: enrollment.studentAddress || '',
         password: rawPassword, // will be hashed by pre-save
-        plainPasswordForAdmin: rawPassword, // stored for admin viewing as requested
+        plainPasswordForAdmin: rawPassword, // stored for admin viewing
         role: 'student',
         status: 'active',
         enrolledCourses: [
@@ -177,15 +214,17 @@ router.post('/enrollments/:id/approve', async (req, res) => {
 
     // Update enrollment status
     enrollment.status = 'approved';
+    enrollment.studentId = studentId;
     enrollment.generatedPassword = rawPassword;
     enrollment.approvedAt = new Date();
     await enrollment.save();
 
-    // Send professional email to the student
+    // Send professional email to the student with official Student ID & credentials
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
     const emailResult = await sendEnrollmentApprovedEmail({
       studentName: enrollment.studentName,
       studentEmail: enrollment.studentEmail,
+      studentId,
       courseTitle: course.title,
       generatedPassword: rawPassword,
       loginUrl,
@@ -201,6 +240,7 @@ router.post('/enrollments/:id/approve', async (req, res) => {
       message: `Enrollment confirmed! ${emailNote}`,
       credentials: {
         email: enrollment.studentEmail,
+        studentId,
         password: rawPassword,
       },
       emailResult,
@@ -229,11 +269,24 @@ router.post('/enrollments/:id/resend-email', async (req, res) => {
     const course = enrollment.course;
     const studentUser = await User.findOne({ email: enrollment.studentEmail });
     const password = enrollment.generatedPassword || studentUser?.plainPasswordForAdmin || 'BLP-LEARN2026';
+    
+    // Ensure studentId exists
+    let studentId = studentUser?.studentId || enrollment.studentId;
+    if (!studentId) {
+      studentId = await generateStudentId(course);
+      if (studentUser) {
+        studentUser.studentId = studentId;
+        await studentUser.save();
+      }
+      enrollment.studentId = studentId;
+      await enrollment.save();
+    }
 
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'https://blueprint-learning-academy.vercel.app/login';
     const emailResult = await sendEnrollmentApprovedEmail({
       studentName: enrollment.studentName,
       studentEmail: enrollment.studentEmail,
+      studentId,
       courseTitle: course ? course.title : 'Blueprint Course Access',
       generatedPassword: password,
       loginUrl,
@@ -243,7 +296,8 @@ router.post('/enrollments/:id/resend-email', async (req, res) => {
     if (emailResult.success) {
       res.json({
         success: true,
-        message: `Credentials email resent successfully to ${enrollment.studentEmail} via ${emailResult.provider || 'SMTP'}!`,
+        message: `Credentials email resent successfully to ${enrollment.studentEmail} (Student ID: ${studentId}) via ${emailResult.provider || 'SMTP'}!`,
+        studentId,
       });
     } else {
       res.status(400).json({

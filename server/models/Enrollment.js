@@ -57,6 +57,10 @@ const enrollmentSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  studentId: {
+    type: String,
+    default: '',
+  },
   approvedAt: {
     type: Date,
   },

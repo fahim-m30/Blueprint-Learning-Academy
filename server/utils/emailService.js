@@ -188,12 +188,17 @@ const PUBLIC_LOGO_URL = 'https://blueprint-learning-academy.vercel.app/logo.png?
 const sendEnrollmentApprovedEmail = async ({
   studentName,
   studentEmail,
+  studentId,
   courseTitle,
   generatedPassword,
   loginUrl,
   whatsappGroupLink,
 }) => {
   const currentYear = new Date().getFullYear();
+  const rawLoginUrl = loginUrl || 'https://blueprint-learning-academy.vercel.app/login';
+  const effectiveLoginUrl = rawLoginUrl.includes('?') 
+    ? `${rawLoginUrl}&email=${encodeURIComponent(studentEmail)}&from=email`
+    : `${rawLoginUrl}?email=${encodeURIComponent(studentEmail)}&from=email`;
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -478,25 +483,36 @@ const sendEnrollmentApprovedEmail = async ({
             🔐 Student Portal Access Credentials
           </div>
 
+          ${
+            studentId
+              ? `
           <div class="cred-row">
-            <div class="cred-label">Login Email Address:</div>
+            <div class="cred-label">Official Student ID:</div>
+            <div class="cred-value-box" style="color: #ffb531; font-size: 16px; letter-spacing: 2px;">${studentId}</div>
+          </div>
+          `
+              : ''
+          }
+
+          <div class="cred-row">
+            <div class="cred-label">Login Identifier (Email or Student ID):</div>
             <div class="cred-value-box">${studentEmail}</div>
           </div>
 
           <div class="cred-row">
-            <div class="cred-label">Auto-Generated Password:</div>
+            <div class="cred-label">Access Password:</div>
             <div class="cred-value-box cred-password">${generatedPassword}</div>
           </div>
 
           <div style="margin-top: 10px; color: #94a3b8; font-size: 11px; line-height: 1.5;">
-            * You can change this password anytime from your profile settings after logging in.
+            * You can sign in using either your Student ID (${studentId || studentEmail}) or your Email Address.
           </div>
         </div>
 
         <!-- CTA Button -->
         <div style="text-align: center;">
-          <a href="${loginUrl}" class="btn-login" target="_blank">
-            👉 Login to Student Dashboard
+          <a href="${effectiveLoginUrl}" class="btn-login" target="_blank">
+            👉 Sign In to Student Portal
           </a>
         </div>
 

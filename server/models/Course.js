@@ -62,6 +62,16 @@ const courseSchema = new mongoose.Schema({
     type: String,
     default: 'Civil Engineering & Real Estate',
   },
+  courseCode: {
+    type: String,
+    default: '01',
+    trim: true,
+  },
+  sessionNumber: {
+    type: String,
+    default: '02',
+    trim: true,
+  },
   shortDescription: {
     type: String,
     required: true,

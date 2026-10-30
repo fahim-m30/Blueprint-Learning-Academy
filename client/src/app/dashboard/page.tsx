@@ -302,7 +302,14 @@ export default function StudentDashboardPage() {
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <div className="text-right hidden sm:block">
               <span className="block text-sm font-black text-slate-900 truncate max-w-[200px]">{studentInfo?.name}</span>
-              <span className="block text-xs font-semibold text-slate-500 truncate max-w-[200px]">{studentInfo?.email}</span>
+              <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                {studentInfo?.studentId && (
+                  <span className="inline-block px-2 py-0.5 bg-amber-100 border border-amber-300 text-amber-900 font-mono font-extrabold text-[11px] rounded-md shadow-2xs">
+                    ID: {studentInfo.studentId}
+                  </span>
+                )}
+                <span className="block text-xs font-semibold text-slate-500 truncate max-w-[160px]">{studentInfo?.email}</span>
+              </div>
             </div>
             <button
               onClick={handleLogout}

@@ -351,8 +351,13 @@ export default function AdminPortalPage() {
         </div>
         <div style="background:#0b1528;border:1.5px solid #ffb531;border-radius:16px;padding:20px;margin-bottom:24px;">
           <div style="color:#ffb531;font-size:13px;font-weight:800;text-transform:uppercase;margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:8px;">🔐 Student Access Credentials</div>
+          ${en.studentId ? `
           <div style="margin-bottom:10px;">
-            <div style="color:#94a3b8;font-size:11px;font-weight:700;">Student Email</div>
+            <div style="color:#94a3b8;font-size:11px;font-weight:700;">Official Student ID</div>
+            <div style="background:#1c1917;border:1px solid #b45309;border-radius:8px;padding:8px 12px;color:#ffb531;font-family:monospace;font-weight:900;font-size:15px;letter-spacing:2px;">${en.studentId}</div>
+          </div>` : ''}
+          <div style="margin-bottom:10px;">
+            <div style="color:#94a3b8;font-size:11px;font-weight:700;">Login Identifier (Student ID or Email)</div>
             <div style="background:#0f1d35;border:1px solid #254070;border-radius:8px;padding:8px 12px;color:#fff;font-family:monospace;font-weight:700;font-size:14px;">${en.studentEmail}</div>
           </div>
           <div>
@@ -361,7 +366,7 @@ export default function AdminPortalPage() {
           </div>
         </div>
         <div style="text-align:center;margin-bottom:24px;">
-          <a href="${loginUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#fff;text-decoration:none;font-size:15px;font-weight:800;padding:14px 32px;border-radius:12px;">Sign In to Student Portal</a>
+          <a href="${loginUrl}?email=${encodeURIComponent(en.studentEmail)}&from=email" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#fff;text-decoration:none;font-size:15px;font-weight:800;padding:14px 32px;border-radius:12px;">Sign In to Student Portal</a>
         </div>
       </div>
       <div style="background:#091224;padding:20px;text-align:center;color:#94a3b8;font-size:12px;">
@@ -380,7 +385,7 @@ export default function AdminPortalPage() {
           to: en.studentEmail,
           subject: `🎉 Enrollment Confirmation & Student Access - Blueprint Learning Academy`,
           html,
-          text: `Welcome ${en.studentName}! Your course access for ${courseTitle} is active. Email: ${en.studentEmail}, Password: ${password}, Login URL: ${loginUrl}`,
+          text: `Welcome ${en.studentName}! Your course access for ${courseTitle} is active. Student ID: ${en.studentId || ''}, Email: ${en.studentEmail}, Password: ${password}, Login URL: ${loginUrl}?email=${encodeURIComponent(en.studentEmail)}&from=email`,
           config: {
             smtpHost: siteSettings?.smtpHost || 'smtp-relay.brevo.com',
             smtpPort: Number(siteSettings?.smtpPort) || 587,
@@ -1711,7 +1716,14 @@ export default function AdminPortalPage() {
                     {enrollments.map((en) => (
                       <tr key={en._id} className="hover:bg-slate-50/80 transition">
                         <td className="p-3.5 font-black text-slate-950 text-sm sm:text-base">
-                          {en.studentName}
+                          <div className="flex items-center gap-2">
+                            <span>{en.studentName}</span>
+                            {en.studentId && (
+                              <span className="px-2 py-0.5 bg-amber-100 border border-amber-300 text-amber-950 font-mono text-[11px] font-black rounded-md">
+                                {en.studentId}
+                              </span>
+                            )}
+                          </div>
                           <span className="block text-xs font-semibold text-slate-500 mt-0.5">{en.studentAddress}</span>
                         </td>
                         <td className="p-3.5">
