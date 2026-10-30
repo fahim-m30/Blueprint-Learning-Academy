@@ -71,26 +71,26 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-22 sm:h-24 lg:h-26 py-2 sm:py-2.5">
+        <div className="flex items-center justify-between h-24 sm:h-28 lg:h-30 py-2 sm:py-3">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5 xs:gap-3.5 sm:gap-4 group min-w-0">
+          <Link href="/" className="flex items-center gap-3 sm:gap-4 group min-w-0">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-50 blur-md group-hover:opacity-90 transition duration-300"></div>
+              <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-45 blur-lg group-hover:opacity-80 transition duration-300"></div>
               <img
-                src="/logo.png?v=3"
+                src="/logo.png?v=5"
                 alt="Blueprint Learning Academy"
-                className="relative w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20 lg:w-22 lg:h-22 object-contain rounded-full ring-2 xs:ring-3 ring-amber-400/90 shadow-xl shadow-blue-950/20 bg-white p-0.5 transition duration-300 group-hover:scale-105"
+                className="relative w-20 h-20 xs:w-22 xs:h-22 sm:w-26 sm:h-26 lg:w-28 lg:h-28 object-contain rounded-full shadow-2xl shadow-blue-950/25 transition duration-300 group-hover:scale-105"
               />
             </div>
             <div className="min-w-0">
-              <span className="text-base xs:text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 block leading-tight truncate">
+              <span className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 block leading-tight truncate">
                 {settings?.siteName || (
                   <>
                     Blueprint <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 bg-clip-text text-transparent">Learning Academy</span>
                   </>
                 )}
               </span>
-              <span className="block text-[9px] xs:text-[10px] sm:text-[11px] lg:text-xs tracking-wider uppercase text-blue-700 font-black truncate mt-0.5">
+              <span className="block text-[10px] xs:text-[11px] sm:text-xs lg:text-sm tracking-wider uppercase text-blue-700 font-extrabold truncate mt-0.5">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>

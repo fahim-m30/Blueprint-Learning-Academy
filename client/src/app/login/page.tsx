@@ -129,11 +129,11 @@ export default function LoginPage() {
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex flex-col items-center gap-3 group">
             <div className="relative">
-              <div className="absolute -inset-2.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-55 blur-xl group-hover:opacity-90 transition duration-300"></div>
+              <div className="absolute -inset-3 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-60 blur-2xl group-hover:opacity-95 transition duration-300"></div>
               <img
-                src="/logo.png?v=3"
+                src="/logo.png?v=5"
                 alt="Blueprint Learning Academy"
-                className="relative w-28 h-28 xs:w-32 xs:h-32 sm:w-36 sm:h-36 object-contain rounded-full ring-4 ring-amber-400/90 bg-white p-1 shadow-2xl shadow-blue-950/25 group-hover:scale-105 transition"
+                className="relative w-32 h-32 xs:w-36 xs:h-36 sm:w-44 sm:h-44 object-contain rounded-full shadow-2xl shadow-blue-950/30 group-hover:scale-105 transition"
               />
             </div>
             <div className="text-center">
