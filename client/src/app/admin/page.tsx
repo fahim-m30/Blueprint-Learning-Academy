@@ -675,14 +675,11 @@ export default function AdminPortalPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
-              <div className="relative shrink-0">
-                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-50 blur-md group-hover:opacity-85 transition"></div>
-                <img
-                  src="/logo.png?v=5"
-                  alt="Blueprint Learning Academy"
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full shadow-lg group-hover:scale-105 transition"
-                />
-              </div>
+              <img
+                src="/logo.png?v=6"
+                alt="Blueprint Learning Academy"
+                className="w-11 h-11 sm:w-12 sm:h-12 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
+              />
               <span className="text-xl font-black text-slate-900 hidden sm:inline">
                 Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>

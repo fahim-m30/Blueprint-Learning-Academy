@@ -282,16 +282,13 @@ export default function StudentDashboardPage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3.5 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <Link href="/" className="flex items-center gap-3 sm:gap-3.5 shrink-0 group">
-              <div className="relative shrink-0">
-                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-50 blur-md group-hover:opacity-85 transition"></div>
-                <img
-                  src="/logo.png?v=5"
-                  alt="Blueprint Learning Academy"
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full shadow-lg group-hover:scale-105 transition"
-                />
-              </div>
-              <span className="text-lg sm:text-2xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
+            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+              <img
+                src="/logo.png?v=6"
+                alt="Blueprint Learning Academy"
+                className="w-11 h-11 sm:w-12 sm:h-12 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
+              />
+              <span className="text-lg sm:text-xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
                 Blueprint <span className="text-blue-700">Learning Academy</span>
               </span>
             </Link>
