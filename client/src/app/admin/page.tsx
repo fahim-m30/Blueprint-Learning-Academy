@@ -1776,20 +1776,9 @@ export default function AdminPortalPage() {
 
             {/* SECTION 1: INSTRUCTOR NAME, PHOTO & PROFILE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2">
-                  👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleSaveSection('instructor', 'Instructor Profile')}
-                  disabled={savingSection === 'instructor'}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{savingSection === 'instructor' ? 'Saving...' : 'Save Instructor Profile'}</span>
-                </button>
-              </div>
+              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
+                👨‍🏫 Lead Instructor Name, Photo &amp; Qualifications
+              </h3>
               
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Photo Preview and File Uploader */}
@@ -1955,20 +1944,9 @@ export default function AdminPortalPage() {
 
             {/* SECTION 2: HOMEPAGE STATS COUNTERS & TOP BADGE */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <h3 className="text-base sm:text-lg font-black text-blue-700 flex items-center gap-2">
-                  📊 Homepage Badges &amp; Stat Numbers
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleSaveSection('stats', 'Stats & Badges')}
-                  disabled={savingSection === 'stats'}
-                  className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{savingSection === 'stats' ? 'Saving...' : 'Save Stats & Badges'}</span>
-                </button>
-              </div>
+              <h3 className="text-base sm:text-lg font-black text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3">
+                📊 Homepage Badges &amp; Stat Numbers
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
@@ -2031,20 +2009,9 @@ export default function AdminPortalPage() {
 
             {/* SECTION 3: WEBSITE BRANDING & HEADLINES */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2">
-                  🌐 Academy Branding &amp; Hero Headline Content
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleSaveSection('branding', 'Branding & Headlines')}
-                  disabled={savingSection === 'branding'}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{savingSection === 'branding' ? 'Saving...' : 'Save Branding & Headlines'}</span>
-                </button>
-              </div>
+              <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2 border-b border-slate-200 pb-3">
+                🌐 Academy Branding &amp; Hero Headline Content
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div>
@@ -2103,20 +2070,9 @@ export default function AdminPortalPage() {
 
             {/* SECTION 4: CONTACT, PHONE, WHATSAPP, EMAIL */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2">
-                  📞 Official Helpline &amp; WhatsApp Numbers
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleSaveSection('contact', 'Helpline & WhatsApp')}
-                  disabled={savingSection === 'contact'}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{savingSection === 'contact' ? 'Saving...' : 'Save Helpline & Contact'}</span>
-                </button>
-              </div>
+              <h3 className="text-base sm:text-lg font-black text-amber-600 flex items-center gap-2 border-b border-slate-200 pb-3">
+                📞 Official Helpline &amp; WhatsApp Numbers
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                 <div>
@@ -2180,20 +2136,9 @@ export default function AdminPortalPage() {
 
             {/* SECTION 5: BKASH & NAGAD PAYMENT GATEWAY */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <h3 className="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2">
-                  💳 bKash, Nagad &amp; Rocket Payment Numbers
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleSaveSection('payment', 'Payment Gateway Numbers')}
-                  disabled={savingSection === 'payment'}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition self-start sm:self-auto hover:scale-105 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{savingSection === 'payment' ? 'Saving...' : 'Save Payment Numbers'}</span>
-                </button>
-              </div>
+              <h3 className="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2 border-b border-slate-200 pb-3">
+                💳 bKash, Nagad &amp; Rocket Payment Numbers
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                 <div>
