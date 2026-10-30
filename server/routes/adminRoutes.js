@@ -332,6 +332,120 @@ router.get('/courses/:id', async (req, res) => {
 });
 
 /**
+ * POST /api/admin/courses/:id/students
+ * Admin manually adds a student directly to this course
+ */
+router.post('/courses/:id/students', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, password, address } = req.body;
+
+    if (!name || !email || !phone) {
+      return res.status(400).json({ success: false, message: 'Student name, email, and phone number are required.' });
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const durationDays = course.durationDays || 30;
+    const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+    let rawPassword = password && password.trim() ? password.trim() : generatePassword();
+    let user = await User.findOne({ email: email.trim().toLowerCase() });
+
+    if (user) {
+      // Check if already in enrolledCourses
+      const alreadyEnrolled = user.enrolledCourses.some(
+        (e) => e.course.toString() === course._id.toString()
+      );
+
+      if (alreadyEnrolled) {
+        return res.status(400).json({ success: false, message: 'This student is already enrolled in this course.' });
+      }
+
+      user.enrolledCourses.push({
+        course: course._id,
+        enrolledAt: new Date(),
+        expiresAt: expiresAt,
+        status: 'active',
+      });
+      user.status = 'active';
+      if (password && password.trim()) {
+        user.password = password.trim();
+        user.plainPasswordForAdmin = password.trim();
+        rawPassword = password.trim();
+      } else {
+        rawPassword = user.plainPasswordForAdmin || 'Use existing account password';
+      }
+      await user.save();
+    } else {
+      user = await User.create({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        address: address ? address.trim() : '',
+        password: rawPassword,
+        plainPasswordForAdmin: rawPassword,
+        role: 'student',
+        status: 'active',
+        enrolledCourses: [
+          {
+            course: course._id,
+            enrolledAt: new Date(),
+            expiresAt: expiresAt,
+            status: 'active',
+          },
+        ],
+      });
+    }
+
+    // Create an approved enrollment record for accounting and records
+    await Enrollment.create({
+      studentName: name.trim(),
+      studentEmail: email.trim().toLowerCase(),
+      studentPhone: phone.trim(),
+      studentAddress: address ? address.trim() : '',
+      course: course._id,
+      paymentMethod: 'Manual (Admin Added)',
+      senderNumber: phone.trim(),
+      transactionId: 'ADM-' + Date.now().toString(36).toUpperCase(),
+      amount: course.price || 0,
+      status: 'approved',
+      generatedPassword: rawPassword,
+      approvedAt: new Date(),
+      notes: 'Directly registered by administrator',
+    });
+
+    // Send email notification to the student (wrapped in try/catch so it doesn't block if email not configured)
+    try {
+      const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
+      await sendEnrollmentApprovedEmail({
+        studentName: user.name,
+        studentEmail: user.email,
+        courseTitle: course.title,
+        generatedPassword: rawPassword,
+        loginUrl,
+        whatsappGroupLink: course.whatsappGroupLink,
+      });
+    } catch (mailErr) {
+      console.warn('Manual student email dispatch warning:', mailErr.message);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Student "${user.name}" successfully enrolled in ${course.title}! Password: ${rawPassword}`,
+      student: user,
+      rawPassword,
+    });
+  } catch (err) {
+    console.error('Add student error:', err);
+    res.status(500).json({ success: false, message: 'Error manually adding student to course.' });
+  }
+});
+
+/**
  * PUT /api/admin/courses/:id
  * Update course details
  */

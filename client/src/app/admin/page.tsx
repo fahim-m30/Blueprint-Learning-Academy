@@ -7,6 +7,8 @@ import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
 import { Course, Enrollment, SiteSettings } from '@/lib/types';
 import {
   ShieldCheck,
+  ArrowLeft,
+  UserPlus,
   Users,
   BookOpen,
   PlusCircle,
@@ -78,6 +80,15 @@ export default function AdminPortalPage() {
   const newTaskPoints = 100;
 
   const [adminChatMsg, setAdminChatMsg] = useState('');
+
+  // Manual student enrollment inside course hub
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [addStudentName, setAddStudentName] = useState('');
+  const [addStudentEmail, setAddStudentEmail] = useState('');
+  const [addStudentPhone, setAddStudentPhone] = useState('');
+  const [addStudentPassword, setAddStudentPassword] = useState('');
+  const [addStudentAddress, setAddStudentAddress] = useState('');
+  const [addingStudent, setAddingStudent] = useState(false);
 
   // Course creation modal state
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
@@ -308,6 +319,41 @@ export default function AdminPortalPage() {
     if (res.success && res.data?.message) {
       setCourseChat((prev) => [...prev, res.data.message]);
       setAdminChatMsg('');
+    }
+  };
+
+  // Manual Add Student to Course Handler
+  const handleAddStudentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseId || !addStudentName.trim() || !addStudentEmail.trim() || !addStudentPhone.trim()) {
+      showAlert('Please enter student name, email, and phone number.', 'error');
+      return;
+    }
+
+    setAddingStudent(true);
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/students`, {
+      method: 'POST',
+      body: JSON.stringify({
+        name: addStudentName.trim(),
+        email: addStudentEmail.trim(),
+        phone: addStudentPhone.trim(),
+        password: addStudentPassword.trim(),
+        address: addStudentAddress.trim(),
+      }),
+    });
+    setAddingStudent(false);
+
+    if (res.success) {
+      showAlert(res.message || 'Student added successfully!', 'success');
+      setShowAddStudentModal(false);
+      setAddStudentName('');
+      setAddStudentEmail('');
+      setAddStudentPhone('');
+      setAddStudentAddress('');
+      setAddStudentPassword('');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Failed to add student.', 'error');
     }
   };
 
@@ -622,103 +668,29 @@ export default function AdminPortalPage() {
             TAB 1: ANALYTICS & COURSE BUTTONS HUB
         ======================================================== */}
         {activeMainTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Top Metric Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Total Enrolled Students</span>
-                <p className="text-3xl font-extrabold text-white flex items-center gap-2">
-                  <Users className="w-6 h-6 text-[#7fb8ea]" />
-                  {stats?.totalStudents || 0}
-                </p>
-                <span className="text-[11px] text-emerald-400">Verified learners across batches</span>
-              </div>
-
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Total Verified Revenue</span>
-                <p className="text-3xl font-extrabold text-[#ffb531] flex items-center gap-2">
-                  ৳{(stats?.totalRevenue || 0).toLocaleString()}
-                </p>
-                <span className="text-[11px] text-[#bccadb]">From confirmed bKash/Nagad payments</span>
-              </div>
-
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Pending Verification</span>
-                <p className="text-3xl font-extrabold text-amber-400 flex items-center gap-2">
-                  {stats?.pendingEnrollments || 0}
-                </p>
-                <span className="text-[11px] text-[#7fb8ea]">TrxID submissions awaiting approval</span>
-              </div>
-
-              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
-                <span className="text-xs text-[#bccadb]">Active Courses</span>
-                <p className="text-3xl font-extrabold text-[#50c878] flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-[#50c878]" />
-                  {coursesList.length}
-                </p>
-                <span className="text-[11px] text-[#bccadb]">Published on academy catalog</span>
-              </div>
-            </div>
-
-            {/* COURSE BUTTONS SECTION (Requirement 1: 'end jei koita course create koreche seigular button hisabe thakbe') */}
-            <div className="bg-[#0b1222] border border-slate-800 rounded-2xl p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Course Management Buttons</h2>
-                  <p className="text-xs text-[#bccadb]">
-                    Click any course button below to open its dedicated hub (add videos, schedule live classes, view enrolled students &amp; login credentials, or chat).
-                  </p>
-                </div>
+          selectedCourseId && selectedCourseData ? (
+            /* DEDICATED COURSE HUB (ENTERED INSIDE COURSE) */
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Top Navigation & Back Button */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                 <button
-                  onClick={() => setShowCreateCourseModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-md shrink-0 transition"
+                  type="button"
+                  onClick={() => {
+                    setSelectedCourseId(null);
+                    setSelectedCourseData(null);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition shadow-sm self-start group"
                 >
-                  <PlusCircle className="w-4 h-4" /> Create New Course
+                  <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-1 transition" />
+                  <span>← Back to All Courses (সকল কোর্স তালিকা)</span>
                 </button>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sky-400 font-bold bg-sky-950/60 border border-sky-800/40 px-3 py-1 rounded-full">
+                    Course Workspace Mode: {selectedCourseData.title}
+                  </span>
+                </div>
               </div>
 
-              {/* The Course Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
-                {coursesList.map((c) => {
-                  const isSelected = selectedCourseId === c._id;
-
-                  return (
-                    <button
-                      key={c._id}
-                      onClick={() => loadCourseHub(c._id)}
-                      className={`text-left p-4 rounded-xl border transition flex flex-col justify-between gap-3 ${
-                        isSelected
-                          ? 'bg-[#1a2c42] border-[#ffb531] shadow-lg shadow-[#ffb531]/10'
-                          : 'bg-[#0f182c] border-slate-800 hover:border-[#3a7bb8] hover:bg-[#142339]'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] mb-1">
-                          <span className="text-[#ffb531] font-bold">৳{c.price.toLocaleString()}</span>
-                          <span className="text-[#7fb8ea] font-medium">{c.durationDays} Days</span>
-                        </div>
-                        <h3 className="text-sm font-bold text-white line-clamp-1">{c.title}</h3>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] text-[#bccadb] pt-2 border-t border-[#1a2c42]">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3 text-emerald-400" /> {c.studentCount} Students
-                        </span>
-                        {c.pendingCount > 0 && (
-                          <span className="text-[#ffb531] font-bold">({c.pendingCount} Pending)</span>
-                        )}
-                        <span className={`text-[10px] font-bold ${isSelected ? 'text-[#ffb531]' : 'text-[#7fb8ea]'}`}>
-                          {isSelected ? '● Active Hub' : 'Manage Course →'}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* DEDICATED COURSE HUB (Requirement 2 & 3: Opens when clicking a course button) */}
-            {selectedCourseId && selectedCourseData && (
               <div className="bg-[#0f182c] border-2 border-[#3a7bb8] rounded-2xl p-6 shadow-2xl space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
                   <div>
@@ -795,10 +767,29 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 1: ENROLLED STUDENTS WITH VISIBLE PASSWORDS & BLOCK ACTION */}
                 {courseSubTab === 'students' && (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-xs text-[#bccadb]">
-                      <span>
-                        Students registered for this course. Passwords are provided so you can assist students directly.
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#08111d] p-4 rounded-xl border border-slate-700/80">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#7fb8ea]" /> Enrolled Students ({courseStudents.length})
+                        </h4>
+                        <p className="text-xs text-[#bccadb] mt-0.5">
+                          Students registered for this course. Passwords are provided so you can assist students directly.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAddStudentName('');
+                          setAddStudentEmail('');
+                          setAddStudentPhone('');
+                          setAddStudentAddress('');
+                          setAddStudentPassword('BLP-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+                          setShowAddStudentModal(true);
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-2 shadow-md shadow-amber-500/20 shrink-0 transition"
+                      >
+                        <UserPlus className="w-4 h-4" /> Add New Student (নতুন স্টুডেন্ট যোগ করুন)
+                      </button>
                     </div>
 
                     {courseStudents.length === 0 ? (
@@ -1181,8 +1172,105 @@ export default function AdminPortalPage() {
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            /* OVERVIEW & ALL COURSES LIST */
+            <div className="space-y-8 animate-in fade-in duration-200">
+              {/* Top Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-[#bccadb]">Total Enrolled Students</span>
+                <p className="text-3xl font-extrabold text-white flex items-center gap-2">
+                  <Users className="w-6 h-6 text-[#7fb8ea]" />
+                  {stats?.totalStudents || 0}
+                </p>
+                <span className="text-[11px] text-emerald-400">Verified learners across batches</span>
+              </div>
+
+              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-[#bccadb]">Total Verified Revenue</span>
+                <p className="text-3xl font-extrabold text-[#ffb531] flex items-center gap-2">
+                  ৳{(stats?.totalRevenue || 0).toLocaleString()}
+                </p>
+                <span className="text-[11px] text-[#bccadb]">From confirmed bKash/Nagad payments</span>
+              </div>
+
+              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-[#bccadb]">Pending Verification</span>
+                <p className="text-3xl font-extrabold text-amber-400 flex items-center gap-2">
+                  {stats?.pendingEnrollments || 0}
+                </p>
+                <span className="text-[11px] text-[#7fb8ea]">TrxID submissions awaiting approval</span>
+              </div>
+
+              <div className="bg-[#0f182c] border border-slate-800 rounded-2xl p-5 space-y-2">
+                <span className="text-xs text-[#bccadb]">Active Courses</span>
+                <p className="text-3xl font-extrabold text-[#50c878] flex items-center gap-2">
+                  <BookOpen className="w-6 h-6 text-[#50c878]" />
+                  {coursesList.length}
+                </p>
+                <span className="text-[11px] text-[#bccadb]">Published on academy catalog</span>
+              </div>
+            </div>
+
+            {/* COURSE BUTTONS SECTION (Requirement 1: 'end jei koita course create koreche seigular button hisabe thakbe') */}
+            <div className="bg-[#0b1222] border border-slate-800 rounded-2xl p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-white">Course Management Buttons</h2>
+                  <p className="text-xs text-[#bccadb]">
+                    Click any course button below to open its dedicated hub (add videos, schedule live classes, view enrolled students &amp; login credentials, or chat).
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCreateCourseModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-extrabold text-xs flex items-center gap-2 shadow-md shrink-0 transition"
+                >
+                  <PlusCircle className="w-4 h-4" /> Create New Course
+                </button>
+              </div>
+
+              {/* The Course Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                {coursesList.map((c) => {
+                  const isSelected = selectedCourseId === c._id;
+
+                  return (
+                    <button
+                      key={c._id}
+                      onClick={() => loadCourseHub(c._id)}
+                      className={`text-left p-4 rounded-xl border transition flex flex-col justify-between gap-3 ${
+                        isSelected
+                          ? 'bg-[#1a2c42] border-[#ffb531] shadow-lg shadow-[#ffb531]/10'
+                          : 'bg-[#0f182c] border-slate-800 hover:border-[#3a7bb8] hover:bg-[#142339]'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] mb-1">
+                          <span className="text-[#ffb531] font-bold">৳{c.price.toLocaleString()}</span>
+                          <span className="text-[#7fb8ea] font-medium">{c.durationDays} Days</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-white line-clamp-1">{c.title}</h3>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-[#bccadb] pt-2 border-t border-[#1a2c42]">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3 text-emerald-400" /> {c.studentCount} Students
+                        </span>
+                        {c.pendingCount > 0 && (
+                          <span className="text-[#ffb531] font-bold">({c.pendingCount} Pending)</span>
+                        )}
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-[#ffb531]' : 'text-[#7fb8ea]'}`}>
+                          {isSelected ? '● Active Hub' : 'Manage Course →'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            </div>
+          )
         )}
 
         {/* ========================================================
@@ -1861,6 +1949,133 @@ export default function AdminPortalPage() {
           </div>
         </div>
       )}
+
+      {/* MANUAL ADD STUDENT MODAL */}
+      {showAddStudentModal && selectedCourseData && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0f182c] border border-slate-700 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 text-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-amber-400" /> Manually Add Student to Course
+                </h3>
+                <p className="text-xs text-sky-400 font-semibold mt-0.5 truncate max-w-sm">
+                  {selectedCourseData.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddStudentModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddStudentSubmit} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-slate-300 mb-1 font-semibold">
+                  Student Full Name (শিক্ষার্থীর পূর্ণ নাম) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={addStudentName}
+                  onChange={(e) => setAddStudentName(e.target.value)}
+                  placeholder="e.g. Engr. Tanvir Ahmed"
+                  className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 mb-1 font-semibold">
+                    Mobile Number (মোবাইল নম্বর) *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={addStudentPhone}
+                    onChange={(e) => setAddStudentPhone(e.target.value)}
+                    placeholder="017XXXXXXXX"
+                    className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 mb-1 font-semibold">
+                    Login Email (লগইন ইমেইল) *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={addStudentEmail}
+                    onChange={(e) => setAddStudentEmail(e.target.value)}
+                    placeholder="tanvir@gmail.com"
+                    className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-slate-300 font-semibold">
+                    Login Password (লগইন পাসওয়ার্ড)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setAddStudentPassword('BLP-' + Math.random().toString(36).substring(2, 8).toUpperCase())}
+                    className="text-[10px] text-amber-400 hover:underline font-bold"
+                  >
+                    🎲 Regenerate Auto-Password
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={addStudentPassword}
+                  onChange={(e) => setAddStudentPassword(e.target.value)}
+                  placeholder="Auto-generated if left empty"
+                  className="w-full bg-[#08111d] border border-amber-400/80 rounded-xl px-3.5 py-2.5 text-amber-300 font-mono font-bold outline-none"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  You can give this password directly to the student so they can log in immediately.
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 mb-1 font-semibold">
+                  Address / City (ঠিকানা বা শহর - ঐচ্ছিক)
+                </label>
+                <input
+                  type="text"
+                  value={addStudentAddress}
+                  onChange={(e) => setAddStudentAddress(e.target.value)}
+                  placeholder="e.g. Uttara, Dhaka"
+                  className="w-full bg-[#08111d] border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-white outline-none"
+                />
+              </div>
+
+              <div className="pt-3 flex justify-end gap-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddStudentModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addingStudent}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-md shadow-amber-500/20 transition disabled:opacity-50"
+                >
+                  {addingStudent ? 'Enrolling Student...' : 'Confirm & Enroll Student'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
