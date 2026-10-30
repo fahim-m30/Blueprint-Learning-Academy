@@ -50,20 +50,15 @@ export default function Navbar({ settings }: NavbarProps) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <span className="text-blue-300 font-bold hidden md:inline-flex items-center gap-1.5 bg-blue-950/70 border border-blue-800/50 px-2.5 py-0.5 rounded-full text-[11px]">
+            <span className="text-blue-300 font-bold inline-flex items-center gap-1.5 bg-blue-950/70 border border-blue-800/50 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Live Batches Open (50% Off)
+              Live Batches Open
             </span>
-            {user ? (
+            {user && (
               <span className="text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30 text-[10px] sm:text-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                 <span className="truncate max-w-[100px] sm:max-w-[150px]">{user.name}</span>
               </span>
-            ) : (
-              <Link href="/login" className="text-amber-400 hover:text-amber-300 font-extrabold transition hover:underline flex items-center gap-1">
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Portal Login</span>
-              </Link>
             )}
           </div>
         </div>
