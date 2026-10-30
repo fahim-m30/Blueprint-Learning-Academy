@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { SiteSettings } from '@/lib/types';
-import { Phone, Mail, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MessageCircle, ShieldCheck, Award, Building2 } from 'lucide-react';
 
 interface FooterProps {
   settings?: SiteSettings | null;
@@ -15,17 +15,17 @@ export default function Footer({ settings }: FooterProps) {
   const email = settings?.contactEmail || 'info@blueprintlearningacademy.com';
 
   return (
-    <footer className="border-t border-slate-800 bg-[#0b132b] text-slate-300 py-10 sm:py-14 px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+    <footer className="border-t border-slate-800 bg-[#0b132b] text-slate-300 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
         {/* Brand */}
-        <div className="sm:col-span-2 space-y-3.5">
+        <div className="sm:col-span-2 space-y-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="relative shrink-0">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-blue-500 to-amber-400 opacity-50 blur-sm"></div>
               <img
                 src="/logo.png"
                 alt="Blueprint Learning Academy"
-                className="relative w-12 h-12 sm:w-16 sm:h-16 object-contain rounded-full ring-2 ring-amber-400 bg-white p-0.5 sm:p-1 shadow-xl shadow-amber-500/20"
+                className="relative w-14 h-14 sm:w-16 sm:h-16 object-contain rounded-full ring-2 ring-amber-400 bg-white p-1 shadow-xl shadow-amber-500/20"
               />
             </div>
             <div className="min-w-0">
@@ -36,58 +36,59 @@ export default function Footer({ settings }: FooterProps) {
                   </>
                 )}
               </span>
-              <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-blue-400 font-extrabold truncate mt-0.5">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-blue-400 font-black truncate mt-0.5">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>
           </div>
-          <p className="text-xs sm:text-sm leading-relaxed max-w-md text-slate-400">
+          <p className="text-sm leading-relaxed max-w-md text-slate-300">
             Building practical engineering capabilities for Bangladesh’s construction &amp; real estate industry.
-            Real drawings, actual BOQ, site QA/QC, and technical interview success.
+            Real developer drawings, actual BOQ, site QA/QC, and technical interview success.
           </p>
           <div className="pt-1">
-            <p className="text-xs text-blue-300 font-semibold bg-blue-950/60 border border-blue-800/40 inline-block px-3 py-1 rounded-lg">
-              সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।
+            <p className="text-xs sm:text-sm text-amber-300 font-extrabold bg-blue-950/70 border border-blue-800/60 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl">
+              <span>✨</span> সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।
             </p>
           </div>
         </div>
 
         {/* Quick Links */}
         <div>
-          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-slate-700/80 pb-1.5 inline-block">
+          <h4 className="text-white font-black text-sm uppercase tracking-wider mb-4 border-b border-slate-700/80 pb-2 inline-block">
             Quick Navigation
           </h4>
-          <ul className="space-y-2 text-xs sm:text-sm text-slate-400">
-            <li><a href="/#courses" className="hover:text-amber-400 transition-colors block py-0.5">All Courses</a></li>
-            <li><a href="/#about" className="hover:text-amber-400 transition-colors block py-0.5">Lead Instructor</a></li>
-            <li><a href="/#payment" className="hover:text-amber-400 transition-colors block py-0.5">Payment &amp; bKash Guide</a></li>
-            <li><a href="/#faq" className="hover:text-amber-400 transition-colors block py-0.5">Frequently Asked Questions</a></li>
-            <li><a href="/login" className="hover:text-amber-400 transition-colors block py-0.5">Student &amp; Admin Portal</a></li>
+          <ul className="space-y-2.5 text-sm text-slate-300">
+            <li><a href="/#courses" className="hover:text-amber-400 transition-colors block py-0.5 font-medium">All Courses</a></li>
+            <li><a href="/#about" className="hover:text-amber-400 transition-colors block py-0.5 font-medium">Lead Instructor</a></li>
+            <li><a href="/#pillars" className="hover:text-amber-400 transition-colors block py-0.5 font-medium">Why Blueprint Academy</a></li>
+            <li><a href="/#payment" className="hover:text-amber-400 transition-colors block py-0.5 font-medium">Payment &amp; bKash Guide</a></li>
+            <li><a href="/#faq" className="hover:text-amber-400 transition-colors block py-0.5 font-medium">Frequently Asked Questions</a></li>
+            <li><a href="/login" className="hover:text-amber-400 transition-colors block py-0.5 font-bold text-amber-300">Student &amp; Admin Portal →</a></li>
           </ul>
         </div>
 
         {/* Contact Help */}
         <div>
-          <h4 className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider mb-3 sm:mb-4 border-b border-slate-700/80 pb-1.5 inline-block">
+          <h4 className="text-white font-black text-sm uppercase tracking-wider mb-4 border-b border-slate-700/80 pb-2 inline-block">
             Support &amp; Helpline
           </h4>
-          <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
-            <li className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <ul className="space-y-3.5 text-sm text-slate-300">
+            <li className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
                 <Phone className="w-4 h-4 text-amber-400" />
               </div>
-              <a href={`tel:${phone}`} className="hover:text-white font-medium">{phone}</a>
+              <a href={`tel:${phone}`} className="hover:text-white font-bold">{phone}</a>
             </li>
-            <li className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <li className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
               </div>
-              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-white font-medium truncate">
+              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-white font-bold truncate">
                 WhatsApp: +{whatsapp}
               </a>
             </li>
-            <li className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+            <li className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
                 <Mail className="w-4 h-4 text-blue-400" />
               </div>
               <a href={`mailto:${email}`} className="hover:text-white font-medium truncate min-w-0">{email}</a>
@@ -96,9 +97,11 @@ export default function Footer({ settings }: FooterProps) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-slate-800/80 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-slate-500 gap-3 text-center sm:text-left">
+      <div className="max-w-7xl mx-auto border-t border-slate-800/80 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3 text-center sm:text-left">
         <p>© {currentYear} {settings?.siteName || 'Blueprint Learning Academy'}. All rights reserved.</p>
-        <p>Built with Next.js, Express &amp; MongoDB for Civil Engineers in Bangladesh.</p>
+        <p className="flex items-center gap-2 justify-center sm:justify-start">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" /> Built for Civil Engineers in Bangladesh
+        </p>
       </div>
     </footer>
   );
