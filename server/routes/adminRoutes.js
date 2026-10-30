@@ -806,6 +806,51 @@ router.put('/courses/:id/batch-info', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/users
+ * List all registered students with their studentId and enrolled courses
+ */
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({ role: 'student' })
+      .select('-password')
+      .populate('enrolledCourses.course', 'title slug courseCode')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, users });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching users.' });
+  }
+});
+
+/**
+ * PUT /api/admin/users/:userId
+ * Update student info (including studentId, plainPasswordForAdmin)
+ */
+router.put('/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { studentId, name, phone, address, plainPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    if (studentId) user.studentId = studentId;
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address !== undefined) user.address = address;
+    if (plainPassword) {
+      user.password = plainPassword;
+      user.plainPasswordForAdmin = plainPassword;
+    }
+
+    await user.save();
+    res.json({ success: true, message: 'Student updated successfully.', user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error updating user.' });
+  }
+});
+
+/**
  * POST /api/admin/users/:userId/status
  * Pause or Block user. If Blocked, enter reason and email is sent immediately.
  */
