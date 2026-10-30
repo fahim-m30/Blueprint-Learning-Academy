@@ -71,26 +71,26 @@ export default function Navbar({ settings }: NavbarProps) {
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-32 sm:h-40 lg:h-44 py-3 sm:py-4">
+        <div className="flex items-center justify-between min-h-[78px] sm:min-h-[96px] lg:min-h-[110px] py-2.5 sm:py-3.5 gap-2 sm:gap-4">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-3.5 sm:gap-5 group min-w-0">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-4 group min-w-0 flex-1 sm:flex-initial">
             <div className="relative shrink-0">
-              <div className="absolute -inset-2.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-50 blur-xl group-hover:opacity-85 transition duration-300"></div>
+              <div className="absolute -inset-1 sm:-inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-blue-500 to-indigo-600 opacity-40 blur-md group-hover:opacity-75 transition duration-300"></div>
               <img
                 src="/logo.png?v=8"
                 alt="Blueprint Learning Academy"
-                className="relative w-28 h-28 xs:w-32 xs:h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 object-contain rounded-full shadow-2xl shadow-blue-950/30 transition duration-300 group-hover:scale-105"
+                className="relative w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain rounded-full shadow-lg shadow-blue-950/20 transition duration-300 group-hover:scale-105"
               />
             </div>
             <div className="min-w-0">
-              <span className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-[40px] font-black tracking-tight text-slate-950 block leading-tight">
+              <span className="text-base xs:text-lg sm:text-2xl md:text-3xl lg:text-[32px] font-black tracking-tight text-slate-950 block leading-tight">
                 {settings?.siteName || (
                   <>
                     Blueprint <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 bg-clip-text text-transparent">Learning Academy</span>
                   </>
                 )}
               </span>
-              <span className="block text-[11px] xs:text-xs sm:text-sm lg:text-base tracking-wider uppercase text-blue-700 font-extrabold mt-1">
+              <span className="block text-[10px] sm:text-xs md:text-sm tracking-wider uppercase text-blue-700 font-extrabold mt-0.5 line-clamp-1 sm:line-clamp-none">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>
@@ -148,7 +148,7 @@ export default function Navbar({ settings }: NavbarProps) {
               <>
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-2xs"
+                  className="hidden xs:inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-2xs"
                 >
                   <LogIn className="w-4 h-4 text-blue-600" />
                   <span>Login</span>
