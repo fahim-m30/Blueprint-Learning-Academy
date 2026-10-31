@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const emailUser = config?.gmailUser || process.env.EMAIL_USER || 'admin.blueprintlearning@gmail.com';
-    const emailPass = config?.gmailPass || process.env.EMAIL_PASS;
+    const emailPass = config?.gmailPass || process.env.EMAIL_PASS || 'ncpcooxwigjauknm';
     const fromAddress = from || `"Blueprint Learning Academy" <${emailUser}>`;
 
     // 1. Try Gmail over Port 465 (Open on Vercel)
@@ -40,10 +40,9 @@ export async function POST(req: NextRequest) {
           subject,
           html,
           text: text || '',
+          replyTo: emailUser,
           headers: {
-            'X-Priority': '1',
-            'Importance': 'high',
-            'X-MSMail-Priority': 'High',
+            'X-Entity-Ref-ID': `BLP-${Date.now()}`,
           },
         });
 
@@ -81,10 +80,9 @@ export async function POST(req: NextRequest) {
         subject,
         html,
         text: text || '',
+        replyTo: emailUser,
         headers: {
-          'X-Priority': '1',
-          'Importance': 'high',
-          'X-MSMail-Priority': 'High',
+          'X-Entity-Ref-ID': `BLP-${Date.now()}`,
         },
       });
 

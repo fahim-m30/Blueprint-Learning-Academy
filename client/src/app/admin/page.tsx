@@ -395,8 +395,8 @@ export default function AdminPortalPage() {
             smtpPort: Number(siteSettings?.smtpPort) || 587,
             smtpUser: siteSettings?.smtpUser || 'c0c2b6001@smtp-brevo.com',
             smtpPass: siteSettings?.smtpPass,
-            gmailUser: siteSettings?.gmailUser,
-            gmailPass: siteSettings?.gmailPass,
+            gmailUser: siteSettings?.gmailUser || 'admin.blueprintlearning@gmail.com',
+            gmailPass: siteSettings?.gmailPass || 'ncpcooxwigjauknm',
           }
         }),
       });

@@ -454,7 +454,7 @@ const sendEnrollmentApprovedEmail = async ({
       <!-- HEADER BANNER -->
       <div class="header-banner">
         <div class="logo-container">
-          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="86" height="86" />
+          <img src="${PUBLIC_LOGO_URL}" alt="Blueprint Learning Academy" class="logo-img" width="86" height="86" />
         </div>
         <h1 class="brand-title">Blueprint <span class="brand-accent">Learning Academy</span></h1>
         <p class="brand-subtitle">Bangladesh's #1 Practical Civil Engineering Academy</p>
@@ -647,7 +647,7 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
     <div class="container">
       <div class="header-banner">
         <div class="logo-container">
-          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="82" height="82" />
+          <img src="${PUBLIC_LOGO_URL}" alt="Blueprint Learning Academy" class="logo-img" width="82" height="82" />
         </div>
         <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
           Blueprint <span style="color: #fca5a5;">Learning Academy</span>
@@ -903,7 +903,7 @@ Website: https://blueprint-learning-academy.vercel.app
       <!-- HEADER -->
       <div class="header-banner">
         <div class="logo-container">
-          <img src="cid:blueprint-logo" onerror="this.onerror=null;this.src='${PUBLIC_LOGO_URL}'" alt="Blueprint Learning Academy" class="logo-img" width="80" height="80" />
+          <img src="${PUBLIC_LOGO_URL}" alt="Blueprint Learning Academy" class="logo-img" width="80" height="80" />
         </div>
         <h1 class="brand-title">Blueprint <span class="brand-accent">Learning Academy</span></h1>
         <p class="brand-subtitle">Security &amp; Account Verification</p>
