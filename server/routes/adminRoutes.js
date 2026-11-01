@@ -901,6 +901,47 @@ router.post('/users/:userId/status', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/chats/all
+ * Centralized list of all course chat rooms with recent message preview
+ */
+router.get('/chats/all', async (req, res) => {
+  try {
+    const courses = await Course.find({ isActive: true }).select('title slug category');
+    const courseChats = await Promise.all(
+      courses.map(async (c) => {
+        const count = await ChatMessage.countDocuments({ course: c._id });
+        const lastMsg = await ChatMessage.findOne({ course: c._id }).sort({ createdAt: -1 });
+        return {
+          courseId: c._id,
+          courseTitle: c.title,
+          category: c.category,
+          totalMessages: count,
+          lastMessage: lastMsg
+            ? {
+                message: lastMsg.message,
+                senderName: lastMsg.senderName,
+                senderRole: lastMsg.senderRole,
+                createdAt: lastMsg.createdAt,
+              }
+            : null,
+        };
+      })
+    );
+
+    // Sort: Courses with recent messages on top
+    courseChats.sort((a, b) => {
+      const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+
+    res.json({ success: true, data: { courseChats }, courseChats });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching chat rooms.' });
+  }
+});
+
+/**
  * GET & POST /api/admin/courses/:id/chat
  * Admin chat interface with students in a course
  */

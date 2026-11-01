@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
@@ -64,6 +64,32 @@ export default function StudentDashboardPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [sendingChat, setSendingChat] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Auto-poll for live chat messages in real-time
+  useEffect(() => {
+    if (!selectedCourseId) return;
+
+    // Fetch every 3.5s when active on chat tab, or every 15s otherwise
+    const pollInterval = activeTab === 'chat' ? 3500 : 15000;
+    const interval = setInterval(async () => {
+      try {
+        const chatRes = await apiRequest(`/student/course/${selectedCourseId}/chat`);
+        if (chatRes.success && chatRes.data?.messages) {
+          setChatMessages(chatRes.data.messages);
+        }
+      } catch {}
+    }, pollInterval);
+
+    return () => clearInterval(interval);
+  }, [selectedCourseId, activeTab]);
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, activeTab]);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -1035,6 +1061,7 @@ export default function StudentDashboardPage() {
                       );
                     })
                   )}
+                  <div ref={chatBottomRef} />
                 </div>
 
                 {/* Message Input Box */}
