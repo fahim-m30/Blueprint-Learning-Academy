@@ -92,6 +92,22 @@ export default function StudentDashboardPage() {
     }
   }, [chatMessages, activeTab]);
 
+  // Real-time polling for CV status & Admin review feedback when activeTab === 'cv'
+  useEffect(() => {
+    if (activeTab !== 'cv') return;
+
+    const cvPoll = setInterval(async () => {
+      try {
+        const res = await apiRequest('/student/dashboard');
+        if (res.success && res.data?.student?.cv) {
+          setStudentCv(res.data.student.cv);
+        }
+      } catch {}
+    }, 3000);
+
+    return () => clearInterval(cvPoll);
+  }, [activeTab]);
+
   useEffect(() => {
     const token = getAuthToken();
     if (!token) {
@@ -292,8 +308,13 @@ export default function StudentDashboardPage() {
 
   const handleCvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cvFileData && !cvFileUrl.trim()) {
-      setCvMsg({ text: 'Please upload a PDF/document or provide a Google Drive URL.', isError: true });
+    let formattedUrl = cvFileUrl.trim();
+    if (formattedUrl && !/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    if (!cvFileData && !formattedUrl) {
+      setCvMsg({ text: 'Please upload a PDF/document or provide a Portfolio / Google Drive URL.', isError: true });
       return;
     }
 
@@ -303,10 +324,10 @@ export default function StudentDashboardPage() {
     const res = await apiRequest('/student/cv', {
       method: 'POST',
       body: JSON.stringify({
-        fileUrl: cvFileUrl.trim(),
+        fileUrl: formattedUrl,
         fileName: cvFileName.trim() || 'Resume.pdf',
         fileData: cvFileData,
-        targetJobTitle: cvTargetJobTitle.trim(),
+        targetJobTitle: cvTargetJobTitle.trim() || 'Site Engineer / Career Candidate',
         note: cvNote.trim(),
       }),
     });
@@ -315,9 +336,12 @@ export default function StudentDashboardPage() {
 
     if (res.success && res.data?.cv) {
       setStudentCv(res.data.cv);
-      setCvMsg({ text: 'CV successfully submitted for instructor and recruiter review!', isError: false });
+      setCvMsg({ text: 'CV / Portfolio successfully submitted! Admin & instructor will review it and provide real-time feedback.', isError: false });
     } else {
-      setCvMsg({ text: res.message || 'Error submitting CV. Please try again.', isError: true });
+      const errMsg = res.message?.includes('not found')
+        ? 'Backend service is deploying the latest update. Please retry in 30-60 seconds.'
+        : (res.message || 'Error submitting CV. Please try again.');
+      setCvMsg({ text: errMsg, isError: true });
     }
   };
 
@@ -1184,37 +1208,51 @@ export default function StudentDashboardPage() {
                             </span>
                           </div>
 
-                          {/* Direct View / Download Button */}
-                          <div className="pt-2">
-                            {studentCv.fileData ? (
+                          {/* Direct View / Download Buttons */}
+                          <div className="pt-2 space-y-2">
+                            {studentCv.fileData && (
                               <a
                                 href={studentCv.fileData}
                                 download={studentCv.fileName || 'My_CV.pdf'}
-                                className="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
+                                className="w-full py-2.5 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                               >
-                                <Download className="w-4 h-4" /> Download / View My CV
+                                <Download className="w-4 h-4" /> Download / View CV ({studentCv.fileName || 'File'})
                               </a>
-                            ) : studentCv.fileUrl ? (
+                            )}
+                            {studentCv.fileUrl && (
                               <a
                                 href={studentCv.fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
+                                className="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                               >
-                                <ExternalLink className="w-4 h-4" /> Open Submitted Link
+                                <ExternalLink className="w-4 h-4" /> Open Portfolio / Cloud Link
                               </a>
-                            ) : null}
+                            )}
                           </div>
 
                           {/* Instructor Feedback If Any */}
-                          {studentCv.adminFeedback && (
-                            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-1.5 text-xs sm:text-sm">
-                              <span className="font-black text-amber-900 flex items-center gap-1.5 uppercase text-xs tracking-wider">
-                                💬 Instructor Review Feedback
-                              </span>
-                              <p className="text-amber-900 leading-relaxed font-medium">
+                          {studentCv.adminFeedback ? (
+                            <div className="mt-4 p-4 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2 text-xs sm:text-sm shadow-xs animate-in fade-in duration-300">
+                              <div className="flex items-center justify-between">
+                                <span className="font-black text-amber-950 flex items-center gap-1.5 uppercase text-xs tracking-wider">
+                                  💬 Instructor Review &amp; Corrections
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-950 font-bold text-[10px]">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Real-Time
+                                </span>
+                              </div>
+                              <p className="text-slate-900 leading-relaxed font-semibold bg-white/80 p-3 rounded-xl border border-amber-200 whitespace-pre-wrap">
                                 {studentCv.adminFeedback}
                               </p>
+                              <span className="text-[11px] text-amber-800 font-medium block">
+                                Tip: Make the requested changes and submit your updated CV or portfolio link below.
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-500 flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                              <span>Instructor review pending. Real-time feedback will appear here as soon as reviewed.</span>
                             </div>
                           )}
                         </div>
@@ -1251,11 +1289,10 @@ export default function StudentDashboardPage() {
                         {/* Target Job Title */}
                         <div>
                           <label className="block text-slate-800 font-bold mb-1.5">
-                            Target Job Role / Career Track *
+                            Target Job Role / Career Track (Optional)
                           </label>
                           <input
                             type="text"
-                            required
                             value={cvTargetJobTitle}
                             onChange={(e) => setCvTargetJobTitle(e.target.value)}
                             placeholder="e.g. Site Engineer, Project Engineer, BOQ Specialist, QA/QC Inspector"
@@ -1294,17 +1331,17 @@ export default function StudentDashboardPage() {
                         {/* Cloud URL (Option B) */}
                         <div>
                           <label className="block text-slate-800 font-bold mb-1.5">
-                            Or Provide Google Drive / Cloud Link
+                            Or Provide Portfolio Website / Google Drive Link (Optional)
                           </label>
                           <input
-                            type="url"
+                            type="text"
                             value={cvFileUrl}
                             onChange={(e) => setCvFileUrl(e.target.value)}
-                            placeholder="https://drive.google.com/file/d/..."
+                            placeholder="https://yourportfolio.com or https://drive.google.com/..."
                             className="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-blue-600 rounded-xl px-4 py-3 text-slate-900 outline-none font-medium text-xs sm:text-sm"
                           />
                           <span className="text-xs text-slate-500 mt-1 block">
-                            Ensure link sharing is set to "Anyone with the link can view".
+                            Ensure link sharing is public or set to "Anyone with the link can view".
                           </span>
                         </div>
 

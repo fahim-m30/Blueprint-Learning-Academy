@@ -28,8 +28,8 @@ app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Root health check & keep-alive endpoints (supports root /, /api/health, /health, /ping)
-app.get(['/', '/api/health', '/health', '/ping'], (req, res) => {
+// Root health check & keep-alive endpoints (supports root /, /api, /api/health, /health, /ping, /keep-alive, /status)
+app.get(['/', '/api', '/api/health', '/health', '/ping', '/keep-alive', '/status'], (req, res) => {
   res.status(200).json({
     status: 'healthy',
     service: 'Blueprint Learning Academy API',

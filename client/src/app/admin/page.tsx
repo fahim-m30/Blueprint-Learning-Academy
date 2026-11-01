@@ -268,6 +268,24 @@ export default function AdminPortalPage() {
     };
   }, [selectedCourseId, courseSubTab]);
 
+  // Live Real-Time Auto-Polling (every 3.5s) when viewing Student CVs
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (activeMainTab === 'cvs') {
+      interval = setInterval(async () => {
+        try {
+          const res = await apiRequest('/admin/cvs');
+          if (res.success && res.data?.students) {
+            setAllStudentCvs(res.data.students);
+          }
+        } catch {}
+      }, 3500);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeMainTab]);
+
   const handleSaveCvFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!viewingStudentCv) return;
@@ -3681,26 +3699,27 @@ export default function AdminPortalPage() {
                 </div>
               )}
 
-              {/* Download / Open File Button */}
-              <div className="pt-2 flex gap-2">
-                {viewingStudentCv.cv?.fileData ? (
+              {/* Download / Open File Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                {viewingStudentCv.cv?.fileData && (
                   <a
                     href={viewingStudentCv.cv.fileData}
                     download={viewingStudentCv.cv.fileName || `${viewingStudentCv.name}_CV.pdf`}
-                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition"
+                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition text-xs sm:text-sm"
                   >
-                    <Download className="w-4 h-4" /> Download CV File ({viewingStudentCv.cv.fileName || 'PDF'})
+                    <Download className="w-4 h-4" /> Download CV ({viewingStudentCv.cv.fileName || 'PDF/DOC'})
                   </a>
-                ) : viewingStudentCv.cv?.fileUrl ? (
+                )}
+                {viewingStudentCv.cv?.fileUrl && (
                   <a
                     href={viewingStudentCv.cv.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2 px-3 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition"
+                    className="flex-1 py-2 px-3 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition text-xs sm:text-sm"
                   >
-                    <ExternalLink className="w-4 h-4" /> Open Submitted Google Drive Link
+                    <ExternalLink className="w-4 h-4" /> Open Portfolio / Cloud Link
                   </a>
-                ) : null}
+                )}
               </div>
             </div>
 
