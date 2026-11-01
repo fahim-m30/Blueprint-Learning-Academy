@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getCurrentUser, removeAuthToken } from '@/lib/api';
+import { getCurrentUser, removeAuthToken, startBackendHeartbeat } from '@/lib/api';
 import { SiteSettings } from '@/lib/types';
 import { Phone, MessageCircle, LogIn, LayoutDashboard, ShieldCheck, LogOut, Menu, X, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -16,6 +16,8 @@ export default function Navbar({ settings }: NavbarProps) {
 
   useEffect(() => {
     setUser(getCurrentUser());
+    const stopHeartbeat = startBackendHeartbeat();
+    return () => stopHeartbeat();
   }, []);
 
   const handleLogout = () => {

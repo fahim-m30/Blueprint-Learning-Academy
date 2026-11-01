@@ -35,14 +35,16 @@ export const setCurrentUser = (user: any) => {
 };
 
 /**
- * Fetch wrapper with automatic auth header, timeout protection, and fast error handling
+ * Fetch wrapper with automatic auth header, cold-start tolerance, auto-retry and fast error handling
  */
 export async function apiRequest<T = any>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryCount: number = 0
 ): Promise<{ success: boolean; data?: T; message?: string; error?: any }> {
+  // 55 seconds timeout for cold starts on cloud hosting (Render free tier wakes up in 30-45s)
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timeoutId = controller ? setTimeout(() => controller.abort(), 18000) : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 55000) : null;
 
   try {
     const token = getAuthToken();
@@ -80,10 +82,41 @@ export async function apiRequest<T = any>(
     };
   } catch (err: any) {
     if (timeoutId) clearTimeout(timeoutId);
-    console.warn(`API Request to ${endpoint} warning:`, err?.message || err);
+    console.warn(`API Request to ${endpoint} warning (attempt ${retryCount + 1}):`, err?.message || err);
+
+    // If first attempt timed out or failed due to network/cold-start, retry once
+    if (retryCount === 0 && (err.name === 'AbortError' || err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError'))) {
+      console.log(`🔄 Cold-start retry: Sending request again to ${endpoint}...`);
+      return apiRequest<T>(endpoint, options, 1);
+    }
+
     return {
       success: false,
-      message: err.name === 'AbortError' ? 'Connection timed out. Loading saved data...' : (err.message || 'Network connection failed.'),
+      message: err.name === 'AbortError' ? 'Server is waking up from standby. Please refresh in a moment.' : (err.message || 'Network connection failed.'),
     };
   }
+}
+
+/**
+ * Background Heartbeat & Keep-Alive to prevent backend from sleeping
+ */
+export function startBackendHeartbeat(): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  const ping = () => {
+    try {
+      fetch(`${API_BASE_URL}/health`, {
+        method: 'GET',
+        headers: { 'Cache-Control': 'no-cache' },
+      }).catch(() => {});
+    } catch {}
+  };
+
+  // Immediate ping on page load
+  ping();
+
+  // Pulse every 4 minutes while tab is open
+  const interval = setInterval(ping, 4 * 60 * 1000);
+
+  return () => clearInterval(interval);
 }

@@ -71,18 +71,28 @@ mongoose
       const https = require('https');
       const pingServer = () => {
         try {
-          https.get(`${backendUrl}/api/health`, (res) => {
+          const req = https.get(`${backendUrl}/api/health`, {
+            headers: {
+              'User-Agent': 'Blueprint-KeepAlive/2.0',
+              'Cache-Control': 'no-cache',
+            },
+            timeout: 15000,
+          }, (res) => {
             console.log(`⚡ Keep-Alive ping responded with ${res.statusCode} at ${new Date().toLocaleTimeString()}`);
-          }).on('error', (err) => {
+          });
+          req.on('error', (err) => {
             console.warn('⚠️ Keep-alive ping warning:', err.message);
+          });
+          req.on('timeout', () => {
+            req.destroy();
           });
         } catch (pingErr) {
           console.warn('⚠️ Keep-alive ping failed:', pingErr.message);
         }
       };
-      setInterval(pingServer, 8 * 60 * 1000); // Trigger every 8 minutes (Render sleeps after 15 min inactivity)
-      // Immediate ping after 30 seconds of startup
-      setTimeout(pingServer, 30000);
+      setInterval(pingServer, 4 * 60 * 1000); // Trigger every 4 minutes (Render sleeps after 15 min inactivity)
+      // Immediate ping after 10 seconds of startup
+      setTimeout(pingServer, 10000);
     });
   })
   .catch((err) => {
