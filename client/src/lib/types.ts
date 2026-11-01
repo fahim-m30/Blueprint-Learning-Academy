@@ -135,6 +135,18 @@ export interface StudentCV {
   status?: 'submitted' | 'reviewed' | 'needs_revision';
 }
 
+export interface CourseProgressData {
+  overall: number;
+  totalVideos: number;
+  completedVideosCount: number;
+  videoProgress: number;
+  totalTasks: number;
+  submittedTasks: number;
+  pendingTasks: number;
+  reviewedTasks: number;
+  taskProgress: number;
+}
+
 export interface User {
   _id: string;
   studentId?: string;
@@ -152,6 +164,8 @@ export interface User {
     enrolledAt: string;
     expiresAt?: string;
     status: string;
+    progress?: number;
+    completedVideos?: string[];
   }>;
 }
 

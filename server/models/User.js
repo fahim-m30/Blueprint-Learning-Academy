@@ -86,6 +86,15 @@ const userSchema = new mongoose.Schema({
         enum: ['active', 'completed', 'expired'],
         default: 'active',
       },
+      completedVideos: [
+        {
+          type: String,
+        },
+      ],
+      progress: {
+        type: Number,
+        default: 0,
+      },
     },
   ],
   createdAt: {

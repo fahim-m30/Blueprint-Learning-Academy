@@ -21,45 +21,77 @@ router.get('/dashboard', async (req, res) => {
     }
 
     const now = new Date();
-    const enrolledWithDuration = user.enrolledCourses
-      .filter((item) => item.course && item.course.isActive)
-      .map((item) => {
-        const course = item.course;
-        let daysRemaining = 0;
-        let isExpired = false;
+    const enrolledWithDuration = await Promise.all(
+      user.enrolledCourses
+        .filter((item) => item.course && item.course.isActive)
+        .map(async (item) => {
+          const course = item.course;
+          let daysRemaining = 0;
+          let isExpired = false;
 
-        if (item.expiresAt) {
-          const diffMs = new Date(item.expiresAt).getTime() - now.getTime();
-          daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-          if (diffMs <= 0) isExpired = true;
-        } else if (course.durationDays && item.enrolledAt) {
-          const expireTime = new Date(item.enrolledAt).getTime() + course.durationDays * 24 * 60 * 60 * 1000;
-          const diffMs = expireTime - now.getTime();
-          daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-          if (diffMs <= 0) isExpired = true;
-        }
+          if (item.expiresAt) {
+            const diffMs = new Date(item.expiresAt).getTime() - now.getTime();
+            daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+            if (diffMs <= 0) isExpired = true;
+          } else if (course.durationDays && item.enrolledAt) {
+            const expireTime = new Date(item.enrolledAt).getTime() + course.durationDays * 24 * 60 * 60 * 1000;
+            const diffMs = expireTime - now.getTime();
+            daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+            if (diffMs <= 0) isExpired = true;
+          }
 
-        return {
-          enrollmentId: item._id,
-          enrolledAt: item.enrolledAt,
-          expiresAt: item.expiresAt,
-          daysRemaining,
-          isExpired,
-          course: {
-            _id: course._id,
-            title: course.title,
-            slug: course.slug,
-            category: course.category,
-            totalClasses: course.totalClasses,
-            durationDays: course.durationDays,
-            whatsappGroupLink: course.whatsappGroupLink,
-            instructor: course.instructor,
-            totalVideos: course.videos ? course.videos.length : 0,
-            totalTasks: course.tasks ? course.tasks.length : 0,
-            totalLiveClasses: course.liveClasses ? course.liveClasses.length : 0,
-          },
-        };
-      });
+          const totalVideos = course.videos ? course.videos.length : 0;
+          const totalTasks = course.tasks ? course.tasks.length : 0;
+          const completedVideosCount = (item.completedVideos || []).length;
+
+          let submittedTasksCount = 0;
+          try {
+            submittedTasksCount = await TaskSubmission.countDocuments({
+              course: course._id,
+              student: user._id,
+            });
+          } catch {}
+
+          let calculatedProgress = item.progress || 0;
+          if (totalVideos + totalTasks > 0) {
+            calculatedProgress = Math.min(
+              100,
+              Math.round(((completedVideosCount + submittedTasksCount) / (totalVideos + totalTasks)) * 100)
+            );
+          }
+
+          const taskProgress = totalTasks > 0 ? Math.round((submittedTasksCount / totalTasks) * 100) : 0;
+
+          return {
+            enrollmentId: item._id,
+            enrolledAt: item.enrolledAt,
+            expiresAt: item.expiresAt,
+            daysRemaining,
+            isExpired,
+            progress: calculatedProgress,
+            completedVideos: item.completedVideos || [],
+            taskProgress: {
+              total: totalTasks,
+              submitted: submittedTasksCount,
+              pending: Math.max(0, totalTasks - submittedTasksCount),
+              percentage: taskProgress,
+            },
+            course: {
+              _id: course._id,
+              title: course.title,
+              slug: course.slug,
+              category: course.category,
+              totalClasses: course.totalClasses,
+              durationDays: course.durationDays,
+              whatsappGroupLink: course.whatsappGroupLink,
+              instructor: course.instructor,
+              totalVideos,
+              totalTasks,
+              totalLiveClasses: course.liveClasses ? course.liveClasses.length : 0,
+            },
+          };
+        })
+    );
 
     res.json({
       success: true,
@@ -112,13 +144,110 @@ router.get('/course/:courseId', async (req, res) => {
       student: req.user._id,
     });
 
+    const enrolledItem = user.enrolledCourses.find(
+      (item) => item.course && item.course.toString() === courseId
+    );
+
+    const completedVideos = enrolledItem?.completedVideos || [];
+    const totalVideos = course.videos ? course.videos.length : 0;
+    const completedVideosCount = completedVideos.length;
+    const videoProgress = totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0;
+
+    const totalTasks = course.tasks ? course.tasks.length : 0;
+    const submittedTasks = mySubmissions.length;
+    const reviewedTasks = mySubmissions.filter((s) => s.status === 'reviewed').length;
+    const pendingTasks = Math.max(0, totalTasks - submittedTasks);
+    const taskProgress = totalTasks > 0 ? Math.round((submittedTasks / totalTasks) * 100) : 0;
+
+    let overallProgress = 0;
+    if (totalVideos + totalTasks > 0) {
+      overallProgress = Math.min(100, Math.round(((completedVideosCount + submittedTasks) / (totalVideos + totalTasks)) * 100));
+    }
+
+    if (enrolledItem && enrolledItem.progress !== overallProgress) {
+      enrolledItem.progress = overallProgress;
+      await user.save();
+    }
+
     res.json({
       success: true,
       course,
       mySubmissions,
+      completedVideos,
+      progress: {
+        overall: overallProgress,
+        totalVideos,
+        completedVideosCount,
+        videoProgress,
+        totalTasks,
+        submittedTasks,
+        pendingTasks,
+        reviewedTasks,
+        taskProgress,
+      },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error fetching course details.' });
+  }
+});
+
+/**
+ * POST /api/student/course/:courseId/videos/:videoId/toggle-complete
+ * Toggle completed/watched status of a video lesson
+ */
+router.post('/course/:courseId/videos/:videoId/toggle-complete', async (req, res) => {
+  try {
+    const { courseId, videoId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    const enrolledItem = user.enrolledCourses.find(
+      (item) => item.course && item.course.toString() === courseId
+    );
+
+    if (!enrolledItem) {
+      return res.status(403).json({ success: false, message: 'Not enrolled in this course.' });
+    }
+
+    if (!enrolledItem.completedVideos) {
+      enrolledItem.completedVideos = [];
+    }
+
+    const idx = enrolledItem.completedVideos.indexOf(videoId);
+    let isCompleted = false;
+    if (idx > -1) {
+      enrolledItem.completedVideos.splice(idx, 1);
+      isCompleted = false;
+    } else {
+      enrolledItem.completedVideos.push(videoId);
+      isCompleted = true;
+    }
+
+    const course = await Course.findById(courseId);
+    const subCount = await TaskSubmission.countDocuments({
+      course: courseId,
+      student: user._id,
+    });
+    const totalVideos = course?.videos ? course.videos.length : 0;
+    const totalTasks = course?.tasks ? course.tasks.length : 0;
+    const completedVideosCount = enrolledItem.completedVideos.length;
+
+    let overallProgress = 0;
+    if (totalVideos + totalTasks > 0) {
+      overallProgress = Math.min(100, Math.round(((completedVideosCount + subCount) / (totalVideos + totalTasks)) * 100));
+    }
+    enrolledItem.progress = overallProgress;
+    await user.save();
+
+    res.json({
+      success: true,
+      isCompleted,
+      completedVideos: enrolledItem.completedVideos,
+      overallProgress,
+      videoProgress: totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0,
+      message: isCompleted ? 'Lesson marked as completed!' : 'Lesson marked as incomplete.',
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error updating video progress.' });
   }
 });
 
@@ -175,7 +304,38 @@ router.post('/course/:courseId/tasks/:taskId/submit', async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: 'Task submitted successfully.', submission });
+    // Recalculate progress for this course
+    const user = await User.findById(req.user._id);
+    const enrolledItem = user?.enrolledCourses?.find(
+      (item) => item.course && item.course.toString() === courseId
+    );
+
+    let updatedProgress = 0;
+    if (enrolledItem) {
+      const subCount = await TaskSubmission.countDocuments({
+        course: courseId,
+        student: user._id,
+      });
+      const totalVideos = course?.videos ? course.videos.length : 0;
+      const totalTasks = course?.tasks ? course.tasks.length : 0;
+      const completedVideosCount = (enrolledItem.completedVideos || []).length;
+
+      if (totalVideos + totalTasks > 0) {
+        updatedProgress = Math.min(
+          100,
+          Math.round(((completedVideosCount + subCount) / (totalVideos + totalTasks)) * 100)
+        );
+      }
+      enrolledItem.progress = updatedProgress;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Task submitted successfully.',
+      submission,
+      overallProgress: updatedProgress,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error submitting task.' });
   }

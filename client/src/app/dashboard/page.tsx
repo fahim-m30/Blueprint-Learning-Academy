@@ -24,6 +24,10 @@ import {
   Briefcase,
   Bell,
   Pin,
+  TrendingUp,
+  BarChart3,
+  Sparkles,
+  Award,
 } from 'lucide-react';
 
 export default function StudentDashboardPage() {
@@ -34,6 +38,7 @@ export default function StudentDashboardPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [courseDetails, setCourseDetails] = useState<Course | null>(null);
   const [mySubmissions, setMySubmissions] = useState<TaskSubmission[]>([]);
+  const [completedVideos, setCompletedVideos] = useState<string[]>([]);
 
   // Active tab in course
   const [activeTab, setActiveTab] = useState<'videos' | 'live' | 'tasks' | 'chat' | 'cv' | 'notices'>('videos');
@@ -150,11 +155,40 @@ export default function StudentDashboardPage() {
       setCourseDetails(cRes.data.course);
       loadedCourse = cRes.data.course;
       setMySubmissions(cRes.data.mySubmissions || []);
+      setCompletedVideos(cRes.data.completedVideos || []);
     }
     if (chatRes.success && chatRes.data?.messages) {
       setChatMessages(chatRes.data.messages);
     }
     return loadedCourse;
+  };
+
+  const handleToggleCompleteVideo = async (videoId: string) => {
+    const isCurrently = completedVideos.includes(videoId);
+    const updated = isCurrently
+      ? completedVideos.filter((id) => id !== videoId)
+      : [...completedVideos, videoId];
+    setCompletedVideos(updated);
+
+    try {
+      const res = await apiRequest(`/student/course/${selectedCourseId}/videos/${videoId}/toggle-complete`, {
+        method: 'POST',
+      });
+      if (res.success && res.data?.completedVideos) {
+        setCompletedVideos(res.data.completedVideos);
+        if (res.data.overallProgress !== undefined) {
+          setEnrolledList((prev) =>
+            prev.map((item) =>
+              item.course._id === selectedCourseId
+                ? { ...item, progress: res.data.overallProgress, completedVideos: res.data.completedVideos }
+                : item
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.warn('Error toggling video completion:', err);
+    }
   };
 
   const handleSelectCourse = async (courseId: string) => {
@@ -267,6 +301,24 @@ export default function StudentDashboardPage() {
 
   const activeEnrolledItem = enrolledList.find((e) => e.course?._id === selectedCourseId);
 
+  // Auto-calculated course & task progress metrics
+  const totalVideos = courseDetails?.videos?.length || 0;
+  const completedVideosCount = courseDetails?.videos?.filter((v) => completedVideos.includes(v._id)).length || 0;
+  const videoProgress = totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0;
+
+  const totalTasks = courseDetails?.tasks?.length || 0;
+  const submittedTasks = courseDetails?.tasks?.filter((t) => mySubmissions.some((s) => s.taskId === t._id)).length || 0;
+  const reviewedTasks = mySubmissions.filter((s) => s.status === 'reviewed').length;
+  const pendingTasks = Math.max(0, totalTasks - submittedTasks);
+  const taskProgress = totalTasks > 0 ? Math.round((submittedTasks / totalTasks) * 100) : 0;
+
+  let overallProgress = 0;
+  if (totalVideos + totalTasks > 0) {
+    overallProgress = Math.min(100, Math.round(((completedVideosCount + submittedTasks) / (totalVideos + totalTasks)) * 100));
+  } else if (activeEnrolledItem?.progress) {
+    overallProgress = activeEnrolledItem.progress;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex items-center justify-center p-4">
@@ -350,26 +402,39 @@ export default function StudentDashboardPage() {
                   <button
                     key={e.course._id}
                     onClick={() => handleSelectCourse(e.course._id)}
-                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition border ${
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition border flex items-center gap-2 ${
                       selectedCourseId === e.course._id
                         ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    {e.course.title}
+                    <span>{e.course.title}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                      selectedCourseId === e.course._id
+                        ? 'bg-blue-800 text-blue-100'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {e.progress || 0}%
+                    </span>
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Course Summary Banner with Countdown Timer & WhatsApp Button */}
+            {/* Course Summary Banner with Progress Bar & Countdown Timer */}
             {courseDetails && (
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-sm">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
                   <div className="min-w-0">
-                    <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold inline-block mb-2">
-                      {courseDetails.category}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold inline-block">
+                        {courseDetails.category}
+                      </span>
+                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black inline-flex items-center gap-1">
+                        <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                        {overallProgress}% Course Completed
+                      </span>
+                    </div>
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">{courseDetails.title}</h1>
                     <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-2xl line-clamp-2 leading-relaxed">
                       {courseDetails.shortDescription}
@@ -402,6 +467,32 @@ export default function StudentDashboardPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Overall Course Progress Bar & Metrics */}
+                <div className="pt-4 border-t border-slate-100 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+                    <span className="font-black text-slate-800 flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-blue-600" />
+                      কোর্স সমাপ্তি প্রগ্রেস (Course Overall Progress)
+                    </span>
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-600">
+                      <span>📹 ভিডিও দেখা: <strong className="text-slate-950 font-black">{completedVideosCount}/{totalVideos}</strong></span>
+                      <span className="text-slate-300">|</span>
+                      <span>📝 টাস্ক জমা: <strong className="text-slate-950 font-black">{submittedTasks}/{totalTasks}</strong></span>
+                      <span className="text-blue-700 font-black bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200">
+                        {overallProgress}% সম্পন্ন
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar Track */}
+                  <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/80">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-full transition-all duration-500 shadow-xs"
+                      style={{ width: `${Math.max(overallProgress, 2)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -416,7 +507,16 @@ export default function StudentDashboardPage() {
                 }`}
               >
                 <Video className="w-4 h-4 shrink-0" />
-                Videos ({courseDetails?.videos?.length || 0})
+                <span>Videos ({completedVideosCount}/{totalVideos})</span>
+                {totalVideos > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                    videoProgress === 100
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {videoProgress}%
+                  </span>
+                )}
               </button>
 
               <button
@@ -440,7 +540,16 @@ export default function StudentDashboardPage() {
                 }`}
               >
                 <ClipboardList className="w-4 h-4 shrink-0" />
-                Tasks ({courseDetails?.tasks?.length || 0})
+                <span>Tasks ({submittedTasks}/{totalTasks})</span>
+                {totalTasks > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                    taskProgress === 100
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {taskProgress}%
+                  </span>
+                )}
               </button>
 
               <button
@@ -474,6 +583,33 @@ export default function StudentDashboardPage() {
             {/* TAB 1: VIDEOS & RECORDINGS */}
             {activeTab === 'videos' && (
               <div className="space-y-6">
+                {/* Videos Progress Bar */}
+                {totalVideos > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <h3 className="text-sm sm:text-base font-black text-slate-950 flex items-center gap-2">
+                        <Video className="w-4 h-4 text-blue-600" />
+                        ক্লাস ভিডিও ও রেকর্ডিং ({completedVideosCount}/{totalVideos} সম্পন্ন)
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        লেকচার ভিডিও দেখা শেষ হলে নিচের "Mark Watched" বাটনে ক্লিক করুন।
+                      </p>
+                    </div>
+                    <div className="w-full sm:w-56 space-y-1.5 shrink-0">
+                      <div className="flex justify-between text-xs font-extrabold text-slate-700">
+                        <span>ভিডিও দেখা অগ্রগতি</span>
+                        <span className="text-blue-700 font-black">{videoProgress}%</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div
+                          className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.max(videoProgress, 2)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {courseDetails?.videos && courseDetails.videos.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                     {courseDetails.videos.map((vid, idx) => {
@@ -510,7 +646,29 @@ export default function StudentDashboardPage() {
                                 📌 <strong>Instructor Note:</strong> {vid.note}
                               </p>
                             )}
-                            <div className="pt-2 flex justify-end">
+                            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleCompleteVideo(vid._id)}
+                                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition ${
+                                  completedVideos.includes(vid._id)
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'
+                                    : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+                                }`}
+                              >
+                                {completedVideos.includes(vid._id) ? (
+                                  <>
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                    <span>Watched ✓</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 text-slate-400" />
+                                    <span>Mark as Watched</span>
+                                  </>
+                                )}
+                              </button>
+
                               <a
                                 href={vid.youtubeUrl}
                                 target="_blank"
@@ -590,10 +748,107 @@ export default function StudentDashboardPage() {
             {activeTab === 'tasks' && (
               <div className="space-y-6">
                 {taskMsg && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs">
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold">
                     {taskMsg}
                   </div>
                 )}
+
+                {/* Auto Task Submission Progress & Analytics Card */}
+                <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 text-white rounded-3xl p-5 sm:p-7 border border-slate-800 shadow-xl space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-black tracking-wide mb-2">
+                        <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
+                        টাস্ক জমা দেওয়ার প্রগ্রেস সিস্টেম
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-black text-white">
+                        Student Assignment &amp; Task Progress
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                        আপনার নির্ধারিত সব অ্যাসাইনমেন্ট সময়মতো জমা দিয়ে কোর্স সার্টিফিকেট আনলক করুন।
+                      </p>
+                    </div>
+
+                    <div className="text-left sm:text-right shrink-0 bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60">
+                      <span className="text-[11px] uppercase tracking-wider text-slate-400 block font-bold">টাস্ক কমপ্লিশন রেট</span>
+                      <span className="text-2xl sm:text-3xl font-black text-amber-400">
+                        {taskProgress}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 4 Metric Counter Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
+                    <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/80">
+                      <span className="text-xs text-slate-400 block font-bold">মোট টাস্ক</span>
+                      <span className="text-xl sm:text-2xl font-black text-white mt-0.5 block">{totalTasks}</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-600/40">
+                      <span className="text-xs text-emerald-300 block font-bold">জমা দেওয়া হয়েছে</span>
+                      <span className="text-xl sm:text-2xl font-black text-emerald-400 mt-0.5 block flex items-center justify-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        {submittedTasks}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-amber-950/50 border border-amber-600/40">
+                      <span className="text-xs text-amber-300 block font-bold">বাকি টাস্ক</span>
+                      <span className="text-xl sm:text-2xl font-black text-amber-400 mt-0.5 block flex items-center justify-center gap-1">
+                        <Clock className="w-4 h-4 text-amber-400" />
+                        {pendingTasks}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-blue-950/50 border border-blue-600/40">
+                      <span className="text-xs text-blue-300 block font-bold">মূল্যায়িত (Reviewed)</span>
+                      <span className="text-xl sm:text-2xl font-black text-blue-400 mt-0.5 block flex items-center justify-center gap-1">
+                        <Award className="w-4 h-4 text-blue-400" />
+                        {reviewedTasks}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Task Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                      <span>টাস্ক সাবমিশন অগ্রগতি</span>
+                      <span className="text-amber-400 font-extrabold">{submittedTasks} of {totalTasks} Tasks Submitted ({taskProgress}%)</span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/80">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-emerald-400 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(taskProgress, 2)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dynamic Motivational Status Message */}
+                  <div className="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60 text-xs sm:text-sm text-slate-300 flex items-center gap-2.5">
+                    {taskProgress === 100 ? (
+                      <>
+                        <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+                        <span className="text-emerald-300 font-bold">
+                          🎉 অভিনন্দন! আপনি এই কোর্সের সবগুলো অ্যাসাইনমেন্ট সফলভাবে জমা দিয়েছেন।
+                        </span>
+                      </>
+                    ) : taskProgress > 0 ? (
+                      <>
+                        <TrendingUp className="w-5 h-5 text-blue-400 shrink-0" />
+                        <span>
+                          ভালো কাজ করছেন! বাকি <strong className="text-amber-400">{pendingTasks}টি</strong> অ্যাসাইনমেন্ট দ্রুত জমা দিয়ে আপনার কোর্স শেষ করুন।
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-5 h-5 text-amber-400 shrink-0" />
+                        <span>
+                          এখনও কোনো টাস্ক জমা দেওয়া হয়নি। নিচে প্রতিটি টাস্কের বিস্তারিত বিবরণ দেখে আপনার সমাধান বা Google Drive লিংক জমা দিন।
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 {courseDetails?.tasks && courseDetails.tasks.length > 0 ? (
                   courseDetails.tasks.map((task) => {
@@ -605,14 +860,27 @@ export default function StudentDashboardPage() {
                         className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 space-y-4 shadow-xs"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3.5">
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex flex-wrap items-center gap-2.5">
                             <span className="text-xs font-black text-amber-800 bg-amber-50 border border-amber-300 px-3 py-1 rounded-lg uppercase tracking-wider">
                               Points: {task.points}
                             </span>
                             <h3 className="text-base sm:text-lg font-black text-slate-950">{task.title}</h3>
                           </div>
-                          <div className="text-xs sm:text-sm font-medium text-slate-500">
-                            Deadline: <span className="text-red-600 font-black">{new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm font-medium">
+                            <span className="text-slate-500">
+                              Deadline: <span className="text-red-600 font-black">{new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            </span>
+                            {submission ? (
+                              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black flex items-center gap-1">
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                                Submitted
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-xs font-black flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                Pending
+                              </span>
+                            )}
                           </div>
                         </div>
 

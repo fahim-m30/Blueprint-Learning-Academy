@@ -1187,6 +1187,7 @@ export default function AdminPortalPage() {
                               <th className="p-3.5">Mobile</th>
                               <th className="p-3.5">Login Email</th>
                               <th className="p-3.5">Generated Password</th>
+                              <th className="p-3.5">Task Progress</th>
                               <th className="p-3.5">CV / Resume</th>
                               <th className="p-3.5">Status</th>
                               <th className="p-3.5 text-right">Actions</th>
@@ -1200,6 +1201,32 @@ export default function AdminPortalPage() {
                                 <td className="p-3.5 font-mono font-bold text-blue-700 text-xs sm:text-sm">{st.email}</td>
                                 <td className="p-3.5 font-mono font-black text-amber-950 bg-amber-50/80 px-3 py-1.5 rounded-lg border border-amber-200 text-xs sm:text-sm">
                                   {st.plainPasswordForAdmin || 'Hidden (Hashed)'}
+                                </td>
+                                <td className="p-3.5">
+                                  {(() => {
+                                    const studentSubs = courseSubmissions.filter((sub) => sub.student === st._id || sub.studentEmail === st.email);
+                                    const totalCourseTasks = selectedCourseData?.tasks?.length || 0;
+                                    const enrolledItem = st.enrolledCourses?.find((e: any) => e.course === selectedCourseData?._id || e.course?._id === selectedCourseData?._id);
+                                    const progress = enrolledItem?.progress ?? (totalCourseTasks > 0 ? Math.round((studentSubs.length / totalCourseTasks) * 100) : 0);
+                                    return (
+                                      <div className="space-y-1 min-w-[100px]">
+                                        <div className="flex items-center justify-between gap-1.5">
+                                          <span className="font-extrabold text-xs text-slate-800">
+                                            {studentSubs.length}/{totalCourseTasks} Tasks
+                                          </span>
+                                          <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                                            {progress}%
+                                          </span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                          <div
+                                            className="h-full bg-blue-600 rounded-full transition-all"
+                                            style={{ width: `${progress}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
                                 </td>
                                 <td className="p-3.5">
                                   {st.cv?.updatedAt ? (
