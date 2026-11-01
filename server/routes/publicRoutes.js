@@ -30,6 +30,15 @@ router.get('/settings', async (req, res) => {
         statsExperience: '10+ Yrs',
         statsMentorTag: 'BUET',
         heroBadgeText: "Bangladesh's #1 Practical Civil Engineering Academy",
+        demoSectionEnabled: true,
+        demoClassTitle: 'ফ্রি লাইভ ডেমো ক্লাস ও প্র্যাকটিক্যাল ভিডিও প্রিভিউ',
+        demoClassSubtitle: 'কোর্সে ভর্তি হওয়ার আগেই আমাদের টিচিং কোয়ালিটি ও রিয়েল প্রজেক্ট সাইট সেশন দেখে নিন।',
+        demoClassLink: 'https://meet.google.com/new',
+        demoClassBtnText: 'লাইভ ডেমো ক্লাসে যোগ দিন',
+        demoClassDateText: 'প্রতি শুক্রবার রাত ৯:০০ টা (সরাসরি গুগল মিট)',
+        demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        demoVideoTitle: 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস',
+        demoVideoDescription: 'বাস্তব প্রজেক্টের আর্কিটেকচারাল ও স্ট্রাকচারাল ড্রয়িং থেকে কাস্টিং ও সাইট ম্যানেজমেন্টের বাস্তব সেশন দেখুন।',
       };
       let needsSave = false;
       for (const [key, val] of Object.entries(defaults)) {

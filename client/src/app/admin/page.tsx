@@ -2548,6 +2548,203 @@ export default function AdminPortalPage() {
               </div>
             </div>
 
+            {/* SECTION 7: DEMO CLASS & RECORDED VIDEO SETTINGS */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <h3 className="text-base sm:text-lg font-black text-rose-600 flex items-center gap-2">
+                  🎥 Free Demo Class &amp; Recorded Video Preview (Home Page)
+                </h3>
+                <label className="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+                  <input
+                    type="checkbox"
+                    checked={siteSettings.demoSectionEnabled !== false}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, demoSectionEnabled: e.target.checked })}
+                    className="w-4 h-4 text-rose-600 rounded focus:ring-rose-500"
+                  />
+                  <span className="text-xs font-black text-slate-800">
+                    {siteSettings.demoSectionEnabled !== false ? '✅ Section Active on Home Page' : '❌ Section Hidden'}
+                  </span>
+                </label>
+              </div>
+
+              {/* Title & Subtitle */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">
+                    Section Main Heading (Bengali/English)
+                  </label>
+                  <input
+                    type="text"
+                    value={siteSettings.demoClassTitle || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, demoClassTitle: e.target.value })}
+                    placeholder="ফ্রি লাইভ ডেমো ক্লাস ও প্র্যাকটিক্যাল ভিডিও প্রিভিউ"
+                    className="w-full bg-white border border-slate-200 focus:border-rose-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold">
+                    Section Subtitle / Description
+                  </label>
+                  <input
+                    type="text"
+                    value={siteSettings.demoClassSubtitle || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, demoClassSubtitle: e.target.value })}
+                    placeholder="কোর্সে ভর্তি হওয়ার আগেই আমাদের টিচিং কোয়ালিটি ও রিয়েল প্রজেক্ট সাইট সেশন দেখে নিন।"
+                    className="w-full bg-white border border-slate-200 focus:border-rose-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Live Demo Class Box (Meeting Link & Schedule) */}
+              <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-4">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 inline-block">
+                  🔴 Live Demo Class Settings (Meeting Link &amp; Schedule)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+                  <div>
+                    <label className="block text-slate-700 mb-1.5 font-bold">
+                      Live Class Meeting URL (Google Meet / Zoom) *
+                    </label>
+                    <input
+                      type="url"
+                      value={siteSettings.demoClassLink || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, demoClassLink: e.target.value })}
+                      placeholder="https://meet.google.com/xyz-abcd-efg"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                    />
+                    <span className="text-[11px] text-blue-700 font-semibold mt-1 block">
+                      Students will open this link directly to join live.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 mb-1.5 font-bold">
+                      Live Class Date &amp; Time Text
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.demoClassDateText || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, demoClassDateText: e.target.value })}
+                      placeholder="প্রতি শুক্রবার রাত ৯:০০ টা (সরাসরি গুগল মিট)"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                    />
+                    <span className="text-[11px] text-slate-500 font-medium mt-1 block">
+                      Displayed on the schedule card on home page.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 mb-1.5 font-bold">
+                      Join Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.demoClassBtnText || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, demoClassBtnText: e.target.value })}
+                      placeholder="লাইভ ডেমো ক্লাসে যোগ দিন"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                    />
+                    <span className="text-[11px] text-slate-500 font-medium mt-1 block">
+                      Label on the main CTA button.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demo Recorded Video Settings */}
+              <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-4">
+                <span className="text-xs font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md border border-rose-200 inline-block">
+                  📹 Recorded Demo Video Settings (YouTube or Direct Video)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                  <div>
+                    <label className="block text-slate-700 mb-1.5 font-bold">
+                      Recorded Demo Video URL (YouTube / Vimeo / MP4) *
+                    </label>
+                    <input
+                      type="url"
+                      value={siteSettings.demoVideoUrl || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, demoVideoUrl: e.target.value })}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-rose-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                    />
+                    <span className="text-[11px] text-emerald-700 font-semibold mt-1 block">
+                      Supports YouTube Watch links, youtu.be, Shorts, or Vimeo.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 mb-1.5 font-bold">
+                      Recorded Video Title
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.demoVideoTitle || ''}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, demoVideoTitle: e.target.value })}
+                      placeholder="সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-rose-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 mb-1.5 font-bold text-xs sm:text-sm">
+                    Recorded Video Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={siteSettings.demoVideoDescription || ''}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, demoVideoDescription: e.target.value })}
+                    placeholder="বাস্তব প্রজেক্টের আর্কিটেকচারাল ও স্ট্রাকচারাল ড্রয়িং থেকে কাস্টিং ও সাইট ম্যানেজমেন্টের বাস্তব সেশন দেখুন।"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-rose-500 rounded-xl px-4 py-2.5 text-slate-900 outline-none font-medium text-xs sm:text-sm resize-none"
+                  />
+                </div>
+
+                {/* Instant Video Player Preview inside Admin */}
+                {siteSettings.demoVideoUrl && (
+                  <div className="pt-2">
+                    <span className="text-xs font-bold text-slate-500 block mb-2">Live Player Preview:</span>
+                    <div className="max-w-md aspect-video rounded-xl overflow-hidden bg-slate-950 border border-slate-700 shadow-md">
+                      {(() => {
+                        const trimmed = (siteSettings.demoVideoUrl || '').trim();
+                        let embed = trimmed;
+                        const ytMatch = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                        if (ytMatch && ytMatch[1]) {
+                          embed = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+                          return (
+                            <iframe
+                              src={embed}
+                              title="Demo Video Preview"
+                              className="w-full h-full border-0"
+                              allowFullScreen
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 p-4 text-center">
+                            Video will render on Home Page ({trimmed})
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Save Section Button */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveSection('demo', 'Demo Class & Video Preview')}
+                  disabled={savingSection === 'demo'}
+                  className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition hover:scale-105 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSection === 'demo' ? 'Saving Demo Settings...' : 'Save Demo Class & Video Settings'}</span>
+                </button>
+              </div>
+            </div>
+
             {/* MASTER SAVE BUTTON AT BOTTOM */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
               <span className="text-xs sm:text-sm text-slate-500 font-medium">

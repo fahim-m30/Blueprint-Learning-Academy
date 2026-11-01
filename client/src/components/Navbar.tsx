@@ -92,7 +92,11 @@ export default function Navbar({ settings }: NavbarProps) {
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-bold text-slate-600">
+          <div className="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-600">
+            <a href="/#demo-class" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 hover:bg-amber-100 transition-colors shadow-2xs font-black">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              ফ্রি ডেমো ক্লাস
+            </a>
             <a href="/#courses" className="hover:text-blue-700 transition-colors py-1">
               Courses
             </a>
@@ -173,6 +177,17 @@ export default function Navbar({ settings }: NavbarProps) {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 shadow-xl px-4 py-5 animate-in slide-in-from-top-3 duration-200 space-y-4">
           <div className="flex flex-col space-y-1">
+            <a
+              href="/#demo-class"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-3 rounded-xl text-amber-900 bg-amber-50/90 border border-amber-200/80 font-black text-sm transition"
+            >
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                ফ্রি ডেমো ক্লাস ও ভিডিও প্রিভিউ
+              </span>
+              <ChevronRight className="w-4 h-4 text-amber-600" />
+            </a>
             <a
               href="/#courses"
               onClick={() => setMobileMenuOpen(false)}

@@ -38,7 +38,39 @@ import {
   Palmtree,
   Megaphone,
   CalendarDays,
+  Play,
+  Video,
+  Radio,
 } from 'lucide-react';
+
+function getEmbedVideoInfo(url?: string): { embedUrl: string | null; isDirectVideo: boolean; rawUrl: string } {
+  if (!url) return { embedUrl: null, isDirectVideo: false, rawUrl: '' };
+  const trimmed = url.trim();
+
+  if (trimmed.match(/\.(mp4|webm|ogg)(\?.*)?$/i)) {
+    return { embedUrl: trimmed, isDirectVideo: true, rawUrl: trimmed };
+  }
+
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`,
+      isDirectVideo: false,
+      rawUrl: trimmed,
+    };
+  }
+
+  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return {
+      embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+      isDirectVideo: false,
+      rawUrl: trimmed,
+    };
+  }
+
+  return { embedUrl: trimmed, isDirectVideo: false, rawUrl: trimmed };
+}
 
 export default function HomePage() {
   const [courses, setCourses] = useState<Course[]>(DEFAULT_COURSES);
@@ -200,18 +232,25 @@ export default function HomePage() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3.5 pt-2 flex-wrap">
                 <a
                   href="#courses"
-                  className="px-7 sm:px-9 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 ring-1 ring-amber-400/40 flex items-center justify-center gap-2.5 transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                  className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 ring-1 ring-amber-400/40 flex items-center justify-center gap-2 transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 >
                   Explore All 6 Courses <ArrowRight className="w-4 h-4 shrink-0" />
+                </a>
+                <a
+                  href="#demo-class"
+                  className="px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition duration-200 border border-slate-800 hover:-translate-y-0.5"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  ফ্রি ডেমো ক্লাস ও ভিডিও <Play className="w-4 h-4 fill-amber-400 text-amber-400" />
                 </a>
                 <a
                   href={`https://wa.me/${whatsapp}?text=Hello!%20I%20want%20to%20learn%20more%20about%20Blueprint%20Learning%20Academy%20courses.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 sm:px-8 py-4 rounded-xl bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-900 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition duration-200 shadow-xs hover:shadow-sm"
+                  className="px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-900 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition duration-200 shadow-xs hover:shadow-sm"
                 >
                   <PhoneCall className="w-4 h-4 text-emerald-600 shrink-0" /> Talk to Lead Instructor
                 </a>
@@ -513,6 +552,194 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      {/* =========================================================================
+          FREE DEMO CLASS & RECORDED VIDEO PREVIEW (#demo-class)
+      ========================================================================= */}
+      {(settings?.demoSectionEnabled ?? true) && (
+        <section id="demo-class" className="py-16 sm:py-24 bg-gradient-to-b from-[#091429] via-[#0d1d3a] to-[#0a162b] text-white relative overflow-hidden border-b border-slate-800">
+          {/* Ambient Lighting Gradients */}
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-4">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-black tracking-wide shadow-inner">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse"></span>
+                <span>🔴 ফ্রি লাইভ ডেমো ও রেকর্ডেড ক্লাস প্রিভিউ</span>
+              </div>
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+                {settings?.demoClassTitle || 'ফ্রি লাইভ ডেমো ক্লাস ও প্র্যাকটিক্যাল ভিডিও প্রিভিউ'}
+              </h2>
+              <p className="text-sm sm:text-base md:text-lg text-slate-300 font-normal leading-relaxed">
+                {settings?.demoClassSubtitle || 'কোর্সে ভর্তি হওয়ার আগেই আমাদের টিচিং কোয়ালিটি ও রিয়েল প্রজেক্ট সাইট সেশন দেখে নিন।'}
+              </p>
+            </div>
+
+            {/* Two-Column Grid: Left (Live Demo Class CTA Card), Right (Embedded Video Player) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+              
+              {/* Left Column: Live Demo Class Card (5 cols) */}
+              <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-8 rounded-3xl bg-slate-900/80 backdrop-blur-md border border-slate-700/80 shadow-2xl relative group overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="space-y-6">
+                  {/* Top Badge */}
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-4">
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black tracking-wide flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                      ১০০% ফ্রি সেশন • কোনো ফি নেই
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-400">Google Meet / Live</span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                      সরাসরি লাইভ ডেমো ক্লাসে অংশ নিন
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                      বুয়েট গ্র্যাজুয়েট অভিজ্ঞ প্র্যাকটিসিং ইঞ্জিনিয়ারের সাথে সরাসরি ক্লাসে যুক্ত হয়ে দেখুন কীভাবে বাস্তব সাইটের জটিল বিষয়গুলো সহজে সমাধান শেখানো হয়।
+                    </p>
+                  </div>
+
+                  {/* Schedule Box */}
+                  <div className="p-4 rounded-2xl bg-slate-950/70 border border-amber-500/30 flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                      <CalendarDays className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-[11px] uppercase tracking-wider text-amber-400 font-extrabold">ক্লাস শিডিউল ও সময়</span>
+                      <span className="block text-sm sm:text-base font-black text-white mt-0.5">
+                        {settings?.demoClassDateText || 'প্রতি শুক্রবার রাত ৯:০০ টা (সরাসরি গুগল মিট)'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Benefit Points */}
+                  <ul className="space-y-2.5 text-xs sm:text-sm text-slate-200">
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>রিয়েল এস্টেট প্রজেক্টের আসল সাইট ড্রয়িং ও বিওকিউ (BOQ) বিশ্লেষণ</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>সাইট ইঞ্জিনিয়ারিং ও জব ইন্টারভিউ প্রস্তুতির বাস্তব রূপরেখা</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>সরাসরি প্রশ্ন-উত্তর ও ক্যারিয়ার কাউন্সেলিং সেশন</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-6 mt-6 border-t border-slate-800 space-y-3">
+                  <a
+                    href={settings?.demoClassLink || 'https://meet.google.com/new'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]"
+                  >
+                    <Radio className="w-5 h-5 text-slate-950 animate-pulse" />
+                    <span>{settings?.demoClassBtnText || 'লাইভ ডেমো ক্লাসে যোগ দিন'}</span>
+                    <ExternalLink className="w-4 h-4 text-slate-950" />
+                  </a>
+
+                  <a
+                    href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('আসসালামু আলাইকুম, আমি ব্লুপ্রিন্ট লার্নিং একাডেমির ফ্রি লাইভ ডেমো ক্লাসের লিংক ও শিডিউল পেতে চাই।')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 hover:text-emerald-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <span>হোয়াটসঅ্যাপে ডেমো ক্লাসের লিংক ও রিমাইন্ডার নিন</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Column: Demo Recorded Video Player (7 cols) */}
+              <div className="lg:col-span-7 flex flex-col justify-between p-6 sm:p-8 rounded-3xl bg-slate-900/80 backdrop-blur-md border border-slate-700/80 shadow-2xl relative">
+                <div className="space-y-4">
+                  {/* Top Header of Video */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
+                      <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                        রেকর্ডেড ডেমো ক্লাস ভিডিও
+                      </span>
+                    </div>
+                    <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25">
+                      HD Quality • Real Project Site
+                    </span>
+                  </div>
+
+                  {/* Video Player Container */}
+                  {(() => {
+                    const videoInfo = getEmbedVideoInfo(settings?.demoVideoUrl);
+                    return (
+                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-2xl">
+                        {videoInfo.isDirectVideo ? (
+                          <video
+                            controls
+                            className="w-full h-full object-cover"
+                            src={videoInfo.embedUrl || ''}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : videoInfo.embedUrl ? (
+                          <iframe
+                            src={videoInfo.embedUrl}
+                            title={settings?.demoVideoTitle || 'Blueprint Learning Academy Demo Class'}
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          ></iframe>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">
+                            <Video className="w-12 h-12 text-slate-600 mb-2" />
+                            <p className="text-sm">Video link not configured yet.</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Video Metadata & Info */}
+                  <div className="pt-2">
+                    <h4 className="text-lg sm:text-xl font-black text-white">
+                      {settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস'}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
+                      {settings?.demoVideoDescription || 'বাস্তব প্রজেক্টের আর্কিটেকচারাল ও স্ট্রাকচারাল ড্রয়িং থেকে কাস্টিং ও সাইট ম্যানেজমেন্টের বাস্তব সেশন দেখুন।'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bottom Footer Action */}
+                <div className="pt-5 mt-5 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                  <div className="flex items-center gap-2 text-slate-300 font-medium">
+                    <HardHat className="w-4 h-4 text-amber-400" />
+                    <span>প্র্যাকটিক্যাল সাইট ট্রেইনিং • বুয়েট ইঞ্জিনিয়ার ইন্সট্রাক্টর</span>
+                  </div>
+                  {settings?.demoVideoUrl && (
+                    <a
+                      href={settings.demoVideoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-extrabold hover:underline"
+                    >
+                      <span>ইউটিউবে বড় পর্দায় দেখুন</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* =========================================================================
           THREE CORE PILLARS SECTION (#pillars)

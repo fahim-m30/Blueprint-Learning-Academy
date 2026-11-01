@@ -113,6 +113,15 @@ export interface SiteSettings {
   emailFrom?: string;
   gmailUser?: string;
   gmailPass?: string;
+  demoSectionEnabled?: boolean;
+  demoClassTitle?: string;
+  demoClassSubtitle?: string;
+  demoClassLink?: string;
+  demoClassBtnText?: string;
+  demoClassDateText?: string;
+  demoVideoUrl?: string;
+  demoVideoTitle?: string;
+  demoVideoDescription?: string;
 }
 
 export interface StudentCV {
