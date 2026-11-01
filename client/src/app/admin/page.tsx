@@ -1706,7 +1706,22 @@ export default function AdminPortalPage() {
 
                 {/* HUB TAB 5: ADMIN CHAT WITH STUDENTS */}
                 {courseSubTab === 'chat' && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[450px]">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[480px]">
+                    <div className="px-4 py-2.5 bg-blue-50 border-b border-blue-200 flex items-center justify-between text-xs">
+                      <span className="font-bold text-blue-900">
+                        💬 Chatting in: <strong>{selectedCourseData?.title}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveMainTab('chat');
+                          setSelectedCourseId(null);
+                        }}
+                        className="text-[11px] font-extrabold text-blue-700 hover:underline flex items-center gap-1"
+                      >
+                        Open All-Courses Chat Hub &rarr;
+                      </button>
+                    </div>
                     <div className="flex-1 p-4 overflow-y-auto space-y-3">
                       {courseChat.length === 0 ? (
                         <p className="text-center py-8 text-xs text-slate-600">No discussion in this course room yet.</p>
@@ -2209,6 +2224,8 @@ export default function AdminPortalPage() {
                   ) : (
                     allCourseChats.map((c) => {
                       const isSelected = selectedChatCourseId === c.courseId;
+                      const isStudentWaiting = c.lastMessage && c.lastMessage.senderRole === 'student';
+
                       return (
                         <button
                           key={c.courseId}
@@ -2216,27 +2233,38 @@ export default function AdminPortalPage() {
                           onClick={() => setSelectedChatCourseId(c.courseId)}
                           className={`w-full text-left p-3 rounded-xl transition border flex flex-col gap-1.5 ${
                             isSelected
-                              ? 'bg-blue-50 border-blue-400 shadow-xs ring-1 ring-blue-300'
+                              ? 'bg-blue-50 border-blue-400 shadow-xs ring-2 ring-blue-500'
+                              : isStudentWaiting
+                              ? 'bg-amber-50 hover:bg-amber-100 border-amber-400'
                               : 'bg-white hover:bg-slate-100 border-slate-200'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <h4 className="text-xs font-bold text-slate-900 truncate flex-1">{c.courseTitle}</h4>
-                            <span
-                              className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                c.totalMessages > 0
-                                  ? 'bg-[#ffb531] text-[#1a1100]'
-                                  : 'bg-slate-200 text-slate-600'
-                              }`}
-                            >
-                              {c.totalMessages} msg
-                            </span>
+                            <div className="flex items-center gap-1">
+                              {isStudentWaiting && (
+                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-red-600 text-white animate-pulse">
+                                  New Student Msg
+                                </span>
+                              )}
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                  c.totalMessages > 0
+                                    ? 'bg-[#ffb531] text-[#1a1100]'
+                                    : 'bg-slate-200 text-slate-600'
+                                }`}
+                              >
+                                {c.totalMessages} msg
+                              </span>
+                            </div>
                           </div>
 
                           {c.lastMessage ? (
                             <div className="text-[11px] text-slate-600 line-clamp-1 flex items-center justify-between gap-2">
                               <span className="truncate">
-                                <strong className="text-slate-800">{c.lastMessage.senderName}: </strong>
+                                <strong className={isStudentWaiting ? 'text-red-700' : 'text-slate-800'}>
+                                  {c.lastMessage.senderName}:{' '}
+                                </strong>
                                 {c.lastMessage.message}
                               </span>
                               <span className="text-[9px] text-slate-600 shrink-0">

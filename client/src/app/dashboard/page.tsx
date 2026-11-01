@@ -1014,17 +1014,50 @@ export default function StudentDashboardPage() {
             {activeTab === 'chat' && (
               <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden flex flex-col h-[540px] sm:h-[620px] shadow-sm">
                 {/* Chat Header */}
-                <div className="bg-slate-50 border-b border-slate-200 p-4 sm:p-5 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-black text-slate-950 flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Course Instructor &amp; Support Discussion
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5 font-medium">Direct line with Engr. Md Abdul Mazid &amp; Course Admin</p>
+                <div className="bg-slate-50 border-b border-slate-200 p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm sm:text-base font-black text-slate-950 flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Course Instructor &amp; Support Discussion
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                        Active Room: <strong className="text-blue-800">{courseDetails?.title || 'Course Room'}</strong>
+                      </p>
+                    </div>
+                    <span className="text-xs text-blue-700 font-extrabold bg-blue-50 px-3 py-1 rounded-full border border-blue-200 w-fit">
+                      🟢 Live Chat (3.5s Sync)
+                    </span>
                   </div>
-                  <span className="text-xs text-blue-700 font-extrabold bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                    Batch Active
-                  </span>
+
+                  {/* Course switcher if student has multiple enrolled courses */}
+                  {enrolledList.length > 1 && (
+                    <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                      <span className="text-[11px] font-extrabold uppercase text-slate-500 shrink-0">Switch Course Room:</span>
+                      {enrolledList.map((item: any) => {
+                        const c = item.course;
+                        if (!c) return null;
+                        const isCurrent = c._id === selectedCourseId;
+                        return (
+                          <button
+                            key={c._id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCourseId(c._id);
+                              loadCourseData(c._id);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 text-xs shadow-xs ${
+                              isCurrent
+                                ? 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400'
+                                : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
+                            }`}
+                          >
+                            <span>{c.title}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Messages Feed */}
