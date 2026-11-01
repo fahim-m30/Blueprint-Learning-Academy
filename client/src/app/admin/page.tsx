@@ -251,7 +251,7 @@ export default function AdminPortalPage() {
     }
   }, [courseChat, courseSubTab]);
 
-  // Live Real-Time Auto-Polling (every 3.0s) for Pending Enrollments, Payments & Overview Stats
+  // Live Real-Time Auto-Polling (every 1.5s) for Pending Enrollments, Payments & Overview Stats
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     interval = setInterval(async () => {
@@ -267,14 +267,14 @@ export default function AdminPortalPage() {
           setStats(overviewRes.data.stats);
         }
       } catch {}
-    }, 3000);
+    }, 1500);
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, []);
 
-  // Live Real-Time Auto-Polling (every 2.5s) inside Course Hub (Chat, Students, Tasks)
+  // Live Ultra-Fast Real-Time Auto-Polling (every 1.0s) inside Course Hub (Chat, Students, Tasks)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (selectedCourseId) {
@@ -294,14 +294,14 @@ export default function AdminPortalPage() {
             setCourseChat(msgs);
           }
         } catch {}
-      }, 2500);
+      }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [selectedCourseId]);
 
-  // Live Real-Time Auto-Polling (every 3.0s) when viewing Student CVs
+  // Live Real-Time Auto-Polling (every 1.5s) when viewing Student CVs
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (activeMainTab === 'cvs') {
@@ -312,7 +312,7 @@ export default function AdminPortalPage() {
             setAllStudentCvs(res.data.students);
           }
         } catch {}
-      }, 3000);
+      }, 1500);
     }
     return () => {
       if (interval) clearInterval(interval);

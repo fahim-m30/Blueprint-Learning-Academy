@@ -67,7 +67,7 @@ export default function StudentDashboardPage() {
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-poll for live chat messages in real-time
-  // Live Real-Time Auto-Polling for Student Dashboard & Course Hub (every 2.5s)
+  // Live Ultra-Fast Real-Time Auto-Polling for Student Dashboard & Course Hub (every 1.0s)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     interval = setInterval(async () => {
@@ -97,7 +97,7 @@ export default function StudentDashboardPage() {
           }
         }
       } catch {}
-    }, 2500);
+    }, 1000);
 
     return () => {
       if (interval) clearInterval(interval);
