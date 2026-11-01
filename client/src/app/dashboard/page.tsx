@@ -67,23 +67,42 @@ export default function StudentDashboardPage() {
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-poll for live chat messages in real-time
+  // Live Real-Time Auto-Polling for Student Dashboard & Course Hub (every 2.5s)
   useEffect(() => {
-    if (!selectedCourseId) return;
-
-    // Fetch every 2s when active on chat tab, or every 10s otherwise
-    const pollInterval = activeTab === 'chat' ? 2000 : 10000;
-    const interval = setInterval(async () => {
+    let interval: NodeJS.Timeout | null = null;
+    interval = setInterval(async () => {
       try {
-        const chatRes: any = await apiRequest(`/student/course/${selectedCourseId}/chat`);
-        const msgs = chatRes.data?.messages || chatRes.messages;
-        if (chatRes.success && msgs) {
-          setChatMessages(msgs);
+        // 1. Sync student profile, enrollment approvals, and CV review feedback
+        const res = await apiRequest('/student/dashboard');
+        if (res.success && res.data) {
+          if (res.data.student) setStudentInfo(res.data.student);
+          if (res.data.enrolledCourses) setEnrolledList(res.data.enrolledCourses);
+          if (res.data.student?.cv) setStudentCv(res.data.student.cv);
+        }
+
+        // 2. If a course is selected, sync live classes, notices, task grades/submissions, and chat
+        if (selectedCourseId) {
+          const [cRes, chatRes] = await Promise.all([
+            apiRequest(`/student/course/${selectedCourseId}`),
+            apiRequest(`/student/course/${selectedCourseId}/chat`),
+          ]);
+          if (cRes.success && cRes.data?.course) {
+            setCourseDetails(cRes.data.course);
+            if (cRes.data.mySubmissions) setMySubmissions(cRes.data.mySubmissions);
+            if (cRes.data.completedVideos) setCompletedVideos(cRes.data.completedVideos);
+          }
+          const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
+          if (chatRes.success && msgs) {
+            setChatMessages(msgs);
+          }
         }
       } catch {}
-    }, pollInterval);
+    }, 2500);
 
-    return () => clearInterval(interval);
-  }, [selectedCourseId, activeTab]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [selectedCourseId]);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -91,22 +110,6 @@ export default function StudentDashboardPage() {
       chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages, activeTab]);
-
-  // Real-time polling for CV status & Admin review feedback when activeTab === 'cv'
-  useEffect(() => {
-    if (activeTab !== 'cv') return;
-
-    const cvPoll = setInterval(async () => {
-      try {
-        const res = await apiRequest('/student/dashboard');
-        if (res.success && res.data?.student?.cv) {
-          setStudentCv(res.data.student.cv);
-        }
-      } catch {}
-    }, 3000);
-
-    return () => clearInterval(cvPoll);
-  }, [activeTab]);
 
   useEffect(() => {
     const token = getAuthToken();

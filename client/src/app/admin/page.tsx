@@ -251,24 +251,57 @@ export default function AdminPortalPage() {
     }
   }, [courseChat, courseSubTab]);
 
-  // Live Real-Time Auto-Polling (every 2.5s) inside Course Messenger
+  // Live Real-Time Auto-Polling (every 3.0s) for Pending Enrollments, Payments & Overview Stats
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (selectedCourseId && courseSubTab === 'chat') {
-      interval = setInterval(async () => {
-        const res: any = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
-        const msgs = res.data?.messages || res.messages;
-        if (res.success && msgs) {
-          setCourseChat(msgs);
+    interval = setInterval(async () => {
+      try {
+        const [enrollRes, overviewRes] = await Promise.all([
+          apiRequest('/admin/enrollments'),
+          apiRequest('/admin/overview'),
+        ]);
+        if (enrollRes.success && enrollRes.data?.enrollments) {
+          setEnrollments(enrollRes.data.enrollments);
         }
+        if (overviewRes.success && overviewRes.data?.stats) {
+          setStats(overviewRes.data.stats);
+        }
+      } catch {}
+    }, 3000);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
+  // Live Real-Time Auto-Polling (every 2.5s) inside Course Hub (Chat, Students, Tasks)
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (selectedCourseId) {
+      interval = setInterval(async () => {
+        try {
+          const [cRes, chatRes] = await Promise.all([
+            apiRequest(`/admin/courses/${selectedCourseId}`),
+            apiRequest(`/admin/courses/${selectedCourseId}/chat`),
+          ]);
+          if (cRes.success && cRes.data) {
+            setSelectedCourseData(cRes.data.course);
+            if (cRes.data.students) setCourseStudents(cRes.data.students);
+            if (cRes.data.taskSubmissions) setCourseSubmissions(cRes.data.taskSubmissions);
+          }
+          const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
+          if (chatRes.success && msgs) {
+            setCourseChat(msgs);
+          }
+        } catch {}
       }, 2500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [selectedCourseId, courseSubTab]);
+  }, [selectedCourseId]);
 
-  // Live Real-Time Auto-Polling (every 3.5s) when viewing Student CVs
+  // Live Real-Time Auto-Polling (every 3.0s) when viewing Student CVs
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (activeMainTab === 'cvs') {
@@ -279,7 +312,7 @@ export default function AdminPortalPage() {
             setAllStudentCvs(res.data.students);
           }
         } catch {}
-      }, 3500);
+      }, 3000);
     }
     return () => {
       if (interval) clearInterval(interval);
