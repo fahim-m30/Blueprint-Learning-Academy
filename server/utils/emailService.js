@@ -571,6 +571,23 @@ const sendEnrollmentApprovedEmail = async ({
 const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) => {
   const currentYear = new Date().getFullYear();
 
+  const textContent = `Hello ${studentName},
+
+This is an official notice regarding your student account access at Blueprint Learning Academy.
+
+Your student dashboard access has been temporarily restricted by the academy administration.
+
+Official Reason Provided:
+"${reason}"
+
+If you believe this is an error or wish to clear your account status, please contact our support desk directly:
+• WhatsApp Support: https://wa.me/8801313916161
+• Direct Helpline: +880 1313-916161 | +880 1313-893838
+
+Blueprint Learning Academy
+Practical Engineering & Real Estate Career Development
+Dhaka, Bangladesh`;
+
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -701,8 +718,176 @@ const sendAccountBlockedEmail = async ({ studentName, studentEmail, reason }) =>
 
   return await dispatchMail({
     to: studentEmail,
-    subject: `Important: Your Student Account Status Notice - Blueprint Learning Academy`,
+    subject: `Student Account Status Update: Action Required - Blueprint Learning Academy`,
     html: htmlContent,
+    text: textContent,
+  });
+};
+
+/**
+ * Send Account Unblock / Reinstatement Notification
+ */
+const sendAccountUnblockedEmail = async ({ studentName, studentEmail }) => {
+  const currentYear = new Date().getFullYear();
+
+  const textContent = `Hello ${studentName},
+
+Great news! Your Blueprint Learning Academy student account access has been fully restored.
+
+You can now log into your student dashboard to access all your enrolled courses, recorded video lessons, live classes, and task submissions.
+
+Login to Dashboard: https://blueprint-learning-academy.vercel.app/login
+
+If you need any assistance, our support team is available 24/7:
+• WhatsApp Support: https://wa.me/8801313916161
+• Direct Helpline: +880 1313-916161 | +880 1313-893838
+
+Best regards,
+Blueprint Learning Academy Team
+Dhaka, Bangladesh`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Restored - Blueprint Learning Academy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #334155;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f1f5f9;
+      padding: 30px 10px 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .logo-container {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      border: 3px solid #6ee7b7;
+      background-color: #ffffff;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+    .content-body {
+      padding: 32px 30px;
+    }
+    .success-card {
+      background-color: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-left: 5px solid #10b981;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .footer {
+      background-color: #091224;
+      padding: 24px 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header-banner">
+        <div class="logo-container">
+          <img src="${PUBLIC_LOGO_URL}" alt="Blueprint Learning Academy" class="logo-img" width="82" height="82" />
+        </div>
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
+          Blueprint <span style="color: #a7f3d0;">Learning Academy</span>
+        </h1>
+        <p style="color: #d1fae5; margin: 6px 0 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+          Account Access Reinstated
+        </p>
+      </div>
+
+      <div class="content-body">
+        <h2 style="color: #065f46; margin-top: 0; font-size: 20px; font-weight: 900;">
+          Welcome Back! Your Access is Restored
+        </h2>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          Dear <strong>${studentName}</strong>,
+        </p>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          Your student dashboard access at <strong>Blueprint Learning Academy</strong> has been officially reinstated by our administration.
+        </p>
+
+        <div class="success-card">
+          <div style="font-size: 11px; font-weight: 800; color: #047857; text-transform: uppercase; margin-bottom: 4px;">
+            Account Status:
+          </div>
+          <div style="font-size: 14px; color: #064e3b; font-weight: 700; line-height: 1.5;">
+            Active &amp; Fully Verified
+          </div>
+          <p style="font-size: 12px; color: #047857; margin: 6px 0 0;">
+            You can now view your enrolled courses, watch class recordings, submit assignments, and participate in discussion chats.
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0 20px;">
+          <a href="https://blueprint-learning-academy.vercel.app/login" style="display: inline-block; background-color: #059669; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 800; padding: 14px 34px; border-radius: 12px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);" target="_blank">
+            Login to Student Dashboard &rarr;
+          </a>
+        </div>
+
+        <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 10px;">
+          If you encounter any issues logging in, please contact our support desk on WhatsApp.
+        </p>
+
+        <div style="text-align: center; margin-top: 18px;">
+          <a href="https://wa.me/8801313916161" style="display: inline-block; background-color: #22c55e; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 10px 22px; border-radius: 8px;" target="_blank">
+            WhatsApp Support: +880 1313-916161
+          </a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <strong style="color: #ffffff;">Blueprint Learning Academy</strong><br>
+        Direct Helpline: +880 1313-916161 | +880 1313-893838<br>
+        © ${currentYear} Blueprint Learning Academy. Dhaka, Bangladesh.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  return await dispatchMail({
+    to: studentEmail,
+    subject: `Student Account Restored - Blueprint Learning Academy Access Reinstated`,
+    html: htmlContent,
+    text: textContent,
   });
 };
 
@@ -966,5 +1151,6 @@ module.exports = {
   dispatchMail,
   sendEnrollmentApprovedEmail,
   sendAccountBlockedEmail,
+  sendAccountUnblockedEmail,
   sendPasswordResetOtpEmail,
 };

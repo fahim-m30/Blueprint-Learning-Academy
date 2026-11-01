@@ -147,6 +147,7 @@ export default function AdminPortalPage() {
   // Block modal state
   const [blockingUser, setBlockingUser] = useState<any | null>(null);
   const [blockReasonInput, setBlockReasonInput] = useState('');
+  const [blockingLoading, setBlockingLoading] = useState(false);
   const [sendingTestEmail, setSendingTestEmail] = useState(false);
 
   // Feedback notifications
@@ -542,6 +543,8 @@ export default function AdminPortalPage() {
     e.preventDefault();
     if (!blockingUser) return;
 
+    setBlockingLoading(true);
+    showAlert('Suspending student and dispatching official notice email...');
     const res = await apiRequest(`/admin/users/${blockingUser._id}/status`, {
       method: 'POST',
       body: JSON.stringify({
@@ -549,9 +552,10 @@ export default function AdminPortalPage() {
         blockReason: blockReasonInput.trim(),
       }),
     });
+    setBlockingLoading(false);
 
     if (res.success) {
-      showAlert(`User has been blocked. Notification email sent to ${blockingUser.email}`);
+      showAlert(res.message || `User has been blocked. Notification email sent to ${blockingUser.email}`);
       setBlockingUser(null);
       setBlockReasonInput('');
       if (selectedCourseId) loadCourseHub(selectedCourseId);
@@ -560,14 +564,17 @@ export default function AdminPortalPage() {
     }
   };
 
-  const handleUnblockUser = async (userId: string) => {
+  const handleUnblockUser = async (userId: string, studentName?: string, studentEmail?: string) => {
+    showAlert('Reinstating account & sending confirmation email to student...');
     const res = await apiRequest(`/admin/users/${userId}/status`, {
       method: 'POST',
       body: JSON.stringify({ status: 'active' }),
     });
     if (res.success) {
-      showAlert('User account reinstated to Active.');
+      showAlert(res.message || `User account reinstated to Active! Confirmation email dispatched${studentEmail ? ` to ${studentEmail}` : ''}.`);
       if (selectedCourseId) loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Error unblocking user.', 'error');
     }
   };
 
@@ -1412,7 +1419,7 @@ export default function AdminPortalPage() {
                                 <td className="p-3.5 text-right">
                                   {st.status === 'blocked' ? (
                                     <button
-                                      onClick={() => handleUnblockUser(st._id)}
+                                      onClick={() => handleUnblockUser(st._id, st.name, st.email)}
                                       className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-extrabold transition shadow-xs"
                                     >
                                       Unblock
@@ -3511,9 +3518,10 @@ export default function AdminPortalPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold shadow"
+                  disabled={blockingLoading}
+                  className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold shadow flex items-center gap-1.5"
                 >
-                  Confirm &amp; Send Block Email
+                  {blockingLoading ? 'Sending Notice Email...' : 'Confirm & Send Block Email'}
                 </button>
               </div>
             </form>

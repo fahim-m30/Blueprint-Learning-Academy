@@ -8,7 +8,11 @@ const TaskSubmission = require('../models/TaskSubmission');
 const ChatMessage = require('../models/ChatMessage');
 const SiteSettings = require('../models/SiteSettings');
 const { verifyToken, requireAdmin } = require('../middleware/auth');
-const { sendEnrollmentApprovedEmail, sendAccountBlockedEmail } = require('../utils/emailService');
+const {
+  sendEnrollmentApprovedEmail,
+  sendAccountBlockedEmail,
+  sendAccountUnblockedEmail,
+} = require('../utils/emailService');
 const { cleanExpiredCoursesNow } = require('../services/cronService');
 
 // All admin routes require valid admin token
@@ -868,15 +872,34 @@ router.post('/users/:userId/status', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
+    const previousStatus = user.status;
     user.status = status;
+
+    let emailDispatched = false;
+
     if (status === 'blocked') {
       user.blockReason = blockReason || 'Policy violation. Contact support.';
-      // Automatically send notification email explaining reason
-      await sendAccountBlockedEmail({
-        studentName: user.name,
-        studentEmail: user.email,
-        reason: user.blockReason,
-      });
+      try {
+        const mailResult = await sendAccountBlockedEmail({
+          studentName: user.name,
+          studentEmail: user.email,
+          reason: user.blockReason,
+        });
+        emailDispatched = mailResult?.success === true;
+      } catch (mailErr) {
+        console.warn('⚠️ Block notification email warning:', mailErr.message);
+      }
+    } else if (status === 'active') {
+      user.blockReason = '';
+      try {
+        const mailResult = await sendAccountUnblockedEmail({
+          studentName: user.name,
+          studentEmail: user.email,
+        });
+        emailDispatched = mailResult?.success === true;
+      } catch (mailErr) {
+        console.warn('⚠️ Unblock confirmation email warning:', mailErr.message);
+      }
     } else {
       user.blockReason = '';
     }
@@ -885,7 +908,13 @@ router.post('/users/:userId/status', async (req, res) => {
 
     res.json({
       success: true,
-      message: `User status changed to ${status}.${status === 'blocked' ? ' Notification email dispatched.' : ''}`,
+      emailDispatched,
+      message:
+        status === 'blocked'
+          ? `User status changed to blocked.${emailDispatched ? ' Official notice email dispatched to student.' : ''}`
+          : status === 'active'
+          ? `User unblocked and reinstated to Active.${emailDispatched ? ' Reinstatement email dispatched to student.' : ''}`
+          : `User status changed to ${status}.`,
       user: {
         id: user._id,
         name: user.name,
