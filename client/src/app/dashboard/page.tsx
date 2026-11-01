@@ -70,13 +70,14 @@ export default function StudentDashboardPage() {
   useEffect(() => {
     if (!selectedCourseId) return;
 
-    // Fetch every 3.5s when active on chat tab, or every 15s otherwise
-    const pollInterval = activeTab === 'chat' ? 3500 : 15000;
+    // Fetch every 2s when active on chat tab, or every 10s otherwise
+    const pollInterval = activeTab === 'chat' ? 2000 : 10000;
     const interval = setInterval(async () => {
       try {
-        const chatRes = await apiRequest(`/student/course/${selectedCourseId}/chat`);
-        if (chatRes.success && chatRes.data?.messages) {
-          setChatMessages(chatRes.data.messages);
+        const chatRes: any = await apiRequest(`/student/course/${selectedCourseId}/chat`);
+        const msgs = chatRes.data?.messages || chatRes.messages;
+        if (chatRes.success && msgs) {
+          setChatMessages(msgs);
         }
       } catch {}
     }, pollInterval);

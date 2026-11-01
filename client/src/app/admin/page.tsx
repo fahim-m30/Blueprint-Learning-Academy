@@ -57,15 +57,11 @@ export default function AdminPortalPage() {
   const [savingSection, setSavingSection] = useState<string | null>(null);
 
   // Active view
-  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'chat' | 'cvs' | 'settings' | 'security'>('overview');
+  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security'>('overview');
 
-  // Centralized Chat Hub States
-  const [allCourseChats, setAllCourseChats] = useState<any[]>([]);
-  const [selectedChatCourseId, setSelectedChatCourseId] = useState<string | null>(null);
-  const [chatHubMessages, setChatHubMessages] = useState<any[]>([]);
-  const [chatHubInput, setChatHubInput] = useState('');
-  const [chatHubLoading, setChatHubLoading] = useState(false);
-  const chatHubBottomRef = useRef<HTMLDivElement | null>(null);
+  // Course Messenger States
+  const [selectedChatStudentId, setSelectedChatStudentId] = useState<string | null>(null);
+  const [chatStudentSearch, setChatStudentSearch] = useState('');
   const courseChatBottomRef = useRef<HTMLDivElement | null>(null);
 
   // Admin Team & Password Verification States
@@ -225,8 +221,6 @@ export default function AdminPortalPage() {
       setAllStudentCvs(cvsRes.data.students);
     }
 
-    loadAllCourseChats();
-
     try {
       localStorage.setItem(
         'bpa_admin_cache',
@@ -251,108 +245,28 @@ export default function AdminPortalPage() {
     setCvLoading(false);
   };
 
-  const loadAllCourseChats = async () => {
-    try {
-      const res: any = await apiRequest('/admin/chats/all');
-      const chats = res.data?.courseChats || res.courseChats;
-      if (res.success && chats) {
-        setAllCourseChats(chats);
-        setSelectedChatCourseId((prev) => {
-          if (prev && chats.some((c: any) => c.courseId === prev)) return prev;
-          return chats.length > 0 ? chats[0].courseId : null;
-        });
-      }
-    } catch (e) {
-      console.error('Error loading all course chats:', e);
-    }
-  };
-
-  const loadChatHubMessages = async (courseId: string) => {
-    try {
-      setChatHubLoading(true);
-      const res = await apiRequest(`/admin/courses/${courseId}/chat`);
-      if (res.success && res.data) {
-        setChatHubMessages(res.data.messages || []);
-      }
-    } catch (e) {
-      console.error('Error loading chat hub messages:', e);
-    } finally {
-      setChatHubLoading(false);
-    }
-  };
-
-  const handleSendChatHubMsg = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedChatCourseId || !chatHubInput.trim()) return;
-    const msgToSend = chatHubInput.trim();
-    setChatHubInput('');
-    try {
-      const res = await apiRequest(`/admin/courses/${selectedChatCourseId}/chat`, {
-        method: 'POST',
-        body: JSON.stringify({ message: msgToSend }),
-      });
-      if (res.success && res.data?.message) {
-        setChatHubMessages((prev) => [...prev, res.data.message]);
-        loadAllCourseChats();
-      }
-    } catch (e) {
-      console.error('Error sending chat hub message:', e);
-    }
-  };
-
-  useEffect(() => {
-    if (activeMainTab === 'chat') {
-      loadAllCourseChats();
-    }
-  }, [activeMainTab]);
-
-  useEffect(() => {
-    if (activeMainTab === 'chat' && selectedChatCourseId) {
-      loadChatHubMessages(selectedChatCourseId);
-    }
-  }, [activeMainTab, selectedChatCourseId]);
-
-  useEffect(() => {
-    if (activeMainTab === 'chat' && chatHubBottomRef.current) {
-      chatHubBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chatHubMessages, activeMainTab]);
-
   useEffect(() => {
     if (courseChatBottomRef.current && courseSubTab === 'chat') {
       courseChatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [courseChat, courseSubTab]);
 
-  // Live Auto-Polling (every 3.5s)
+  // Live Real-Time Auto-Polling (every 2.5s) inside Course Messenger
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (activeMainTab === 'chat' && selectedChatCourseId) {
+    if (selectedCourseId && courseSubTab === 'chat') {
       interval = setInterval(async () => {
-        const [cRes, allRes]: any[] = await Promise.all([
-          apiRequest(`/admin/courses/${selectedChatCourseId}/chat`),
-          apiRequest('/admin/chats/all'),
-        ]);
-        if (cRes.success && cRes.data?.messages) {
-          setChatHubMessages(cRes.data.messages);
+        const res: any = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
+        const msgs = res.data?.messages || res.messages;
+        if (res.success && msgs) {
+          setCourseChat(msgs);
         }
-        const chats = allRes.data?.courseChats || allRes.courseChats;
-        if (allRes.success && chats) {
-          setAllCourseChats(chats);
-        }
-      }, 3500);
-    } else if (selectedCourseId && courseSubTab === 'chat') {
-      interval = setInterval(async () => {
-        const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
-        if (res.success && res.data?.messages) {
-          setCourseChat(res.data.messages);
-        }
-      }, 3500);
+      }, 2500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [activeMainTab, selectedChatCourseId, selectedCourseId, courseSubTab]);
+  }, [selectedCourseId, courseSubTab]);
 
   const handleSaveCvFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1131,27 +1045,6 @@ export default function AdminPortalPage() {
           </button>
 
           <button
-            onClick={() => {
-              setActiveMainTab('chat');
-              setSelectedCourseId(null);
-              loadAllCourseChats();
-            }}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
-              activeMainTab === 'chat'
-                ? 'bg-blue-700 text-white shadow-md'
-                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
-            }`}
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Student Messages &amp; Chat Hub</span>
-            {allCourseChats.reduce((acc, c) => acc + (c.totalMessages || 0), 0) > 0 && (
-              <span className="min-w-5 h-5 px-1.5 rounded-full bg-[#ffb531] text-[#1a1100] text-xs font-black flex items-center justify-center">
-                {allCourseChats.reduce((acc, c) => acc + (c.totalMessages || 0), 0)}
-              </span>
-            )}
-          </button>
-
-          <button
             onClick={() => setActiveMainTab('settings')}
             className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs ${
               activeMainTab === 'settings'
@@ -1284,7 +1177,12 @@ export default function AdminPortalPage() {
                     }`}
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Student Discussion Chat
+                    Student Discussion Messenger
+                    {courseChat.length > 0 && (
+                      <span className="min-w-5 h-5 px-1.5 rounded-full bg-blue-700 text-white text-[10px] font-black flex items-center justify-center">
+                        {courseChat.length}
+                      </span>
+                    )}
                   </button>
                 </div>
 
@@ -1704,67 +1602,338 @@ export default function AdminPortalPage() {
                   </div>
                 )}
 
-                {/* HUB TAB 5: ADMIN CHAT WITH STUDENTS */}
+                {/* HUB TAB 5: MESSENGER - REAL-TIME STUDENT CHAT */}
                 {courseSubTab === 'chat' && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[480px]">
-                    <div className="px-4 py-2.5 bg-blue-50 border-b border-blue-200 flex items-center justify-between text-xs">
-                      <span className="font-bold text-blue-900">
-                        💬 Chatting in: <strong>{selectedCourseData?.title}</strong>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveMainTab('chat');
-                          setSelectedCourseId(null);
-                        }}
-                        className="text-[11px] font-extrabold text-blue-700 hover:underline flex items-center gap-1"
-                      >
-                        Open All-Courses Chat Hub &rarr;
-                      </button>
-                    </div>
-                    <div className="flex-1 p-4 overflow-y-auto space-y-3">
-                      {courseChat.length === 0 ? (
-                        <p className="text-center py-8 text-xs text-slate-600">No discussion in this course room yet.</p>
-                      ) : (
-                        courseChat.map((msg, idx) => {
-                          const isAdmin = msg.senderRole === 'admin';
+                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col md:flex-row h-[620px]">
+                    {/* LEFT SIDEBAR: STUDENTS OF THIS COURSE (MESSENGER INBOX LIST) */}
+                    <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 bg-slate-50 flex flex-col h-64 md:h-auto shrink-0">
+                      {/* Search & Header */}
+                      <div className="p-3.5 border-b border-slate-200 bg-white">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <h4 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+                            <MessageSquare className="w-3.5 h-3.5 text-blue-700" /> Course Messenger
+                          </h4>
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-900">
+                            {courseStudents.length} Students
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={chatStudentSearch}
+                          onChange={(e) => setChatStudentSearch(e.target.value)}
+                          placeholder="Search student by name/ID..."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:bg-white focus:ring-1 focus:ring-blue-600"
+                        />
+                      </div>
 
-                          return (
-                            <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
-                              <span className="text-[10px] text-slate-600 mb-0.5 px-1">
-                                {msg.senderName} ({msg.senderRole})
-                              </span>
-                              <div
-                                className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-xs ${
-                                  isAdmin
-                                    ? 'bg-blue-700 text-white rounded-br-none'
-                                    : 'bg-white text-slate-900 border border-slate-200 rounded-bl-none'
+                      {/* Student Conversations List */}
+                      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+                        {/* Option 1: View Entire Course Room (All Messages) */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedChatStudentId(null)}
+                          className={`w-full text-left p-2.5 rounded-xl transition flex items-center gap-2.5 border ${
+                            selectedChatStudentId === null
+                              ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                              : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200'
+                          }`}
+                        >
+                          <div
+                            className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                              selectedChatStudentId === null ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                            }`}
+                          >
+                            👥
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs font-black truncate">Entire Course Room</span>
+                              <span
+                                className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                                  selectedChatStudentId === null ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'
                                 }`}
                               >
-                                {msg.message}
-                              </div>
+                                {courseChat.length}
+                              </span>
                             </div>
-                          );
-                        })
-                      )}
-                      <div ref={courseChatBottomRef} />
+                            <p
+                              className={`text-[11px] truncate ${
+                                selectedChatStudentId === null ? 'text-blue-100' : 'text-slate-500'
+                              }`}
+                            >
+                              All discussion in this course
+                            </p>
+                          </div>
+                        </button>
+
+                        <div className="pt-1.5 pb-0.5 px-1 flex items-center justify-between text-[10px] font-black uppercase text-slate-500">
+                          <span>Individual Students</span>
+                          <span>Last Activity</span>
+                        </div>
+
+                        {/* List of enrolled students in this course */}
+                        {(() => {
+                          const filtered = courseStudents.filter((st: any) => {
+                            if (!chatStudentSearch.trim()) return true;
+                            const q = chatStudentSearch.toLowerCase();
+                            return (
+                              st.name?.toLowerCase().includes(q) ||
+                              st.email?.toLowerCase().includes(q) ||
+                              st.studentId?.toLowerCase().includes(q)
+                            );
+                          });
+
+                          // Sort: Students with messages or recent messages first
+                          const sorted = [...filtered].sort((a: any, b: any) => {
+                            const aMsgs = courseChat.filter(
+                              (m: any) => m.sender === a._id || m.senderName === a.name
+                            );
+                            const bMsgs = courseChat.filter(
+                              (m: any) => m.sender === b._id || m.senderName === b.name
+                            );
+                            const aLast = aMsgs[aMsgs.length - 1];
+                            const bLast = bMsgs[bMsgs.length - 1];
+                            const aTime = aLast ? new Date(aLast.createdAt).getTime() : 0;
+                            const bTime = bLast ? new Date(bLast.createdAt).getTime() : 0;
+                            return bTime - aTime;
+                          });
+
+                          if (sorted.length === 0) {
+                            return (
+                              <p className="text-[11px] text-slate-400 text-center py-6">
+                                No students found.
+                              </p>
+                            );
+                          }
+
+                          return sorted.map((st: any) => {
+                            const isSelected = selectedChatStudentId === st._id;
+                            const studentMsgs = courseChat.filter(
+                              (m: any) => m.sender === st._id || m.senderName === st.name
+                            );
+                            const lastMsg = studentMsgs[studentMsgs.length - 1];
+                            const hasStudentUnreplied = lastMsg && lastMsg.senderRole === 'student';
+
+                            return (
+                              <button
+                                key={st._id}
+                                type="button"
+                                onClick={() => setSelectedChatStudentId(st._id)}
+                                className={`w-full text-left p-2.5 rounded-xl transition flex items-center gap-2.5 border ${
+                                  isSelected
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                    : hasStudentUnreplied
+                                    ? 'bg-amber-50 hover:bg-amber-100 border-amber-300'
+                                    : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200'
+                                }`}
+                              >
+                                <div className="relative shrink-0">
+                                  <div
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-xs uppercase ${
+                                      isSelected
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                                    }`}
+                                  >
+                                    {st.name?.charAt(0) || 'S'}
+                                  </div>
+                                  {hasStudentUnreplied && (
+                                    <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-ping" />
+                                  )}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="text-xs font-bold truncate">{st.name}</span>
+                                    {lastMsg && (
+                                      <span
+                                        className={`text-[9px] shrink-0 ${
+                                          isSelected ? 'text-blue-100' : 'text-slate-400'
+                                        }`}
+                                      >
+                                        {new Date(lastMsg.createdAt).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center justify-between gap-1 mt-0.5">
+                                    <p
+                                      className={`text-[11px] truncate ${
+                                        isSelected
+                                          ? 'text-blue-100'
+                                          : hasStudentUnreplied
+                                          ? 'text-red-700 font-bold'
+                                          : 'text-slate-500'
+                                      }`}
+                                    >
+                                      {lastMsg ? lastMsg.message : (st.studentId || st.email)}
+                                    </p>
+                                    {hasStudentUnreplied && (
+                                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-red-600 text-white shrink-0">
+                                        Waiting
+                                      </span>
+                                    )}
+                                    {studentMsgs.length > 0 && !hasStudentUnreplied && (
+                                      <span
+                                        className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${
+                                          isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'
+                                        }`}
+                                      >
+                                        {studentMsgs.length}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          });
+                        })()}
+                      </div>
                     </div>
 
-                    <form onSubmit={handleSendAdminChat} className="p-3 bg-white border-t border-slate-200 flex gap-2">
-                      <input
-                        type="text"
-                        value={adminChatMsg}
-                        onChange={(e) => setAdminChatMsg(e.target.value)}
-                        placeholder="Reply to students in this course..."
-                        className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 outline-none"
-                      />
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-[#ffb531] text-[#1a1100] font-bold text-xs rounded-lg flex items-center gap-1 shadow"
-                      >
-                        <Send className="w-3.5 h-3.5" /> Reply
-                      </button>
-                    </form>
+                    {/* RIGHT PANEL: LIVE MESSENGER CHAT WINDOW */}
+                    <div className="flex-1 flex flex-col bg-slate-100/70 overflow-hidden">
+                      {/* Messenger Top Header */}
+                      {(() => {
+                        const targetStudent = selectedChatStudentId
+                          ? courseStudents.find((s: any) => s._id === selectedChatStudentId)
+                          : null;
+
+                        return (
+                          <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between gap-3 shadow-xs">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                {targetStudent ? (targetStudent.name?.charAt(0) || 'S') : '👥'}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-extrabold text-slate-950 flex items-center gap-2">
+                                  {targetStudent ? targetStudent.name : 'Entire Course Group Room'}
+                                  <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live (2s)
+                                  </span>
+                                </h4>
+                                <p className="text-[11px] text-slate-500 font-medium">
+                                  {targetStudent
+                                    ? `ID: ${targetStudent.studentId || 'N/A'} • ${targetStudent.email}`
+                                    : `Discussion room for "${selectedCourseData?.title}" • ${courseChat.length} messages`}
+                                </p>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!selectedCourseId) return;
+                                const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
+                                if (res.success && res.data?.messages) {
+                                  setCourseChat(res.data.messages);
+                                }
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 transition"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" /> Sync
+                            </button>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Messenger Feed */}
+                      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                        {(() => {
+                          const targetStudent = selectedChatStudentId
+                            ? courseStudents.find((s: any) => s._id === selectedChatStudentId)
+                            : null;
+
+                          const displayMessages = targetStudent
+                            ? courseChat.filter(
+                                (m: any) =>
+                                  m.senderRole === 'admin' ||
+                                  m.sender === targetStudent._id ||
+                                  m.senderName === targetStudent.name
+                              )
+                            : courseChat;
+
+                          if (displayMessages.length === 0) {
+                            return (
+                              <div className="text-center py-16 space-y-2">
+                                <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
+                                <p className="text-xs font-bold text-slate-700">No messages yet.</p>
+                                <p className="text-[11px] text-slate-500">
+                                  {targetStudent
+                                    ? `Send a message below to chat with ${targetStudent.name}!`
+                                    : 'Send a message below to broadcast to all students in this course!'}
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          return displayMessages.map((msg: any, idx: number) => {
+                            const isAdmin = msg.senderRole === 'admin';
+
+                            return (
+                              <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
+                                <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] font-semibold text-slate-500">
+                                  <strong className={isAdmin ? 'text-blue-800' : 'text-slate-800'}>
+                                    {isAdmin ? 'Admin / Instructor' : msg.senderName}
+                                  </strong>
+                                  <span
+                                    className={`text-[9px] px-1.5 py-0.2 rounded font-black uppercase ${
+                                      isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-900'
+                                    }`}
+                                  >
+                                    {msg.senderRole}
+                                  </span>
+                                  <span className="text-slate-400 text-[9px]">
+                                    {msg.createdAt
+                                      ? new Date(msg.createdAt).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })
+                                      : ''}
+                                  </span>
+                                </div>
+
+                                <div
+                                  className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
+                                    isAdmin
+                                      ? 'bg-blue-600 text-white rounded-br-xs'
+                                      : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs'
+                                  }`}
+                                >
+                                  {msg.message}
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+                        <div ref={courseChatBottomRef} />
+                      </div>
+
+                      {/* Messenger Input Box */}
+                      <form onSubmit={handleSendAdminChat} className="p-3 bg-white border-t border-slate-200 flex gap-2">
+                        <input
+                          type="text"
+                          value={adminChatMsg}
+                          onChange={(e) => setAdminChatMsg(e.target.value)}
+                          placeholder={
+                            selectedChatStudentId
+                              ? `Type message to ${courseStudents.find((s: any) => s._id === selectedChatStudentId)?.name || 'student'}... (Enter to send)`
+                              : 'Type message to all students in this course... (Enter to send)'
+                          }
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!adminChatMsg.trim()}
+                          className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition"
+                        >
+                          <Send className="w-3.5 h-3.5" /> Send
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2172,221 +2341,6 @@ export default function AdminPortalPage() {
                 </div>
               );
             })()}
-          </div>
-        )}
-
-        {/* ========================================================
-            TAB: STUDENT MESSAGES & CHAT HUB (CENTRALIZED)
-        ======================================================== */}
-        {activeMainTab === 'chat' && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-950 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-blue-700" /> Student Messages &amp; Real-Time Discussion Hub
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
-                  Connect with students in every course room. Messages auto-refresh every 3.5 seconds live.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Sync (3.5s)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    loadAllCourseChats();
-                    if (selectedChatCourseId) loadChatHubMessages(selectedChatCourseId);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[550px]">
-              {/* LEFT COLUMN: COURSE ROOMS LIST */}
-              <div className="lg:col-span-4 bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col h-[580px]">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200 px-1">
-                  <h3 className="text-xs font-black uppercase text-slate-600 tracking-wider">
-                    Courses ({allCourseChats.length})
-                  </h3>
-                  <span className="text-[11px] text-slate-600">Select course to chat</span>
-                </div>
-
-                <div className="flex-1 overflow-y-auto space-y-2 mt-3 pr-1">
-                  {allCourseChats.length === 0 ? (
-                    <p className="text-xs text-slate-600 text-center py-8">No courses available.</p>
-                  ) : (
-                    allCourseChats.map((c) => {
-                      const isSelected = selectedChatCourseId === c.courseId;
-                      const isStudentWaiting = c.lastMessage && c.lastMessage.senderRole === 'student';
-
-                      return (
-                        <button
-                          key={c.courseId}
-                          type="button"
-                          onClick={() => setSelectedChatCourseId(c.courseId)}
-                          className={`w-full text-left p-3 rounded-xl transition border flex flex-col gap-1.5 ${
-                            isSelected
-                              ? 'bg-blue-50 border-blue-400 shadow-xs ring-2 ring-blue-500'
-                              : isStudentWaiting
-                              ? 'bg-amber-50 hover:bg-amber-100 border-amber-400'
-                              : 'bg-white hover:bg-slate-100 border-slate-200'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <h4 className="text-xs font-bold text-slate-900 truncate flex-1">{c.courseTitle}</h4>
-                            <div className="flex items-center gap-1">
-                              {isStudentWaiting && (
-                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-red-600 text-white animate-pulse">
-                                  New Student Msg
-                                </span>
-                              )}
-                              <span
-                                className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                  c.totalMessages > 0
-                                    ? 'bg-[#ffb531] text-[#1a1100]'
-                                    : 'bg-slate-200 text-slate-600'
-                                }`}
-                              >
-                                {c.totalMessages} msg
-                              </span>
-                            </div>
-                          </div>
-
-                          {c.lastMessage ? (
-                            <div className="text-[11px] text-slate-600 line-clamp-1 flex items-center justify-between gap-2">
-                              <span className="truncate">
-                                <strong className={isStudentWaiting ? 'text-red-700' : 'text-slate-800'}>
-                                  {c.lastMessage.senderName}:{' '}
-                                </strong>
-                                {c.lastMessage.message}
-                              </span>
-                              <span className="text-[9px] text-slate-600 shrink-0">
-                                {new Date(c.lastMessage.createdAt).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-[10px] text-slate-600 italic">No messages yet</span>
-                          )}
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: ACTIVE CHAT CONVERSATION */}
-              <div className="lg:col-span-8 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[580px]">
-                {selectedChatCourseId ? (
-                  <>
-                    {/* Chat Header */}
-                    <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between gap-3">
-                      <div>
-                        <h4 className="text-sm font-extrabold text-slate-950">
-                          {allCourseChats.find((c) => c.courseId === selectedChatCourseId)?.courseTitle || 'Course Chat'}
-                        </h4>
-                        <p className="text-[11px] text-slate-600">
-                          Live student &amp; instructor discussion feed • {chatHubMessages.length} total messages
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => loadChatHubMessages(selectedChatCourseId)}
-                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"
-                        title="Reload messages"
-                      >
-                        <RefreshCw className={`w-4 h-4 ${chatHubLoading ? 'animate-spin' : ''}`} />
-                      </button>
-                    </div>
-
-                    {/* Chat Messages Feed */}
-                    <div className="flex-1 p-4 overflow-y-auto space-y-3">
-                      {chatHubMessages.length === 0 ? (
-                        <div className="text-center py-16 space-y-2">
-                          <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
-                          <p className="text-xs font-semibold text-slate-600">
-                            No messages in this course room yet.
-                          </p>
-                          <p className="text-[11px] text-slate-600">
-                            Type a message below to broadcast to all enrolled students in this course!
-                          </p>
-                        </div>
-                      ) : (
-                        chatHubMessages.map((msg, idx) => {
-                          const isAdmin = msg.senderRole === 'admin';
-                          return (
-                            <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
-                              <span className="text-[10px] font-semibold text-slate-600 mb-1 px-1 flex items-center gap-1.5">
-                                <strong className="text-slate-800">{msg.senderName}</strong>
-                                <span
-                                  className={`text-[9px] px-1.5 py-0.2 rounded font-black uppercase ${
-                                    isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-900'
-                                  }`}
-                                >
-                                  {msg.senderRole}
-                                </span>
-                                <span className="text-slate-600 text-[9px]">
-                                  {msg.createdAt
-                                    ? new Date(msg.createdAt).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })
-                                    : ''}
-                                </span>
-                              </span>
-                              <div
-                                className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
-                                  isAdmin
-                                    ? 'bg-blue-700 text-white rounded-br-none'
-                                    : 'bg-white text-slate-900 border border-slate-200 rounded-bl-none'
-                                }`}
-                              >
-                                {msg.message}
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                      <div ref={chatHubBottomRef} />
-                    </div>
-
-                    {/* Chat Reply Input */}
-                    <form onSubmit={handleSendChatHubMsg} className="p-3 bg-white border-t border-slate-200 flex gap-2">
-                      <input
-                        type="text"
-                        value={chatHubInput}
-                        onChange={(e) => setChatHubInput(e.target.value)}
-                        placeholder={`Reply to students in "${allCourseChats.find((c) => c.courseId === selectedChatCourseId)?.courseTitle || 'this course'}"...`}
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition"
-                      />
-                      <button
-                        type="submit"
-                        disabled={!chatHubInput.trim()}
-                        className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition"
-                      >
-                        <Send className="w-3.5 h-3.5" /> Send Reply
-                      </button>
-                    </form>
-                  </>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-2">
-                    <MessageSquare className="w-10 h-10 text-slate-300" />
-                    <p className="text-sm font-bold text-slate-700">Select a course to view discussion</p>
-                    <p className="text-xs text-slate-600">Choose any course from the list on the left to start chatting.</p>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
