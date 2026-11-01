@@ -28,11 +28,12 @@ app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Root health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
+// Root health check & keep-alive endpoints (supports root /, /api/health, /health, /ping)
+app.get(['/', '/api/health', '/health', '/ping'], (req, res) => {
+  res.status(200).json({
     status: 'healthy',
-    service: 'Career Path Academy API',
+    service: 'Blueprint Learning Academy API',
+    uptime: Math.floor(process.uptime()),
     time: new Date().toISOString(),
   });
 });
