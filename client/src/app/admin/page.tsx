@@ -546,25 +546,41 @@ export default function AdminPortalPage() {
   // 3. Add Video
   const handleAddVideo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCourseId || !newVideoTitle || !newVideoUrl) return;
+    if (!selectedCourseId) {
+      showAlert('Please select a course first.', 'error');
+      return;
+    }
+    if (!newVideoTitle.trim() || !newVideoUrl.trim()) {
+      showAlert('Please provide both Video Title and YouTube Link.', 'error');
+      return;
+    }
 
+    let formattedUrl = newVideoUrl.trim();
+    if (formattedUrl && !/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    setSavingSection('video');
     const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos`, {
       method: 'POST',
       body: JSON.stringify({
-        title: newVideoTitle,
-        youtubeUrl: newVideoUrl,
-        duration: newVideoDuration,
-        note: newVideoNote,
+        title: newVideoTitle.trim(),
+        youtubeUrl: formattedUrl,
+        duration: newVideoDuration.trim(),
+        note: newVideoNote.trim(),
       }),
     });
+    setSavingSection(null);
 
     if (res.success) {
-      showAlert('Class video added successfully.');
+      showAlert('✓ Class video added successfully and published to student dashboard.');
       setNewVideoTitle('');
       setNewVideoUrl('');
       setNewVideoDuration('');
       setNewVideoNote('');
       loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(`✕ Error adding video: ${res.message || 'Please check connection.'}`, 'error');
     }
   };
 
@@ -816,10 +832,19 @@ export default function AdminPortalPage() {
   const handleSaveSection = async (sectionKey: string, sectionTitle: string) => {
     if (!siteSettings) return;
 
+    // Auto-format URLs if missing protocol
+    const payload = { ...siteSettings };
+    if (payload.demoClassLink && !/^https?:\/\//i.test(payload.demoClassLink.trim())) {
+      payload.demoClassLink = `https://${payload.demoClassLink.trim()}`;
+    }
+    if (payload.demoVideoUrl && !/^https?:\/\//i.test(payload.demoVideoUrl.trim())) {
+      payload.demoVideoUrl = `https://${payload.demoVideoUrl.trim()}`;
+    }
+
     setSavingSection(sectionKey);
     const res = await apiRequest('/admin/settings', {
       method: 'PUT',
-      body: JSON.stringify(siteSettings),
+      body: JSON.stringify(payload),
     });
     setSavingSection(null);
 
@@ -829,7 +854,7 @@ export default function AdminPortalPage() {
         setSiteSettings(res.data.settings);
       }
     } else {
-      showAlert(`❌ Error saving ${sectionTitle}. Please check connection.`, 'error');
+      showAlert(`❌ Error saving ${sectionTitle}: ${res.message || 'Please check connection.'}`, 'error');
     }
   };
 
@@ -1414,11 +1439,11 @@ export default function AdminPortalPage() {
                         <div>
                           <label className="block text-slate-600 mb-1">YouTube URL / Link *</label>
                           <input
-                            type="url"
+                            type="text"
                             required
                             value={newVideoUrl}
                             onChange={(e) => setNewVideoUrl(e.target.value)}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            placeholder="https://www.youtube.com/watch?v=... or youtu.be/..."
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
@@ -3011,7 +3036,7 @@ export default function AdminPortalPage() {
                       Live Class Meeting URL (Google Meet / Zoom) *
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       value={siteSettings.demoClassLink || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, demoClassLink: e.target.value })}
                       placeholder="https://meet.google.com/xyz-abcd-efg"
@@ -3067,7 +3092,7 @@ export default function AdminPortalPage() {
                       Recorded Demo Video URL (YouTube / Vimeo / MP4) *
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       value={siteSettings.demoVideoUrl || ''}
                       onChange={(e) => setSiteSettings({ ...siteSettings, demoVideoUrl: e.target.value })}
                       placeholder="https://www.youtube.com/watch?v=..."

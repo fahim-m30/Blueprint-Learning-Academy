@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: blueprint-learning-academy
+    env: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && cd server && npm install
+    startCommand: node server/server.js
+    autoDeploy: true
