@@ -229,7 +229,9 @@ export default function HomePage() {
               {/* Bengali Highlight Banner */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-amber-100/50 to-orange-50/60 border-l-4 border-amber-500 border-y border-r border-amber-200 shadow-sm">
                 <p className="text-amber-950 font-black text-sm sm:text-base md:text-lg leading-snug flex items-center gap-2">
-                  <span className="text-amber-600">✨</span> {settings?.heroBengaliNote || 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।'}
+                  <span className="text-amber-600">✨</span> {(!settings?.heroBengaliNote || settings.heroBengaliNote.includes('???'))
+                    ? 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।'
+                    : settings.heroBengaliNote}
                 </p>
               </div>
 
