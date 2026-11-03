@@ -71,6 +71,9 @@ export interface Course {
   notices?: CourseNotice[];
   batchStartDate?: string;
   batchSchedule?: string;
+  demoVideoUrl?: string;
+  demoVideoTitle?: string;
+  demoVideoDescription?: string;
   isActive: boolean;
   createdAt: string;
   expiresAt?: string;

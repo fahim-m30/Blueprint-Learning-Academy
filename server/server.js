@@ -22,11 +22,16 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
 
-// API Routes
+// API Routes (supports both /api/* and root prefixes)
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
+
+app.use('/auth', authRoutes);
+app.use('/public', publicRoutes);
+app.use('/student', studentRoutes);
+app.use('/admin', adminRoutes);
 
 // Root health check & keep-alive endpoints (supports root /, /api, /api/health, /health, /ping, /keep-alive, /status)
 app.get(['/', '/api', '/api/health', '/health', '/ping', '/keep-alive', '/status'], (req, res) => {

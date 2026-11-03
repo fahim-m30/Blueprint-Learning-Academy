@@ -112,6 +112,19 @@ const courseSchema = new mongoose.Schema({
   liveClasses: [liveClassSchema],
   tasks: [taskSchema],
   notices: [noticeSchema],
+  // Public Demo Preview Video for this specific course (displayed on Homepage Demo Section)
+  demoVideoUrl: {
+    type: String,
+    default: '',
+  },
+  demoVideoTitle: {
+    type: String,
+    default: '',
+  },
+  demoVideoDescription: {
+    type: String,
+    default: '',
+  },
   batchStartDate: {
     type: String,
     default: 'Starting Soon',

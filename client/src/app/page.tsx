@@ -14,6 +14,7 @@ import {
   CheckCircle,
   ArrowRight,
   ChevronRight,
+  ChevronLeft,
   Sparkles,
   PhoneCall,
   MessageCircle,
@@ -81,6 +82,9 @@ export default function HomePage() {
   // Modal states
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
   const [selectedCourseForEnroll, setSelectedCourseForEnroll] = useState<Course | null>(null);
+
+  // Dedicated Course Demo Preview Video selector state
+  const [selectedDemoCourseId, setSelectedDemoCourseId] = useState<string>('all');
 
   // Live Notice Board states
   const [noticeCategoryFilter, setNoticeCategoryFilter] = useState<'all' | 'batch_start' | 'vacation' | 'special_notice'>('all');
@@ -173,6 +177,7 @@ export default function HomePage() {
 
   const phone = settings?.contactPhone || '01313893838';
   const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');
+  const selectedDemoCourse = courses.find((c) => c._id === selectedDemoCourseId) || null;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-amber-400 selection:text-slate-950 overflow-x-hidden">
@@ -568,7 +573,7 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             {/* Section Header */}
-            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-4">
+            <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-black tracking-wide shadow-inner">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse"></span>
                 <span>🔴 ফ্রি লাইভ ডেমো ও রেকর্ডেড ক্লাস প্রিভিউ</span>
@@ -579,6 +584,88 @@ export default function HomePage() {
               <p className="text-sm sm:text-base md:text-lg text-slate-300 font-normal leading-relaxed">
                 {settings?.demoClassSubtitle || 'কোর্সে ভর্তি হওয়ার আগেই আমাদের টিচিং কোয়ালিটি ও রিয়েল প্রজেক্ট সাইট সেশন দেখে নিন।'}
               </p>
+            </div>
+
+            {/* Interactive Course Demo Video Selector (Horizontal Scrollable Carousel) */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between gap-3 mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                  <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400">
+                    যে কোর্সের ডেমো দেখতে চান ক্লিক করুন:
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-slate-400">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById('demo-course-scroll-container');
+                      if (el) el.scrollBy({ left: -260, behavior: 'smooth' });
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition"
+                    title="Scroll Left"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById('demo-course-scroll-container');
+                      if (el) el.scrollBy({ left: 260, behavior: 'smooth' });
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition"
+                    title="Scroll Right"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Horizontal Scroll Bar */}
+              <div
+                id="demo-course-scroll-container"
+                className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none scroll-smooth"
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedDemoCourseId('all')}
+                  className={`px-4 py-2.5 rounded-xl font-black text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-2 shrink-0 border ${
+                    selectedDemoCourseId === 'all'
+                      ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/50 scale-[1.02]'
+                      : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700/80 hover:border-slate-600'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>🌟 একাডেমি মাস্টার ডেমো</span>
+                </button>
+
+                {courses.map((c, idx) => {
+                  const isSelected = selectedDemoCourseId === c._id;
+                  const hasCustomVideo = Boolean(c.demoVideoUrl);
+                  return (
+                    <button
+                      type="button"
+                      key={c._id}
+                      onClick={() => setSelectedDemoCourseId(c._id)}
+                      className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-2 shrink-0 border ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-black border-amber-400 shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/50 scale-[1.02]'
+                          : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700/80 hover:border-slate-600'
+                      }`}
+                    >
+                      <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
+                        isSelected ? 'bg-slate-950 text-amber-400' : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        0{idx + 1}
+                      </span>
+                      <span>{c.title}</span>
+                      {hasCustomVideo ? (
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-slate-950 animate-ping' : 'bg-rose-500 animate-pulse'}`} />
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Two-Column Grid: Left (Live Demo Class CTA Card), Right (Embedded Video Player) */}
@@ -666,11 +753,11 @@ export default function HomePage() {
               <div className="lg:col-span-7 flex flex-col justify-between p-6 sm:p-8 rounded-3xl bg-slate-900/80 backdrop-blur-md border border-slate-700/80 shadow-2xl relative">
                 <div className="space-y-4">
                   {/* Top Header of Video */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
                       <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-                        রেকর্ডেড ডেমো ক্লাস ভিডিও
+                        {selectedDemoCourse ? `${selectedDemoCourse.title} - ডেমো ভিডিও` : 'একাডেমি মাস্টার ডেমো ক্লাস'}
                       </span>
                     </div>
                     <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25">
@@ -678,9 +765,40 @@ export default function HomePage() {
                     </span>
                   </div>
 
+                  {/* Course Context Card if Course is Selected */}
+                  {selectedDemoCourse && (
+                    <div className="flex flex-wrap items-center justify-between gap-2.5 bg-slate-950/70 p-3 rounded-2xl border border-amber-500/30">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-amber-400 font-black block">সিলেক্টেড কোর্স ডেমো:</span>
+                        <span className="text-xs sm:text-sm font-black text-white block mt-0.5">{selectedDemoCourse.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCourseForEnroll(selectedDemoCourse)}
+                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs hover:scale-105 transition shadow-sm"
+                        >
+                          ভর্তি হন (৳{selectedDemoCourse.price})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCourseForDetails(selectedDemoCourse)}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-600 transition"
+                        >
+                          সিলেবাস
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Video Player Container */}
                   {(() => {
-                    const videoInfo = getEmbedVideoInfo(settings?.demoVideoUrl);
+                    const videoToPlay = selectedDemoCourse?.demoVideoUrl || settings?.demoVideoUrl;
+                    const videoInfo = getEmbedVideoInfo(videoToPlay);
+                    const videoTitle = selectedDemoCourse
+                      ? (selectedDemoCourse.demoVideoTitle || `${selectedDemoCourse.title} - ডেমো ক্লাস`)
+                      : (settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস');
+
                     return (
                       <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-2xl">
                         {videoInfo.isDirectVideo ? (
@@ -694,7 +812,7 @@ export default function HomePage() {
                         ) : videoInfo.embedUrl ? (
                           <iframe
                             src={videoInfo.embedUrl}
-                            title={settings?.demoVideoTitle || 'Blueprint Learning Academy Demo Class'}
+                            title={videoTitle}
                             className="w-full h-full border-0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
@@ -702,7 +820,7 @@ export default function HomePage() {
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">
                             <Video className="w-12 h-12 text-slate-600 mb-2" />
-                            <p className="text-sm">Video link not configured yet.</p>
+                            <p className="text-sm">Video link not configured yet for this course.</p>
                           </div>
                         )}
                       </div>
@@ -712,10 +830,14 @@ export default function HomePage() {
                   {/* Video Metadata & Info */}
                   <div className="pt-2">
                     <h4 className="text-lg sm:text-xl font-black text-white">
-                      {settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস'}
+                      {selectedDemoCourse
+                        ? (selectedDemoCourse.demoVideoTitle || `${selectedDemoCourse.title} - ডেমো ক্লাস ও প্র্যাকটিক্যাল প্রিভিউ`)
+                        : (settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস')}
                     </h4>
                     <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
-                      {settings?.demoVideoDescription || 'বাস্তব প্রজেক্টের আর্কিটেকচারাল ও স্ট্রাকচারাল ড্রয়িং থেকে কাস্টিং ও সাইট ম্যানেজমেন্টের বাস্তব সেশন দেখুন।'}
+                      {selectedDemoCourse
+                        ? (selectedDemoCourse.demoVideoDescription || selectedDemoCourse.shortDescription)
+                        : (settings?.demoVideoDescription || 'বাস্তব প্রজেক্টের আর্কিটেকচারাল ও স্ট্রাকচারাল ড্রয়িং থেকে কাস্টিং ও সাইট ম্যানেজমেন্টের বাস্তব সেশন দেখুন।')}
                     </p>
                   </div>
                 </div>
@@ -726,17 +848,20 @@ export default function HomePage() {
                     <HardHat className="w-4 h-4 text-amber-400" />
                     <span>প্র্যাকটিক্যাল সাইট ট্রেইনিং • বুয়েট ইঞ্জিনিয়ার ইন্সট্রাক্টর</span>
                   </div>
-                  {settings?.demoVideoUrl && (
-                    <a
-                      href={settings.demoVideoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-extrabold hover:underline"
-                    >
-                      <span>ইউটিউবে বড় পর্দায় দেখুন</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
+                  {(() => {
+                    const videoToPlay = selectedDemoCourse?.demoVideoUrl || settings?.demoVideoUrl;
+                    return videoToPlay ? (
+                      <a
+                        href={videoToPlay}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-extrabold hover:underline"
+                      >
+                        <span>ইউটিউবে বড় পর্দায় দেখুন</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    ) : null;
+                  })()}
                 </div>
               </div>
 

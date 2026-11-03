@@ -106,6 +106,12 @@ export default function AdminPortalPage() {
   const [newVideoDuration, setNewVideoDuration] = useState('');
   const [newVideoNote, setNewVideoNote] = useState('');
 
+  // Course-specific Public Demo Video states (for Homepage Demo Carousel)
+  const [courseDemoUrl, setCourseDemoUrl] = useState('');
+  const [courseDemoTitle, setCourseDemoTitle] = useState('');
+  const [courseDemoDescription, setCourseDemoDescription] = useState('');
+  const [savingCourseDemo, setSavingCourseDemo] = useState(false);
+
   const [newLiveTitle, setNewLiveTitle] = useState('');
   const [newLiveDate, setNewLiveDate] = useState('');
   const [newLiveTime, setNewLiveTime] = useState('08:30 PM');
@@ -351,9 +357,13 @@ export default function AdminPortalPage() {
     ]);
 
     if (cRes.success && cRes.data) {
-      setSelectedCourseData(cRes.data.course);
+      const crs = cRes.data.course;
+      setSelectedCourseData(crs);
       setCourseStudents(cRes.data.students || []);
       setCourseSubmissions(cRes.data.taskSubmissions || []);
+      setCourseDemoUrl(crs?.demoVideoUrl || '');
+      setCourseDemoTitle(crs?.demoVideoTitle || '');
+      setCourseDemoDescription(crs?.demoVideoDescription || '');
     }
     if (chatRes.success && chatRes.data) {
       setCourseChat(chatRes.data.messages || []);
@@ -540,6 +550,62 @@ export default function AdminPortalPage() {
       if (selectedCourseId) loadCourseHub(selectedCourseId);
     } else {
       showAlert(res.message || 'Error unblocking user.', 'error');
+    }
+  };
+
+  // 2.5 Course Demo Preview Video (Homepage Carousel)
+  const handleSaveCourseDemoVideo = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedCourseId) {
+      showAlert('Please select a course first.', 'error');
+      return;
+    }
+    let formattedUrl = courseDemoUrl.trim();
+    if (formattedUrl && !/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    setSavingCourseDemo(true);
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        demoVideoUrl: formattedUrl,
+        demoVideoTitle: courseDemoTitle.trim(),
+        demoVideoDescription: courseDemoDescription.trim(),
+      }),
+    });
+    setSavingCourseDemo(false);
+
+    if (res.success) {
+      showAlert('✓ Public Demo Video updated for this course! It is now live on the homepage demo carousel.');
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(`✕ Error saving course demo video: ${res.message || 'Please check connection.'}`, 'error');
+    }
+  };
+
+  const handleSetVideoAsDemo = async (vid: { title: string; youtubeUrl: string; note?: string }) => {
+    if (!selectedCourseId) return;
+    setCourseDemoUrl(vid.youtubeUrl || '');
+    setCourseDemoTitle(vid.title || '');
+    setCourseDemoDescription(vid.note || '');
+
+    setSavingCourseDemo(true);
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        demoVideoUrl: vid.youtubeUrl || '',
+        demoVideoTitle: vid.title || '',
+        demoVideoDescription: vid.note || '',
+      }),
+    });
+    setSavingCourseDemo(false);
+
+    if (res.success) {
+      showAlert(`✓ Video "${vid.title}" is now set as the Homepage Demo Preview for this course!`);
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(`✕ Error setting video as demo: ${res.message || 'Please check connection.'}`, 'error');
     }
   };
 
@@ -1419,6 +1485,96 @@ export default function AdminPortalPage() {
                 {/* HUB TAB 2: PUSH YOUTUBE VIDEOS */}
                 {courseSubTab === 'videos' && (
                   <div className="space-y-6">
+                    {/* Course-Specific Demo Video Configuration Card */}
+                    <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-slate-900/40 border border-amber-500/30 p-5 rounded-2xl space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/20 pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+                          <h4 className="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-2">
+                            <span>🎬 Public Demo Preview Video for this Course</span>
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 border border-amber-300">
+                              Homepage Carousel
+                            </span>
+                          </h4>
+                        </div>
+                        {courseDemoUrl && (
+                          <span className="text-[11px] font-bold text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
+                            ✓ Demo Video Configured
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        ওয়েবসাইটের হোমপেজে <strong>&quot;ফ্রি ডেমো ক্লাস&quot;</strong> সেকশনে শিক্ষার্থীরা একটি প্রফেশনাল স্ক্রলযোগ্য লিস্ট থেকে এই কোর্সের নাম সিলেক্ট করলেই নিচের ভিডিওটি ডেমো হিসেবে দেখতে পাবে।
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div className="sm:col-span-2">
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Demo Video YouTube Link / URL *
+                          </label>
+                          <input
+                            type="text"
+                            value={courseDemoUrl}
+                            onChange={(e) => setCourseDemoUrl(e.target.value)}
+                            placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono text-xs outline-none focus:border-amber-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Demo Headline / Title (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={courseDemoTitle}
+                            onChange={(e) => setCourseDemoTitle(e.target.value)}
+                            placeholder="e.g. সাইট এক্সিকিউশন ও বিওকিউ প্র্যাকটিক্যাল ডেমো ক্লাস"
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-xs outline-none focus:border-amber-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">
+                            Short Summary / Description (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={courseDemoDescription}
+                            onChange={(e) => setCourseDemoDescription(e.target.value)}
+                            placeholder="e.g. বাস্তব প্রজেক্টের ড্রয়িং থেকে রড কাটিং ও ঢালাই চেকিং সেশন..."
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-xs outline-none focus:border-amber-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                        <div className="text-[11px] text-slate-500">
+                          {courseDemoUrl ? (
+                            <a
+                              href={courseDemoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-700 font-semibold hover:underline inline-flex items-center gap-1"
+                            >
+                              <span>▶ Test Preview Link</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : (
+                            <span>Tip: নিচে প্রকাশিত যেকোনো ক্লাসের পাশের ⭐ বাটনে ক্লিক করেও এই কোর্সের ডেমো বানাতে পারেন।</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveCourseDemoVideo()}
+                          disabled={savingCourseDemo}
+                          className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>{savingCourseDemo ? 'Saving Demo...' : 'Save Course Demo Video'}</span>
+                        </button>
+                      </div>
+                    </div>
+
                     <form onSubmit={handleAddVideo} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                       <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <PlusCircle className="w-4 h-4 text-[#ffb531]" />
@@ -1481,20 +1637,49 @@ export default function AdminPortalPage() {
                     {/* Existing Videos List */}
                     <div className="space-y-2">
                       <h4 className="text-xs font-bold text-slate-600">Published Videos ({selectedCourseData.videos?.length || 0}):</h4>
-                      {selectedCourseData.videos?.map((vid) => (
-                        <div
-                          key={vid._id}
-                          className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between text-xs"
-                        >
-                          <div>
-                            <span className="font-bold text-slate-900 block">{vid.title}</span>
-                            <span className="text-blue-700 font-mono text-[11px] truncate max-w-sm block">
-                              {vid.youtubeUrl}
-                            </span>
+                      {selectedCourseData.videos?.map((vid) => {
+                        const isCurrentDemo = courseDemoUrl && courseDemoUrl.trim() === vid.youtubeUrl.trim();
+                        return (
+                          <div
+                            key={vid._id}
+                            className={`p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border ${
+                              isCurrentDemo
+                                ? 'bg-amber-50/70 border-amber-300'
+                                : 'bg-slate-50 border-slate-200'
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-900 block">{vid.title}</span>
+                                {isCurrentDemo && (
+                                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 border border-amber-300">
+                                    ★ Active Homepage Demo
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-blue-700 font-mono text-[11px] truncate max-w-sm block">
+                                {vid.youtubeUrl}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                              <span className="text-slate-600 text-[11px]">{vid.duration}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleSetVideoAsDemo(vid)}
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+                                  isCurrentDemo
+                                    ? 'bg-amber-200 text-amber-900 hover:bg-amber-300'
+                                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
+                                }`}
+                                title="Set this video as the homepage demo preview for this course"
+                              >
+                                <span>⭐</span>
+                                <span>{isCurrentDemo ? 'Reset as Demo' : 'Set as Course Demo'}</span>
+                              </button>
+                            </div>
                           </div>
-                          <span className="text-slate-600 text-[11px]">{vid.duration}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
