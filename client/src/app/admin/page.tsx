@@ -2394,7 +2394,7 @@ export default function AdminPortalPage() {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleResendCredentialsEmail(en)}
-                                className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                                className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
                                 title="Resend Welcome & Login Credentials Email"
                               >
                                 <Mail className="w-3.5 h-3.5" /> Resend Email
@@ -3169,7 +3169,7 @@ export default function AdminPortalPage() {
                 <h3 className="text-base sm:text-lg font-black text-rose-600 flex items-center gap-2">
                   🎥 Free Demo Class &amp; Recorded Video Preview (Home Page)
                 </h3>
-                <label className="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+                <label className="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
                   <input
                     type="checkbox"
                     checked={siteSettings.demoSectionEnabled !== false}

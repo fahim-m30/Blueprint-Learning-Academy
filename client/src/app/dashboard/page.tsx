@@ -410,7 +410,7 @@ export default function StudentDashboardPage() {
               <span className="block text-sm font-black text-slate-900 truncate max-w-[200px]">{studentInfo?.name}</span>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 {studentInfo?.studentId && (
-                  <span className="inline-block px-2 py-0.5 bg-amber-100 border border-amber-300 text-amber-900 font-mono font-extrabold text-[11px] rounded-md shadow-2xs">
+                  <span className="inline-block px-2 py-0.5 bg-amber-100 border border-amber-300 text-amber-900 font-mono font-extrabold text-[11px] rounded-md shadow-xs">
                     ID: {studentInfo.studentId}
                   </span>
                 )}

@@ -187,7 +187,7 @@ export default function HomePage() {
       {/* =========================================================================
           HERO SECTION: High-Impact, Trust-Driven & Visually Elegant
       ========================================================================= */}
-      <section className="relative pt-8 pb-16 sm:pt-14 sm:pb-22 md:pt-18 md:pb-28 overflow-hidden bg-gradient-to-b from-white via-slate-50/80 to-[#f8fafc] border-b border-slate-200/80">
+      <section className="relative pt-10 pb-16 sm:pt-16 sm:pb-24 md:pt-20 md:pb-28 overflow-hidden bg-gradient-to-b from-white via-slate-50/80 to-[#f8fafc] border-b border-slate-200/80">
         {/* Soft Ambient Radial Accents */}
         <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 sm:w-[550px] h-80 sm:h-[550px] bg-blue-500/8 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute top-1/3 right-1/4 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-amber-500/7 rounded-full blur-3xl pointer-events-none"></div>
@@ -331,7 +331,7 @@ export default function HomePage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 border-b border-slate-200/80 pb-6">
             <div className="space-y-2 max-w-2xl text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black uppercase tracking-wider shadow-2xs">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black uppercase tracking-wider shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <Megaphone className="w-3.5 h-3.5" />
                 Academy Live Notice Board
@@ -350,7 +350,7 @@ export default function HomePage() {
               <select
                 value={noticeCourseFilter}
                 onChange={(e) => setNoticeCourseFilter(e.target.value)}
-                className="bg-white border-2 border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-800 outline-none shadow-2xs cursor-pointer"
+                className="bg-white border-2 border-slate-200 focus:border-blue-600 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-800 outline-none shadow-sm cursor-pointer"
               >
                 <option value="all">All Courses ({courses.length})</option>
                 {courses.map((c) => (
@@ -516,7 +516,7 @@ export default function HomePage() {
       {/* =========================================================================
           INFINITE MARQUEE ROW (All 6 Specializations)
       ========================================================================= */}
-      <section className="py-7 sm:py-9 bg-[#fcfdff] border-b border-slate-200/90 overflow-hidden relative shadow-2xs">
+      <section className="py-7 sm:py-9 bg-[#fcfdff] border-b border-slate-200/90 overflow-hidden relative shadow-sm">
         {/* Left & Right Edge Vignette Fades */}
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#fcfdff] via-[#fcfdff]/80 to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#fcfdff] via-[#fcfdff]/80 to-transparent z-10" />
@@ -540,9 +540,9 @@ export default function HomePage() {
             return (
               <div
                 key={i}
-                className="flex items-center gap-3.5 sm:gap-4 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white border-2 border-slate-200/90 hover:border-blue-600 shadow-2xs hover:shadow-lg hover:shadow-blue-900/10 hover:-translate-y-0.5 transition-all duration-300 shrink-0 group cursor-default"
+                className="flex items-center gap-3.5 sm:gap-4 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white border-2 border-slate-200/90 hover:border-blue-600 shadow-sm hover:shadow-lg hover:shadow-blue-900/10 hover:-translate-y-0.5 transition-all duration-300 shrink-0 group cursor-default"
               >
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition duration-300 shadow-2xs shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition duration-300 shadow-sm shrink-0">
                   <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5 shrink-0 transition-transform group-hover:scale-110" />
                 </div>
                 <div className="text-left">
@@ -933,7 +933,7 @@ export default function HomePage() {
       {/* =========================================================================
           MAIN COURSES CATALOG SECTION (#courses)
       ========================================================================= */}
-      <section id="courses" className="py-18 sm:py-26 bg-[#f8fafc] border-b border-slate-200/80">
+      <section id="courses" className="py-20 sm:py-28 md:py-32 bg-[#f8fafc] border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-5">
             <div className="space-y-2">
@@ -1040,7 +1040,7 @@ export default function HomePage() {
                     <div className="grid grid-cols-2 gap-2.5">
                       <button
                         onClick={() => setSelectedCourseForDetails(course)}
-                        className="py-3 px-3 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 shadow-2xs hover:border-slate-300"
+                        className="py-3 px-3 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 shadow-sm hover:border-slate-300"
                       >
                         Curriculum
                       </button>
@@ -1062,28 +1062,67 @@ export default function HomePage() {
       {/* =========================================================================
           DEDICATED INSTRUCTOR SECTION (#about)
       ========================================================================= */}
-      <section id="about" className="py-18 sm:py-26 bg-white border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-center">
-            {/* Instructor Photo with Tag */}
+      <section id="about" className="py-20 sm:py-28 md:py-32 bg-gradient-to-b from-white via-slate-50/60 to-white border-b border-slate-200/80 relative overflow-hidden">
+        {/* Soft Ambient Radial Accents */}
+        <div className="absolute top-1/3 left-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 lg:gap-16 items-center">
+            {/* Instructor Photo with Executive Frame */}
             <div className="md:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[320px] xs:max-w-xs sm:max-w-sm">
-                <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-blue-500/20 via-amber-500/15 to-indigo-500/20 opacity-80 blur-2xl"></div>
-                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-slate-200 shadow-2xl bg-white group">
-                  <img
-                    src={settings?.instructorImage || "/instructor.jpg?v=2"}
-                    alt={`${settings?.instructorName || 'Engr. Md Abdul Mazid'}, civil engineer and founder of Blueprint Learning Academy`}
-                    className="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 text-slate-950 font-black text-sm sm:text-base py-3 px-4 rounded-2xl shadow-lg flex items-center justify-between">
-                    <div>
-                      <span>{settings?.instructorName || 'Engr. Md Abdul Mazid'}</span>
-                      <span className="block text-xs text-slate-500 font-semibold">Lead Instructor &amp; Mentor</span>
+              <div className="relative w-full max-w-[340px] xs:max-w-xs sm:max-w-sm">
+                {/* Multi-layered Glow Background */}
+                <div className="absolute -inset-4 rounded-[32px] bg-gradient-to-tr from-blue-600/20 via-amber-500/20 to-indigo-600/20 opacity-80 blur-2xl"></div>
+
+                {/* Luxury Outer Border Container */}
+                <div className="relative p-1.5 rounded-[30px] bg-gradient-to-b from-amber-400/50 via-slate-200 to-blue-500/40 shadow-2xl shadow-slate-900/10">
+                  <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden bg-slate-950 group">
+                    <img
+                      src={settings?.instructorImage || "/instructor.jpg?v=2"}
+                      alt={`${settings?.instructorName || 'Engr. Md Abdul Mazid'}, Civil Engineer and Founder of Blueprint Learning Academy`}
+                      className="w-full h-full object-cover object-top transition duration-700 group-hover:scale-105"
+                    />
+
+                    {/* Gradient overlay for contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+
+                    {/* Verified Mentor Badge (Top Left) */}
+                    <div className="absolute top-3.5 left-3.5 z-10 bg-slate-950/85 backdrop-blur-md border border-amber-400/40 text-amber-300 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{settings?.statsMentorTag || 'BUET'} Civil Alumni</span>
                     </div>
-                    <span className="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-                      {settings?.statsMentorTag ? `${settings.statsMentorTag} Civil` : 'BUET Civil'}
-                    </span>
+
+                    {/* Experience Tag (Top Right) */}
+                    <div className="absolute top-3.5 right-3.5 z-10 bg-white/95 backdrop-blur-md border border-slate-200 text-slate-900 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-md">
+                      <HardHat className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{settings?.instructorShortExp || '10+ Yrs Exp'}</span>
+                    </div>
+
+                    {/* Bottom Bio Card */}
+                    <div className="absolute bottom-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-md border border-slate-200/90 p-4 rounded-2xl shadow-xl">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <span className="block font-black text-slate-950 text-base sm:text-lg tracking-tight">
+                            {settings?.instructorName || 'Engr. Md Abdul Mazid'}
+                          </span>
+                          <span className="block text-xs font-extrabold text-blue-700 mt-0.5">
+                            {settings?.instructorDegree || 'B.Sc. in Civil Engineering (BUET)'}
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-black shrink-0 flex items-center gap-1 shadow-sm">
+                          <Award className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Mentor</span>
+                        </span>
+                      </div>
+                      <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+                        <span>Senior Structural &amp; Site Lead</span>
+                        <span className="text-emerald-700 font-bold flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          1-on-1 Support
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1091,55 +1130,100 @@ export default function HomePage() {
 
             {/* Instructor Bio & Mission */}
             <div className="md:col-span-7 space-y-6">
-              <div className="space-y-2.5">
-                <span className="text-xs font-black text-blue-700 uppercase tracking-[0.2em] block">
-                  Lead Instructor &amp; Mentor
-                </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-tight">
-                  Learn From a Working Senior Engineer
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-black uppercase tracking-widest shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  <span>Lead Instructor &amp; Mentor</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.12]">
+                  Learn From a <span className="bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 bg-clip-text text-transparent">Working Senior Engineer</span>
                 </h2>
-                <p className="text-base font-extrabold text-blue-700">
-                  {settings?.instructorDegree || 'B.Sc. in Civil Engineering (BUET)'} • {settings?.instructorExp || '10+ Years On Real Projects in Bangladesh'}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-0.5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 font-black text-xs sm:text-sm">
+                    <GraduationCap className="w-4 h-4 text-blue-700" />
+                    {settings?.instructorDegree || 'B.Sc. in Civil Engineering (BUET)'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 font-black text-xs sm:text-sm">
+                    <HardHat className="w-4 h-4 text-amber-600" />
+                    {settings?.instructorExp || '10+ Years On Real Projects in Bangladesh'}
+                  </span>
+                </div>
               </div>
 
-              <p className="text-base text-slate-600 leading-relaxed font-normal">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
                 {settings?.instructorBio ||
                   'Engr. Md Abdul Mazid is a practicing civil engineer and BUET graduate with over a decade of hands-on experience leading residential, commercial, and high-rise developer construction projects in Dhaka. He founded Blueprint Learning Academy to bridge the massive gap between academic university textbooks and what Bangladeshi developer companies and site consultants actually demand.'}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-1.5 shadow-2xs">
-                  <div className="text-2xl text-amber-500">📐</div>
-                  <h4 className="text-base font-black text-slate-950">{settings?.feature1Title || 'Real Developer Drawings'}</h4>
+              {/* 4 Feature Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="bg-white border border-slate-200/90 hover:border-amber-400 p-5 rounded-2xl space-y-2 shadow-xs hover:shadow-md transition duration-300 group">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center group-hover:scale-110 transition">
+                    <FileSpreadsheet className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-base font-black text-slate-950 group-hover:text-amber-600 transition">
+                    {settings?.feature1Title || 'Real Developer Drawings'}
+                  </h4>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {settings?.feature1Desc || 'Learn using actual architectural, structural, and MEP drawings approved by RAJUK and CDA.'}
                   </p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-1.5 shadow-2xs">
-                  <div className="text-2xl text-emerald-600">🏗️</div>
-                  <h4 className="text-base font-black text-slate-950">{settings?.feature2Title || 'Live Site Situations'}</h4>
+                <div className="bg-white border border-slate-200/90 hover:border-emerald-500 p-5 rounded-2xl space-y-2 shadow-xs hover:shadow-md transition duration-300 group">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-base font-black text-slate-950 group-hover:text-emerald-700 transition">
+                    {settings?.feature2Title || 'Live Site Situations'}
+                  </h4>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {settings?.feature2Desc || 'Master casting SOPs, rebar BBS optimization, defect prevention, and subcontractor measurement bills.'}
                   </p>
                 </div>
+
+                <div className="bg-white border border-slate-200/90 hover:border-blue-500 p-5 rounded-2xl space-y-2 shadow-xs hover:shadow-md transition duration-300 group">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center group-hover:scale-110 transition">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-base font-black text-slate-950 group-hover:text-blue-700 transition">
+                    Direct Mentor WhatsApp
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Ask questions, clarify site difficulties, and receive direct audio/text guidance whenever you face a problem on site.
+                  </p>
+                </div>
+
+                <div className="bg-white border border-slate-200/90 hover:border-indigo-500 p-5 rounded-2xl space-y-2 shadow-xs hover:shadow-md transition duration-300 group">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-base font-black text-slate-950 group-hover:text-indigo-700 transition">
+                    CV &amp; Interview Review
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Submit your CV for personalized instructor feedback and real-estate technical interview prep tips.
+                  </p>
+                </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4">
                 <a
-                  href={`https://wa.me/${whatsapp}`}
+                  href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('আসসালামু আলাইকুম স্যার, আমি ব্লুপ্রিন্ট লার্নিং একাডেমির কোর্স ও ক্যারিয়ার গাইডেন্স সম্পর্কে জানতে চাই।')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-7 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/25"
+                  className="px-7 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition shadow-lg shadow-emerald-600/25 hover:scale-[1.02] active:scale-[0.99]"
                 >
-                  <MessageCircle className="w-4 h-4 shrink-0" /> Message Instructor on WhatsApp
+                  <MessageCircle className="w-4 h-4 shrink-0" />
+                  <span>Message Instructor on WhatsApp</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping ml-1" />
                 </a>
                 <a
                   href="#courses"
-                  className="px-7 py-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-900 font-extrabold text-xs sm:text-sm text-center transition"
+                  className="px-7 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm text-center transition flex items-center justify-center gap-2 shadow-md hover:scale-[1.02]"
                 >
-                  Explore All 6 Courses
+                  <span>Explore All 6 Courses</span>
+                  <ChevronRight className="w-4 h-4 text-amber-400" />
                 </a>
               </div>
             </div>
@@ -1150,7 +1234,7 @@ export default function HomePage() {
       {/* =========================================================================
           PAYMENT INSTRUCTIONS & BKASH/NAGAD GUIDE (#payment)
       ========================================================================= */}
-      <section id="payment" className="py-18 sm:py-26 bg-[#f8fafc] border-b border-slate-200/80">
+      <section id="payment" className="py-20 sm:py-28 md:py-32 bg-[#f8fafc] border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="luxury-card rounded-3xl p-6 sm:p-10 md:p-14 border border-slate-200 shadow-xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -1168,7 +1252,7 @@ export default function HomePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   {/* bKash Card */}
-                  <div className="bg-pink-50/80 border border-pink-200 p-5 rounded-2xl shadow-2xs space-y-2">
+                  <div className="bg-pink-50/80 border border-pink-200 p-5 rounded-2xl shadow-sm space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-pink-700 font-bold uppercase tracking-wider">Official bKash Number</span>
                       <button
@@ -1195,7 +1279,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Nagad Card */}
-                  <div className="bg-orange-50/80 border border-orange-200 p-5 rounded-2xl shadow-2xs space-y-2">
+                  <div className="bg-orange-50/80 border border-orange-200 p-5 rounded-2xl shadow-sm space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-orange-700 font-bold uppercase tracking-wider">Official Nagad Number</span>
                       <button
@@ -1264,7 +1348,7 @@ export default function HomePage() {
       {/* =========================================================================
           FAQ SECTION (#faq)
       ========================================================================= */}
-      <section id="faq" className="py-18 sm:py-26 bg-white">
+      <section id="faq" className="py-20 sm:py-28 md:py-32 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 space-y-2">
             <span className="text-xs font-black text-blue-700 uppercase tracking-[0.2em] block">Got Questions?</span>
@@ -1273,7 +1357,7 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-2xs">
+            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-sm">
               <summary className="flex items-center justify-between font-black text-base sm:text-lg text-slate-950 gap-2">
                 <span>Who should join these courses?</span>
                 <span className="transition group-open:rotate-180 text-blue-600 shrink-0 font-bold">▼</span>
@@ -1283,7 +1367,7 @@ export default function HomePage() {
               </p>
             </details>
 
-            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-2xs">
+            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-sm">
               <summary className="flex items-center justify-between font-black text-base sm:text-lg text-slate-950 gap-2">
                 <span>How are classes held and do I get recordings?</span>
                 <span className="transition group-open:rotate-180 text-blue-600 shrink-0 font-bold">▼</span>
@@ -1293,7 +1377,7 @@ export default function HomePage() {
               </p>
             </details>
 
-            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-2xs">
+            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-sm">
               <summary className="flex items-center justify-between font-black text-base sm:text-lg text-slate-950 gap-2">
                 <span>How will I receive my login credentials?</span>
                 <span className="transition group-open:rotate-180 text-blue-600 shrink-0 font-bold">▼</span>
@@ -1303,7 +1387,7 @@ export default function HomePage() {
               </p>
             </details>
 
-            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-2xs">
+            <details className="group bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer transition shadow-sm">
               <summary className="flex items-center justify-between font-black text-base sm:text-lg text-slate-950 gap-2">
                 <span>Will I receive a course completion certificate?</span>
                 <span className="transition group-open:rotate-180 text-blue-600 shrink-0 font-bold">▼</span>

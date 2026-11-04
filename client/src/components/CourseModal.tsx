@@ -116,7 +116,7 @@ export default function CourseModal({ course, isOpen, onClose, onEnroll }: Cours
                 course.syllabus.map((item, idx) => (
                   <div
                     key={idx}
-                    className="border border-slate-200 bg-slate-50/80 hover:bg-white rounded-2xl p-4 sm:p-5 transition shadow-2xs"
+                    className="border border-slate-200 bg-slate-50/80 hover:bg-white rounded-2xl p-4 sm:p-5 transition shadow-xs"
                   >
                     <div className="flex items-start gap-3.5">
                       <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-900 font-black text-xs sm:text-sm flex items-center justify-center shrink-0">

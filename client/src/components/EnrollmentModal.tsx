@@ -265,12 +265,12 @@ export default function EnrollmentModal({ course, settings, isOpen, onClose }: E
                     <span className="text-xs text-slate-600 block font-semibold">Send exact amount via {paymentMethod}:</span>
                     <span className="text-2xl font-black text-slate-950">৳{course.price.toLocaleString()}</span>
                   </div>
-                  <span className="text-xs bg-white text-slate-700 px-3 py-1 rounded-xl border border-slate-200 font-bold shadow-2xs">
+                  <span className="text-xs bg-white text-slate-700 px-3 py-1 rounded-xl border border-slate-200 font-bold shadow-xs">
                     {activeType}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs">
+                <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-3.5 shadow-xs">
                   <div>
                     <span className="text-xs text-slate-500 block font-medium">Official {paymentMethod} Number</span>
                     <span className="text-lg sm:text-xl font-mono font-black text-slate-950 tracking-wider">{activeNumber}</span>

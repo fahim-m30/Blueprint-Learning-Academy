@@ -95,7 +95,7 @@ export default function Navbar({ settings }: NavbarProps) {
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-600">
-            <a href="/#demo-class" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 hover:bg-amber-100 transition-colors shadow-2xs font-black">
+            <a href="/#demo-class" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 hover:bg-amber-100 transition-colors shadow-xs font-black">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
               ফ্রি ডেমো ক্লাস
             </a>
@@ -149,7 +149,7 @@ export default function Navbar({ settings }: NavbarProps) {
               <>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-2xs shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 text-xs sm:text-sm font-bold transition duration-150 shadow-xs shrink-0"
                 >
                   <LogIn className="w-4 h-4 text-blue-600" />
                   <span>Login</span>
