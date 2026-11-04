@@ -109,15 +109,19 @@ export default function StudentDashboardPage() {
     index: number;
   } | null>(null);
 
-  const scrollStudentChatToBottom = (instant = false) => {
+  const isUserScrolledUpStudentRef = useRef(false);
+
+  const scrollStudentChatToBottom = (force = false) => {
     if (chatContainerRef.current) {
-      if (instant) {
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-      } else {
-        chatContainerRef.current.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
+      if (!force && isUserScrolledUpStudentRef.current) {
+        return; // User is scrolling up to read earlier messages, do not force scroll down!
+      }
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: force ? 'auto' : 'smooth',
+      });
+      if (force) {
+        isUserScrolledUpStudentRef.current = false;
       }
     }
   };
@@ -1220,7 +1224,15 @@ export default function StudentDashboardPage() {
                 </div>
 
                 {/* Messages Feed */}
-                <div ref={chatContainerRef} className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3.5 bg-[#f8fafc]">
+                <div
+                  ref={chatContainerRef}
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    const isUp = el.scrollHeight - el.scrollTop - el.clientHeight > 80;
+                    isUserScrolledUpStudentRef.current = isUp;
+                  }}
+                  className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3.5 bg-[#f8fafc]"
+                >
                   {chatMessages.length === 0 ? (
                     <div className="text-center py-16 text-sm text-slate-400 font-medium">
                       No messages yet. Send a question to start the conversation!
@@ -1229,26 +1241,52 @@ export default function StudentDashboardPage() {
                     chatMessages.map((msg, idx) => {
                       const isMe = msg.senderRole === 'student';
 
+                      const msgDateStr = msg.createdAt ? new Date(msg.createdAt).toDateString() : '';
+                      const prevDateStr = idx > 0 && chatMessages[idx - 1]?.createdAt
+                        ? new Date(chatMessages[idx - 1].createdAt).toDateString()
+                        : '';
+                      const showDateDivider = msgDateStr && msgDateStr !== prevDateStr;
+
                       return (
-                        <div
-                          key={msg._id || idx}
-                          className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-                        >
-                          <span className="text-xs text-slate-500 mb-1 px-1 font-bold">
-                            {msg.senderName} ({msg.senderRole === 'admin' ? 'Instructor' : 'You'})
-                          </span>
-                          <div
-                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed ${
-                              isMe
-                                ? 'bg-blue-600 text-white rounded-br-none shadow-xs'
-                                : 'bg-white text-slate-900 border border-slate-200/90 rounded-bl-none shadow-xs'
-                            }`}
-                          >
-                            {msg.message}
+                        <div key={msg._id || idx} className="space-y-1">
+                          {showDateDivider && (
+                            <div className="flex items-center justify-center my-3">
+                              <span className="px-3 py-1 bg-slate-200/90 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                {(() => {
+                                  const d = new Date(msg.createdAt);
+                                  const today = new Date();
+                                  if (d.toDateString() === today.toDateString()) return 'Today';
+                                  const yesterday = new Date();
+                                  yesterday.setDate(today.getDate() - 1);
+                                  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                                  return d.toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  });
+                                })()}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                            <span className="text-xs text-slate-500 mb-1 px-1 font-bold">
+                              {msg.senderName} ({msg.senderRole === 'admin' ? 'Instructor' : 'You'})
+                            </span>
+                            <div
+                              className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed ${
+                                isMe
+                                  ? 'bg-blue-600 text-white rounded-br-none shadow-xs'
+                                  : 'bg-white text-slate-900 border border-slate-200/90 rounded-bl-none shadow-xs'
+                              }`}
+                            >
+                              {msg.message}
+                            </div>
+                            <span className="text-[10px] sm:text-xs text-slate-400 mt-0.5 px-1 font-medium">
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
                           </div>
-                          <span className="text-[10px] sm:text-xs text-slate-400 mt-0.5 px-1 font-medium">
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
                         </div>
                       );
                     })

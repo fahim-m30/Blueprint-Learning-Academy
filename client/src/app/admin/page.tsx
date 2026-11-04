@@ -65,15 +65,20 @@ export default function AdminPortalPage() {
   const courseChatBottomRef = useRef<HTMLDivElement | null>(null);
   const courseChatContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollAdminChatToBottom = (instant = false) => {
+  const isUserScrolledUpAdminRef = useRef(false);
+
+  const scrollAdminChatToBottom = (force = false) => {
     if (courseChatContainerRef.current) {
-      if (instant) {
-        courseChatContainerRef.current.scrollTop = courseChatContainerRef.current.scrollHeight;
-      } else {
-        courseChatContainerRef.current.scrollTo({
-          top: courseChatContainerRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
+      // If user has scrolled up to read previous messages, DO NOT force scroll down!
+      if (!force && isUserScrolledUpAdminRef.current) {
+        return;
+      }
+      courseChatContainerRef.current.scrollTo({
+        top: courseChatContainerRef.current.scrollHeight,
+        behavior: force ? 'auto' : 'smooth',
+      });
+      if (force) {
+        isUserScrolledUpAdminRef.current = false;
       }
     }
   };
@@ -353,23 +358,22 @@ export default function AdminPortalPage() {
     };
   }, [selectedCourseId, courseSubTab]);
 
-  // Live Real-Time Auto-Polling (every 1.5s) when viewing Student CVs
+  // Live Real-Time Auto-Polling for Student CVs (every 2.5s, keeps badge & student lists fresh)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (activeMainTab === 'cvs') {
-      interval = setInterval(async () => {
-        try {
-          const res = await apiRequest('/admin/cvs');
-          if (res.success && res.data?.students) {
-            setAllStudentCvs(res.data.students);
-          }
-        } catch {}
-      }, 1500);
-    }
+    interval = setInterval(async () => {
+      try {
+        const res = await apiRequest('/admin/cvs');
+        const list = res.data?.students || (res as any)?.students;
+        if (res.success && Array.isArray(list)) {
+          setAllStudentCvs((prev) => (prev.length !== list.length ? list : prev));
+        }
+      } catch {}
+    }, 2500);
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [activeMainTab]);
+  }, []);
 
   const handleSaveCvFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1478,32 +1482,40 @@ export default function AdminPortalPage() {
                                   })()}
                                 </td>
                                 <td className="p-3.5">
-                                  {st.cv?.updatedAt ? (
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        onClick={() => {
-                                          setViewingStudentCv(st);
-                                          setAdminCvFeedback(st.cv?.adminFeedback || '');
-                                          setAdminCvStatus(st.cv?.status || 'reviewed');
-                                        }}
-                                        className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs inline-flex items-center gap-1.5 transition shadow-xs"
-                                        title="Click to view CV and submit feedback"
-                                      >
-                                        <FileText className="w-3.5 h-3.5" /> View CV
-                                      </button>
-                                      <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase ${
-                                        st.cv.status === 'reviewed'
-                                          ? 'bg-emerald-100 text-emerald-800'
-                                          : st.cv.status === 'needs_revision'
-                                          ? 'bg-amber-100 text-amber-800'
-                                          : 'bg-blue-100 text-blue-800'
-                                      }`}>
-                                        {st.cv.status || 'Sent'}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <span className="text-xs text-slate-400 italic font-medium">No CV</span>
-                                  )}
+                                  {(() => {
+                                    const studentCv = st.cv?.updatedAt
+                                      ? st.cv
+                                      : allStudentCvs.find((c) => c._id === st._id || c.email === st.email)?.cv;
+
+                                    if (studentCv?.updatedAt) {
+                                      return (
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            onClick={() => {
+                                              setViewingStudentCv({ ...st, cv: studentCv });
+                                              setAdminCvFeedback(studentCv.adminFeedback || '');
+                                              setAdminCvStatus(studentCv.status || 'reviewed');
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs inline-flex items-center gap-1.5 transition shadow-xs hover:scale-105"
+                                            title="Click to view CV and submit feedback"
+                                          >
+                                            <FileText className="w-3.5 h-3.5 text-blue-600" /> View CV
+                                          </button>
+                                          <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-black uppercase ${
+                                            studentCv.status === 'reviewed'
+                                              ? 'bg-emerald-100 text-emerald-800'
+                                              : studentCv.status === 'needs_revision'
+                                              ? 'bg-amber-100 text-amber-800'
+                                              : 'bg-blue-100 text-blue-800'
+                                          }`}>
+                                            {studentCv.status || 'Sent'}
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+
+                                    return <span className="text-xs text-slate-400 italic font-medium">No CV</span>;
+                                  })()}
                                 </td>
                                 <td className="p-3.5">
                                   <span
@@ -2036,11 +2048,30 @@ export default function AdminPortalPage() {
 
                           return sorted.map((st: any) => {
                             const isSelected = selectedChatStudentId === st._id;
-                            const studentMsgs = courseChat.filter(
-                              (m: any) => m.sender === st._id || m.senderName === st.name
-                            );
-                            const lastMsg = studentMsgs[studentMsgs.length - 1];
-                            const hasStudentUnreplied = lastMsg && lastMsg.senderRole === 'student';
+                            
+                            // Accurate unreplied detection: check if student sent a message after the last admin message
+                            let lastStudentIdx = -1;
+                            for (let i = courseChat.length - 1; i >= 0; i--) {
+                              const m = courseChat[i];
+                              if (m.sender === st._id || m.senderName === st.name) {
+                                lastStudentIdx = i;
+                                break;
+                              }
+                            }
+
+                            let hasAdminRepliedAfter = false;
+                            if (lastStudentIdx !== -1) {
+                              for (let i = lastStudentIdx + 1; i < courseChat.length; i++) {
+                                if (courseChat[i].senderRole === 'admin') {
+                                  hasAdminRepliedAfter = true;
+                                  break;
+                                }
+                              }
+                            }
+
+                            const hasStudentUnreplied = lastStudentIdx !== -1 && !hasAdminRepliedAfter;
+                            const studentLatestMsg = lastStudentIdx !== -1 ? courseChat[lastStudentIdx] : null;
+                            const studentMsgCount = courseChat.filter((m: any) => m.sender === st._id || m.senderName === st.name).length;
 
                             return (
                               <button
@@ -2073,13 +2104,13 @@ export default function AdminPortalPage() {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between gap-1">
                                     <span className="text-xs font-bold truncate">{st.name}</span>
-                                    {lastMsg && (
+                                    {studentLatestMsg && (
                                       <span
                                         className={`text-[9px] shrink-0 ${
                                           isSelected ? 'text-blue-100' : 'text-slate-400'
                                         }`}
                                       >
-                                        {new Date(lastMsg.createdAt).toLocaleTimeString([], {
+                                        {new Date(studentLatestMsg.createdAt).toLocaleTimeString([], {
                                           hour: '2-digit',
                                           minute: '2-digit',
                                         })}
@@ -2097,20 +2128,20 @@ export default function AdminPortalPage() {
                                           : 'text-slate-500'
                                       }`}
                                     >
-                                      {lastMsg ? lastMsg.message : (st.studentId || st.email)}
+                                      {studentLatestMsg ? studentLatestMsg.message : (st.studentId || st.email)}
                                     </p>
                                     {hasStudentUnreplied && (
                                       <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-red-600 text-white shrink-0">
                                         Waiting
                                       </span>
                                     )}
-                                    {studentMsgs.length > 0 && !hasStudentUnreplied && (
+                                    {studentMsgCount > 0 && !hasStudentUnreplied && (
                                       <span
                                         className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${
                                           isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'
                                         }`}
                                       >
-                                        {studentMsgs.length}
+                                        {studentMsgCount}
                                       </span>
                                     )}
                                   </div>
@@ -2151,25 +2182,61 @@ export default function AdminPortalPage() {
                               </div>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                if (!selectedCourseId) return;
-                                const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
-                                if (res.success && res.data?.messages) {
-                                  setCourseChat(res.data.messages);
+                            <div className="flex items-center gap-2">
+                              {/* Direct View CV Button in Chat Header */}
+                              {targetStudent && (() => {
+                                const studentCvData = targetStudent.cv?.updatedAt
+                                  ? targetStudent.cv
+                                  : allStudentCvs.find((s) => s._id === targetStudent._id || s.email === targetStudent.email)?.cv;
+
+                                if (studentCvData?.updatedAt) {
+                                  return (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setViewingStudentCv({ ...targetStudent, cv: studentCvData });
+                                        setAdminCvFeedback(studentCvData.adminFeedback || '');
+                                        setAdminCvStatus(studentCvData.status || 'reviewed');
+                                      }}
+                                      className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition hover:scale-105"
+                                      title="View student submitted CV & feedback"
+                                    >
+                                      <FileText className="w-3.5 h-3.5 text-amber-600" />
+                                      <span>📄 View CV</span>
+                                    </button>
+                                  );
                                 }
-                              }}
-                              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 transition"
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" /> Sync
-                            </button>
+                                return null;
+                              })()}
+
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (!selectedCourseId) return;
+                                  const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
+                                  if (res.success && res.data?.messages) {
+                                    setCourseChat(res.data.messages);
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 transition"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" /> Sync
+                              </button>
+                            </div>
                           </div>
                         );
                       })()}
 
-                      {/* Messenger Feed */}
-                      <div ref={courseChatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-3">
+                      {/* Messenger Feed with safe up-scroll detection */}
+                      <div
+                        ref={courseChatContainerRef}
+                        onScroll={(e) => {
+                          const el = e.currentTarget;
+                          const isUp = el.scrollHeight - el.scrollTop - el.clientHeight > 80;
+                          isUserScrolledUpAdminRef.current = isUp;
+                        }}
+                        className="flex-1 p-4 overflow-y-auto space-y-3"
+                      >
                         {(() => {
                           const targetStudent = selectedChatStudentId
                             ? courseStudents.find((s: any) => s._id === selectedChatStudentId)
@@ -2201,37 +2268,102 @@ export default function AdminPortalPage() {
                           return displayMessages.map((msg: any, idx: number) => {
                             const isAdmin = msg.senderRole === 'admin';
 
+                            // Date Divider calculation
+                            const msgDateStr = msg.createdAt ? new Date(msg.createdAt).toDateString() : '';
+                            const prevDateStr = idx > 0 && displayMessages[idx - 1]?.createdAt
+                              ? new Date(displayMessages[idx - 1].createdAt).toDateString()
+                              : '';
+                            const showDateDivider = msgDateStr && msgDateStr !== prevDateStr;
+
+                            // Student CV quick access
+                            const studentCv = !isAdmin
+                              ? allStudentCvs.find((s) => s._id === msg.sender || s.email === msg.sender || s.name === msg.senderName)?.cv ||
+                                courseStudents.find((s: any) => s._id === msg.sender || s.name === msg.senderName)?.cv
+                              : null;
+
                             return (
-                              <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
-                                <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] font-semibold text-slate-500">
-                                  <strong className={isAdmin ? 'text-blue-800' : 'text-slate-800'}>
-                                    {isAdmin ? 'Admin / Instructor' : msg.senderName}
-                                  </strong>
-                                  <span
-                                    className={`text-[9px] px-1.5 py-0.2 rounded font-black uppercase ${
-                                      isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-900'
+                              <div key={idx} className="space-y-1">
+                                {showDateDivider && (
+                                  <div className="flex items-center justify-center my-3">
+                                    <span className="px-3 py-1 bg-slate-200/90 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                      {(() => {
+                                        const d = new Date(msg.createdAt);
+                                        const today = new Date();
+                                        if (d.toDateString() === today.toDateString()) return 'Today';
+                                        const yesterday = new Date();
+                                        yesterday.setDate(today.getDate() - 1);
+                                        if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                                        return d.toLocaleDateString('en-US', {
+                                          weekday: 'short',
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                        });
+                                      })()}
+                                    </span>
+                                  </div>
+                                )}
+
+                                <div className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
+                                  <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] font-semibold text-slate-500">
+                                    <strong
+                                      onClick={() => {
+                                        if (!isAdmin) {
+                                          const matched = courseStudents.find(
+                                            (s: any) => s._id === msg.sender || s.name === msg.senderName
+                                          );
+                                          if (matched) setSelectedChatStudentId(matched._id);
+                                        }
+                                      }}
+                                      className={`${isAdmin ? 'text-blue-800' : 'text-slate-800 hover:text-blue-600 cursor-pointer'}`}
+                                    >
+                                      {isAdmin ? 'Admin / Instructor' : msg.senderName}
+                                    </strong>
+                                    <span
+                                      className={`text-[9px] px-1.5 py-0.2 rounded font-black uppercase ${
+                                        isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-900'
+                                      }`}
+                                    >
+                                      {msg.senderRole}
+                                    </span>
+                                    {studentCv?.updatedAt && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const studentObj =
+                                            allStudentCvs.find((s) => s._id === msg.sender || s.email === msg.sender || s.name === msg.senderName) ||
+                                            courseStudents.find((s: any) => s._id === msg.sender || s.name === msg.senderName);
+                                          if (studentObj) {
+                                            setViewingStudentCv({ ...studentObj, cv: studentCv });
+                                            setAdminCvFeedback(studentCv.adminFeedback || '');
+                                            setAdminCvStatus(studentCv.status || 'reviewed');
+                                          }
+                                        }}
+                                        className="px-1.5 py-0.2 rounded-md bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-black text-[9px] flex items-center gap-0.5 cursor-pointer shadow-2xs hover:scale-105 transition"
+                                        title="View student submitted CV"
+                                      >
+                                        <FileText className="w-2.5 h-2.5 text-amber-600" /> CV
+                                      </button>
+                                    )}
+                                    <span className="text-slate-400 text-[9px]">
+                                      {msg.createdAt
+                                        ? new Date(msg.createdAt).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                          })
+                                        : ''}
+                                    </span>
+                                  </div>
+
+                                  <div
+                                    className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
+                                      isAdmin
+                                        ? 'bg-blue-600 text-white rounded-br-xs'
+                                        : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs'
                                     }`}
                                   >
-                                    {msg.senderRole}
-                                  </span>
-                                  <span className="text-slate-400 text-[9px]">
-                                    {msg.createdAt
-                                      ? new Date(msg.createdAt).toLocaleTimeString([], {
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                        })
-                                      : ''}
-                                  </span>
-                                </div>
-
-                                <div
-                                  className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
-                                    isAdmin
-                                      ? 'bg-blue-600 text-white rounded-br-xs'
-                                      : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs'
-                                  }`}
-                                >
-                                  {msg.message}
+                                    {msg.message}
+                                  </div>
                                 </div>
                               </div>
                             );

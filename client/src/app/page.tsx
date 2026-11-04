@@ -125,7 +125,19 @@ export default function HomePage() {
       }
       if (cachedSettings) {
         const parsed = JSON.parse(cachedSettings);
-        if (parsed?.siteName) setSettings(parsed);
+        if (parsed?.siteName) {
+          if (
+            !parsed.heroBengaliNote ||
+            parsed.heroBengaliNote.includes('?') ||
+            !/[\u0980-\u09FF]/.test(parsed.heroBengaliNote)
+          ) {
+            parsed.heroBengaliNote = 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।';
+            try {
+              localStorage.setItem('bpa_cached_settings', JSON.stringify(parsed));
+            } catch {}
+          }
+          setSettings(parsed);
+        }
       }
     } catch (e) {
       // ignore JSON errors
@@ -257,9 +269,13 @@ export default function HomePage() {
               {/* Bengali Highlight Banner */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-amber-100/50 to-orange-50/60 border-l-4 border-amber-500 border-y border-r border-amber-200 shadow-sm">
                 <p className="text-amber-950 font-black text-sm sm:text-base md:text-lg leading-snug flex items-center gap-2">
-                  <span className="text-amber-600">✨</span> {(!settings?.heroBengaliNote || /\?{2,}/.test(settings.heroBengaliNote) || settings.heroBengaliNote.includes('???'))
-                    ? 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।'
-                    : settings.heroBengaliNote}
+                  <span className="text-amber-600">✨</span> {(() => {
+                    const note = settings?.heroBengaliNote;
+                    if (!note || note.includes('?') || !/[\u0980-\u09FF]/.test(note)) {
+                      return 'সাইটে কাজ করার বাস্তব জ্ঞান, চাকরির প্রস্তুতি ও ক্যারিয়ার গড়ার পথ।';
+                    }
+                    return note;
+                  })()}
                 </p>
               </div>
 

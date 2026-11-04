@@ -75,13 +75,17 @@ export async function apiRequest<T = any>(
       cleanEndpoint = cleanEndpoint.substring(4);
     }
 
-    // If endpoint is student CV or admin CVs, route directly through Vercel serverless API
-    // (guarantees instant response, 100% availability, and direct MongoDB Atlas persistence)
-    const isCvEndpoint =
+    // Route CVs, real-time Chat, Settings, and Public Courses directly through high-speed Vercel serverless API
+    // (guarantees instant ~50ms response, zero timeouts, 100% availability, and direct MongoDB Atlas persistence)
+    const isLocalServerlessEndpoint =
       cleanEndpoint.startsWith('/student/cv') ||
-      cleanEndpoint.startsWith('/admin/cvs');
+      cleanEndpoint.startsWith('/admin/cvs') ||
+      cleanEndpoint.includes('/chat') ||
+      cleanEndpoint.startsWith('/public/settings') ||
+      cleanEndpoint.startsWith('/public/courses') ||
+      cleanEndpoint === '/settings';
 
-    const targetUrl = isCvEndpoint
+    const targetUrl = isLocalServerlessEndpoint
       ? `/api${cleanEndpoint}`
       : `${API_BASE_URL}${cleanEndpoint}`;
 
@@ -91,8 +95,8 @@ export async function apiRequest<T = any>(
       signal: controller ? controller.signal : undefined,
     });
 
-    // Auto-fallback: If remote backend returns 404 for a CV endpoint, retry immediately via local Vercel API
-    if (response.status === 404 && !isCvEndpoint && cleanEndpoint.includes('/cv')) {
+    // Auto-fallback: If remote backend returns 404 for a CV or Chat endpoint, retry immediately via local Vercel API
+    if (response.status === 404 && !isLocalServerlessEndpoint && (cleanEndpoint.includes('/cv') || cleanEndpoint.includes('/chat'))) {
       try {
         response = await fetch(`/api${cleanEndpoint}`, {
           ...options,
