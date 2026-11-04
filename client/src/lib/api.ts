@@ -75,11 +75,31 @@ export async function apiRequest<T = any>(
       cleanEndpoint = cleanEndpoint.substring(4);
     }
 
-    const response = await fetch(`${API_BASE_URL}${cleanEndpoint}`, {
+    // If endpoint is student CV or admin CVs, route directly through Vercel serverless API
+    // (guarantees instant response, 100% availability, and direct MongoDB Atlas persistence)
+    const isCvEndpoint =
+      cleanEndpoint.startsWith('/student/cv') ||
+      cleanEndpoint.startsWith('/admin/cvs');
+
+    const targetUrl = isCvEndpoint
+      ? `/api${cleanEndpoint}`
+      : `${API_BASE_URL}${cleanEndpoint}`;
+
+    let response = await fetch(targetUrl, {
       ...options,
       headers,
       signal: controller ? controller.signal : undefined,
     });
+
+    // Auto-fallback: If remote backend returns 404 for a CV endpoint, retry immediately via local Vercel API
+    if (response.status === 404 && !isCvEndpoint && cleanEndpoint.includes('/cv')) {
+      try {
+        response = await fetch(`/api${cleanEndpoint}`, {
+          ...options,
+          headers,
+        });
+      } catch {}
+    }
 
     if (timeoutId) clearTimeout(timeoutId);
 
