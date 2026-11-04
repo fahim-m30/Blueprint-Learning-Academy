@@ -386,6 +386,22 @@ router.post('/course/:courseId/chat', async (req, res) => {
 });
 
 /**
+ * GET /api/student/cv
+ * Retrieve student's current submitted CV
+ */
+router.get('/cv', async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('cv name email phone');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    res.json({ success: true, cv: user.cv || null });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve CV.' });
+  }
+});
+
+/**
  * POST /api/student/cv
  * Upload or update student CV
  */

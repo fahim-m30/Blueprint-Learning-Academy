@@ -1,4 +1,13 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+function getCleanApiBaseUrl(): string {
+  let base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').trim();
+  base = base.replace(/\/+$/, '');
+  if (!base.endsWith('/api')) {
+    base = `${base}/api`;
+  }
+  return base;
+}
+
+const API_BASE_URL = getCleanApiBaseUrl();
 
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -57,7 +66,16 @@ export async function apiRequest<T = any>(
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    // Ensure clean endpoint without leading duplicate /api or missing /
+    let cleanEndpoint = (endpoint || '').trim();
+    if (!cleanEndpoint.startsWith('/')) {
+      cleanEndpoint = `/${cleanEndpoint}`;
+    }
+    if (cleanEndpoint.startsWith('/api/')) {
+      cleanEndpoint = cleanEndpoint.substring(4);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${cleanEndpoint}`, {
       ...options,
       headers,
       signal: controller ? controller.signal : undefined,

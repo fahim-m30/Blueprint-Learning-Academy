@@ -28,7 +28,39 @@ import {
   BarChart3,
   Sparkles,
   Award,
+  Maximize2,
+  X,
+  ChevronLeft,
 } from 'lucide-react';
+
+function getEmbedVideoInfo(url?: string): { embedUrl: string | null; isDirectVideo: boolean; rawUrl: string } {
+  if (!url) return { embedUrl: null, isDirectVideo: false, rawUrl: '' };
+  const trimmed = url.trim();
+
+  if (trimmed.match(/\.(mp4|webm|ogg)(\?.*)?$/i)) {
+    return { embedUrl: trimmed, isDirectVideo: true, rawUrl: trimmed };
+  }
+
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`,
+      isDirectVideo: false,
+      rawUrl: trimmed,
+    };
+  }
+
+  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return {
+      embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+      isDirectVideo: false,
+      rawUrl: trimmed,
+    };
+  }
+
+  return { embedUrl: trimmed, isDirectVideo: false, rawUrl: trimmed };
+}
 
 export default function StudentDashboardPage() {
   const router = useRouter();
@@ -65,51 +97,114 @@ export default function StudentDashboardPage() {
   const [chatInput, setChatInput] = useState('');
   const [sendingChat, setSendingChat] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-poll for live chat messages in real-time
-  // Live Ultra-Fast Real-Time Auto-Polling for Student Dashboard & Course Hub (every 1.0s)
+  // Theater mode video player state (strict in-site big screen playback)
+  const [activeTheaterVideo, setActiveTheaterVideo] = useState<{
+    _id: string;
+    title: string;
+    youtubeUrl: string;
+    duration?: string;
+    note?: string;
+    index: number;
+  } | null>(null);
+
+  const scrollStudentChatToBottom = (instant = false) => {
+    if (chatContainerRef.current) {
+      if (instant) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      } else {
+        chatContainerRef.current.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }
+  };
+
+  // Only scroll when entering chat tab
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      setTimeout(() => scrollStudentChatToBottom(true), 60);
+    }
+  }, [activeTab]);
+
+  // Escape key handler and body scroll lock for Theater Mode video player
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveTheaterVideo(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (activeTheaterVideo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeTheaterVideo]);
+
+  // Live Real-Time Auto-Polling for Student Dashboard (Optimized & Non-Flickering)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     interval = setInterval(async () => {
       try {
-        // 1. Sync student profile, enrollment approvals, and CV review feedback
-        const res = await apiRequest('/student/dashboard');
-        if (res.success && res.data) {
-          if (res.data.student) setStudentInfo(res.data.student);
-          if (res.data.enrolledCourses) setEnrolledList(res.data.enrolledCourses);
-          if (res.data.student?.cv) setStudentCv(res.data.student.cv);
-        }
-
-        // 2. If a course is selected, sync live classes, notices, task grades/submissions, and chat
-        if (selectedCourseId) {
-          const [cRes, chatRes] = await Promise.all([
-            apiRequest(`/student/course/${selectedCourseId}`),
-            apiRequest(`/student/course/${selectedCourseId}/chat`),
-          ]);
-          if (cRes.success && cRes.data?.course) {
-            setCourseDetails(cRes.data.course);
-            if (cRes.data.mySubmissions) setMySubmissions(cRes.data.mySubmissions);
-            if (cRes.data.completedVideos) setCompletedVideos(cRes.data.completedVideos);
-          }
+        if (selectedCourseId && activeTab === 'chat') {
+          // If in chat tab, poll only chat messages every 1.8s
+          const chatRes = await apiRequest(`/student/course/${selectedCourseId}/chat`);
           const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
-          if (chatRes.success && msgs) {
-            setChatMessages(msgs);
+          if (chatRes.success && Array.isArray(msgs)) {
+            setChatMessages((prev) => {
+              const prevLen = prev.length;
+              const newLen = msgs.length;
+              if (prevLen !== newLen || (prevLen > 0 && prev[prevLen - 1]?._id !== msgs[newLen - 1]?._id)) {
+                setTimeout(() => scrollStudentChatToBottom(false), 50);
+                return msgs;
+              }
+              return prev; // Identical messages -> ZERO re-render, ZERO screen jumping!
+            });
+          }
+        } else if (selectedCourseId) {
+          // If in another tab, poll course details quietly
+          const cRes = await apiRequest(`/student/course/${selectedCourseId}`);
+          if (cRes.success && cRes.data?.course) {
+            setCourseDetails((prev) =>
+              JSON.stringify(prev?.notices) !== JSON.stringify(cRes.data.course?.notices) ? cRes.data.course : prev
+            );
+            if (cRes.data.mySubmissions) {
+              setMySubmissions((prev) =>
+                prev.length !== cRes.data.mySubmissions.length ? cRes.data.mySubmissions : prev
+              );
+            }
+            if (cRes.data.completedVideos) {
+              setCompletedVideos((prev) =>
+                prev.length !== cRes.data.completedVideos.length ? cRes.data.completedVideos : prev
+              );
+            }
+          }
+        } else {
+          // In dashboard root
+          const res = await apiRequest('/student/dashboard');
+          if (res.success && res.data) {
+            if (res.data.student) setStudentInfo(res.data.student);
+            if (res.data.enrolledCourses) setEnrolledList(res.data.enrolledCourses);
+            if (res.data.student?.cv) setStudentCv(res.data.student.cv);
           }
         }
       } catch {}
-    }, 1000);
+    }, 2000);
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [selectedCourseId]);
-
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    if (activeTab === 'chat') {
-      chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chatMessages, activeTab]);
+  }, [selectedCourseId, activeTab]);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -270,20 +365,40 @@ export default function StudentDashboardPage() {
     }
   };
 
+  // Instant Optimistic Chat Sending (0ms delay)
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    const text = chatInput.trim();
+    if (!text || !selectedCourseId) return;
 
-    setSendingChat(true);
-    const res = await apiRequest(`/student/course/${selectedCourseId}/chat`, {
-      method: 'POST',
-      body: JSON.stringify({ message: chatInput.trim() }),
-    });
-    setSendingChat(false);
+    // 1. Instantly clear input so user can type next message with zero lag
+    setChatInput('');
 
-    if (res.success && res.data?.message) {
-      setChatMessages((prev) => [...prev, res.data.message]);
-      setChatInput('');
+    // 2. Instant Optimistic Render
+    const tempId = 'temp_std_' + Date.now();
+    const optimisticMsg: any = {
+      _id: tempId,
+      course: selectedCourseId,
+      sender: studentInfo?._id || 'me',
+      senderName: studentInfo?.name || 'You',
+      senderRole: 'student',
+      message: text,
+      createdAt: new Date().toISOString(),
+    };
+    setChatMessages((prev) => [...prev, optimisticMsg]);
+    setTimeout(() => scrollStudentChatToBottom(true), 20);
+
+    // 3. Background Dispatch
+    try {
+      const res = await apiRequest(`/student/course/${selectedCourseId}/chat`, {
+        method: 'POST',
+        body: JSON.stringify({ message: text }),
+      });
+      if (res.success && res.data?.message) {
+        setChatMessages((prev) => prev.map((m) => (m._id === tempId ? res.data.message : m)));
+      }
+    } catch (err) {
+      console.error('Failed to send student message:', err);
     }
   };
 
@@ -667,26 +782,41 @@ export default function StudentDashboardPage() {
                 {courseDetails?.videos && courseDetails.videos.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                     {courseDetails.videos.map((vid, idx) => {
-                      let embedUrl = vid.youtubeUrl;
-                      if (vid.youtubeUrl.includes('watch?v=')) {
-                        embedUrl = vid.youtubeUrl.replace('watch?v=', 'embed/');
-                      } else if (vid.youtubeUrl.includes('youtu.be/')) {
-                        embedUrl = vid.youtubeUrl.replace('youtu.be/', 'www.youtube.com/embed/');
-                      }
+                      const videoInfo = getEmbedVideoInfo(vid.youtubeUrl);
 
                       return (
                         <div
                           key={vid._id || idx}
-                          className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between"
+                          className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between group/card transition hover:border-blue-400"
                         >
-                          <div className="relative aspect-video w-full bg-black">
-                            <iframe
-                              src={embedUrl}
-                              title={vid.title}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              className="absolute inset-0 w-full h-full border-0"
-                            ></iframe>
+                          <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
+                            {videoInfo.isDirectVideo ? (
+                              <video
+                                src={videoInfo.embedUrl || vid.youtubeUrl}
+                                controls
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-contain"
+                              />
+                            ) : (
+                              <iframe
+                                src={videoInfo.embedUrl || vid.youtubeUrl}
+                                title={vid.title}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                                allowFullScreen
+                                className="absolute inset-0 w-full h-full border-0"
+                              ></iframe>
+                            )}
+
+                            {/* Big Screen Overlay Button */}
+                            <button
+                              type="button"
+                              onClick={() => setActiveTheaterVideo({ ...vid, index: idx })}
+                              className="absolute top-2.5 right-2.5 px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-amber-400 hover:text-amber-300 font-black text-xs flex items-center gap-1.5 backdrop-blur-md border border-amber-400/40 shadow-lg transition hover:scale-105 active:scale-95"
+                              title="সম্পূর্ণ বড় পর্দায় দেখুন (Theater Mode)"
+                            >
+                              <Maximize2 className="w-3.5 h-3.5" />
+                              <span>বড় পর্দা</span>
+                            </button>
                           </div>
 
                           <div className="p-4 sm:p-5 space-y-2.5">
@@ -700,7 +830,7 @@ export default function StudentDashboardPage() {
                                 📌 <strong>Instructor Note:</strong> {vid.note}
                               </p>
                             )}
-                            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
                               <button
                                 type="button"
                                 onClick={() => handleToggleCompleteVideo(vid._id)}
@@ -723,14 +853,15 @@ export default function StudentDashboardPage() {
                                 )}
                               </button>
 
-                              <a
-                                href={vid.youtubeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs sm:text-sm text-blue-700 hover:text-blue-800 flex items-center gap-1.5 font-bold hover:underline"
+                              {/* Strict In-Site Fullscreen Theater Mode Button (No YouTube redirects) */}
+                              <button
+                                type="button"
+                                onClick={() => setActiveTheaterVideo({ ...vid, index: idx })}
+                                className="text-xs sm:text-sm px-3.5 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-amber-400 font-extrabold flex items-center gap-1.5 transition shadow-sm border border-slate-800 hover:scale-105"
                               >
-                                Watch on YouTube <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
+                                <Maximize2 className="w-3.5 h-3.5" />
+                                <span>বড় পর্দায় দেখুন</span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1089,7 +1220,7 @@ export default function StudentDashboardPage() {
                 </div>
 
                 {/* Messages Feed */}
-                <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3.5 bg-[#f8fafc]">
+                <div ref={chatContainerRef} className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3.5 bg-[#f8fafc]">
                   {chatMessages.length === 0 ? (
                     <div className="text-center py-16 text-sm text-slate-400 font-medium">
                       No messages yet. Send a question to start the conversation!
@@ -1381,6 +1512,155 @@ export default function StudentDashboardPage() {
           </div>
         )}
       </main>
+
+      {/* ============================================================== */}
+      {/* IN-SITE THEATER MODE VIDEO LIGHTBOX MODAL (NO YOUTUBE REDIRECTS) */}
+      {/* ============================================================== */}
+      {activeTheaterVideo && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Header Bar */}
+          <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-800 text-white max-w-6xl w-full mx-auto">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="px-2.5 py-1 rounded-md bg-amber-400 text-slate-950 font-black text-xs shrink-0">
+                Lecture #{activeTheaterVideo.index + 1}
+              </span>
+              <div className="truncate">
+                <h3 className="text-sm sm:text-base md:text-lg font-black text-white truncate">
+                  {activeTheaterVideo.title}
+                </h3>
+                <p className="text-xs text-slate-400 truncate">
+                  {courseDetails?.title}
+                  {activeTheaterVideo.duration ? ` • ${activeTheaterVideo.duration}` : ''}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveTheaterVideo(null)}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition border border-slate-700 shrink-0"
+            >
+              <X className="w-4 h-4" />
+              <span>বন্ধ করুন (Esc)</span>
+            </button>
+          </div>
+
+          {/* Big Screen Player 16:9 */}
+          <div className="max-w-6xl w-full mx-auto my-auto py-3 sm:py-5">
+            <div className="relative aspect-video w-full bg-black rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+              {getEmbedVideoInfo(activeTheaterVideo.youtubeUrl).isDirectVideo ? (
+                <video
+                  src={getEmbedVideoInfo(activeTheaterVideo.youtubeUrl).embedUrl || activeTheaterVideo.youtubeUrl}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={getEmbedVideoInfo(activeTheaterVideo.youtubeUrl).embedUrl || activeTheaterVideo.youtubeUrl}
+                  title={activeTheaterVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              )}
+            </div>
+
+            {/* Video Controls & Playlist Navigation */}
+            <div className="mt-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {/* Previous Video */}
+                <button
+                  type="button"
+                  disabled={activeTheaterVideo.index === 0}
+                  onClick={() => {
+                    if (courseDetails?.videos && activeTheaterVideo.index > 0) {
+                      const prevIdx = activeTheaterVideo.index - 1;
+                      setActiveTheaterVideo({ ...courseDetails.videos[prevIdx], index: prevIdx });
+                    }
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition border border-slate-700"
+                >
+                  <ChevronLeft className="w-4 h-4" /> আগের লেকচার
+                </button>
+
+                {/* Next Video */}
+                <button
+                  type="button"
+                  disabled={!courseDetails?.videos || activeTheaterVideo.index >= courseDetails.videos.length - 1}
+                  onClick={() => {
+                    if (courseDetails?.videos && activeTheaterVideo.index < courseDetails.videos.length - 1) {
+                      const nextIdx = activeTheaterVideo.index + 1;
+                      setActiveTheaterVideo({ ...courseDetails.videos[nextIdx], index: nextIdx });
+                    }
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition border border-slate-700"
+                >
+                  পরের লেকচার <ChevronRight className="w-4 h-4" />
+                </button>
+
+                {/* Mark as Watched */}
+                <button
+                  type="button"
+                  onClick={() => handleToggleCompleteVideo(activeTheaterVideo._id)}
+                  className={`px-4 py-2 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 transition ${
+                    completedVideos.includes(activeTheaterVideo._id)
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md shadow-amber-400/20'
+                  }`}
+                >
+                  {completedVideos.includes(activeTheaterVideo._id) ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>দেখা সম্পন্ন ✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      <span>দেখা সম্পন্ন চিহ্নিত করুন</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Lecture Playlist Selector */}
+              {courseDetails?.videos && courseDetails.videos.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+                  <span className="text-xs text-slate-400 font-bold shrink-0">প্লেলিস্ট:</span>
+                  {courseDetails.videos.map((v, vIdx) => (
+                    <button
+                      key={v._id || vIdx}
+                      type="button"
+                      onClick={() => setActiveTheaterVideo({ ...v, index: vIdx })}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition shrink-0 ${
+                        activeTheaterVideo.index === vIdx
+                          ? 'bg-amber-400 text-slate-950 ring-2 ring-amber-300'
+                          : completedVideos.includes(v._id)
+                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 hover:bg-emerald-900/60'
+                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      #{vIdx + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Note if present */}
+            {activeTheaterVideo.note && (
+              <div className="mt-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                📌 <strong className="text-amber-400">ইন্সট্রাক্টর নোট:</strong> {activeTheaterVideo.note}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

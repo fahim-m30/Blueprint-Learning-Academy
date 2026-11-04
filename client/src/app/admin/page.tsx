@@ -63,6 +63,20 @@ export default function AdminPortalPage() {
   const [selectedChatStudentId, setSelectedChatStudentId] = useState<string | null>(null);
   const [chatStudentSearch, setChatStudentSearch] = useState('');
   const courseChatBottomRef = useRef<HTMLDivElement | null>(null);
+  const courseChatContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollAdminChatToBottom = (instant = false) => {
+    if (courseChatContainerRef.current) {
+      if (instant) {
+        courseChatContainerRef.current.scrollTop = courseChatContainerRef.current.scrollHeight;
+      } else {
+        courseChatContainerRef.current.scrollTo({
+          top: courseChatContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }
+  };
 
   // Admin Team & Password Verification States
   const [adminsList, setAdminsList] = useState<any[]>([]);
@@ -251,13 +265,14 @@ export default function AdminPortalPage() {
     setCvLoading(false);
   };
 
+  // Only scroll when entering chat tab or switching student
   useEffect(() => {
-    if (courseChatBottomRef.current && courseSubTab === 'chat') {
-      courseChatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (courseSubTab === 'chat') {
+      setTimeout(() => scrollAdminChatToBottom(true), 60);
     }
-  }, [courseChat, courseSubTab]);
+  }, [courseSubTab, selectedChatStudentId]);
 
-  // Live Real-Time Auto-Polling (every 1.5s) for Pending Enrollments, Payments & Overview Stats
+  // Live Auto-Polling for Pending Enrollments, Payments & Overview Stats (every 3.5s)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     interval = setInterval(async () => {
@@ -267,45 +282,76 @@ export default function AdminPortalPage() {
           apiRequest('/admin/overview'),
         ]);
         if (enrollRes.success && enrollRes.data?.enrollments) {
-          setEnrollments(enrollRes.data.enrollments);
+          setEnrollments((prev) => (prev.length !== enrollRes.data.enrollments.length ? enrollRes.data.enrollments : prev));
         }
         if (overviewRes.success && overviewRes.data?.stats) {
-          setStats(overviewRes.data.stats);
+          setStats((prev: any) => {
+            if (
+              !prev ||
+              prev.pendingEnrollments !== overviewRes.data.stats.pendingEnrollments ||
+              prev.totalRevenue !== overviewRes.data.stats.totalRevenue
+            ) {
+              return overviewRes.data.stats;
+            }
+            return prev;
+          });
         }
       } catch {}
-    }, 1500);
+    }, 3500);
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, []);
 
-  // Live Ultra-Fast Real-Time Auto-Polling (every 1.0s) inside Course Hub (Chat, Students, Tasks)
+  // Live Smooth Real-Time Auto-Polling inside Course Hub (Non-Flickering, Messenger Smoothness)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (selectedCourseId) {
       interval = setInterval(async () => {
         try {
-          const [cRes, chatRes] = await Promise.all([
-            apiRequest(`/admin/courses/${selectedCourseId}`),
-            apiRequest(`/admin/courses/${selectedCourseId}/chat`),
-          ]);
-          if (cRes.success && cRes.data) {
-            setSelectedCourseData(cRes.data.course);
-            if (cRes.data.students) setCourseStudents(cRes.data.students);
-            if (cRes.data.taskSubmissions) setCourseSubmissions(cRes.data.taskSubmissions);
-          }
-          const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
-          if (chatRes.success && msgs) {
-            setCourseChat(msgs);
+          if (courseSubTab === 'chat') {
+            const chatRes = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
+            const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
+            if (chatRes.success && Array.isArray(msgs)) {
+              setCourseChat((prev) => {
+                const prevLen = prev.length;
+                const newLen = msgs.length;
+                if (prevLen !== newLen || (prevLen > 0 && prev[prevLen - 1]?._id !== msgs[newLen - 1]?._id)) {
+                  setTimeout(() => scrollAdminChatToBottom(false), 50);
+                  return msgs;
+                }
+                return prev; // Same data -> NO re-render, ZERO screen jump!
+              });
+            }
+          } else {
+            const cRes = await apiRequest(`/admin/courses/${selectedCourseId}`);
+            if (cRes.success && cRes.data) {
+              setSelectedCourseData((prev: any) => {
+                if (JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus)) {
+                  return cRes.data.course;
+                }
+                return prev;
+              });
+              if (cRes.data.students) {
+                setCourseStudents((prev: any[]) =>
+                  prev.length !== cRes.data.students.length ? cRes.data.students : prev
+                );
+              }
+              if (cRes.data.taskSubmissions) {
+                setCourseSubmissions((prev: any[]) =>
+                  prev.length !== cRes.data.taskSubmissions.length ? cRes.data.taskSubmissions : prev
+                );
+              }
+            }
           }
         } catch {}
-      }, 1000);
+      }, 1800);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [selectedCourseId]);
+  }, [selectedCourseId, courseSubTab]);
 
   // Live Real-Time Auto-Polling (every 1.5s) when viewing Student CVs
   useEffect(() => {
@@ -700,19 +746,40 @@ export default function AdminPortalPage() {
     }
   };
 
-  // 6. Admin Chat
+  // 6. Admin Chat (Instant Optimistic UI + Background Dispatch)
   const handleSendAdminChat = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCourseId || !adminChatMsg.trim()) return;
+    const text = adminChatMsg.trim();
+    if (!selectedCourseId || !text) return;
 
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`, {
-      method: 'POST',
-      body: JSON.stringify({ message: adminChatMsg.trim() }),
-    });
+    // Immediately clear input for smooth, lag-free typing
+    setAdminChatMsg('');
 
-    if (res.success && res.data?.message) {
-      setCourseChat((prev) => [...prev, res.data.message]);
-      setAdminChatMsg('');
+    // Instant optimistic render in feed (0ms delay)
+    const tempId = 'temp_admin_' + Date.now();
+    const optimisticMsg: any = {
+      _id: tempId,
+      course: selectedCourseId,
+      sender: 'admin',
+      senderName: 'Admin / Instructor',
+      senderRole: 'admin',
+      message: text,
+      createdAt: new Date().toISOString(),
+    };
+    setCourseChat((prev) => [...prev, optimisticMsg]);
+    setTimeout(() => scrollAdminChatToBottom(true), 20);
+
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/chat`, {
+        method: 'POST',
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (res.success && res.data?.message) {
+        setCourseChat((prev) => prev.map((m) => (m._id === tempId ? res.data.message : m)));
+      }
+    } catch (err) {
+      console.error('Failed to post admin message:', err);
     }
   };
 
@@ -2102,7 +2169,7 @@ export default function AdminPortalPage() {
                       })()}
 
                       {/* Messenger Feed */}
-                      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                      <div ref={courseChatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-3">
                         {(() => {
                           const targetStudent = selectedChatStudentId
                             ? courseStudents.find((s: any) => s._id === selectedChatStudentId)
