@@ -366,7 +366,7 @@ export default function AdminPortalPage() {
         const res = await apiRequest('/admin/cvs');
         const list = res.data?.students || (res as any)?.students;
         if (res.success && Array.isArray(list)) {
-          setAllStudentCvs((prev) => (prev.length !== list.length ? list : prev));
+          setAllStudentCvs(list);
         }
       } catch {}
     }, 2500);
@@ -1483,9 +1483,10 @@ export default function AdminPortalPage() {
                                 </td>
                                 <td className="p-3.5">
                                   {(() => {
-                                    const studentCv = st.cv?.updatedAt
-                                      ? st.cv
-                                      : allStudentCvs.find((c) => c._id === st._id || c.email === st.email)?.cv;
+                                    const atlasStudent = allStudentCvs.find((c) => c._id === st._id || c.email === st.email);
+                                    const studentCv = atlasStudent?.cv?.updatedAt
+                                      ? atlasStudent.cv
+                                      : (st.cv?.updatedAt ? st.cv : null);
 
                                     if (studentCv?.updatedAt) {
                                       return (
@@ -1496,7 +1497,7 @@ export default function AdminPortalPage() {
                                               setAdminCvFeedback(studentCv.adminFeedback || '');
                                               setAdminCvStatus(studentCv.status || 'reviewed');
                                             }}
-                                            className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs inline-flex items-center gap-1.5 transition shadow-xs hover:scale-105"
+                                            className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-extrabold text-xs inline-flex items-center gap-1.5 transition shadow-xs hover:scale-105 cursor-pointer"
                                             title="Click to view CV and submit feedback"
                                           >
                                             <FileText className="w-3.5 h-3.5 text-blue-600" /> View CV
@@ -2736,14 +2737,31 @@ export default function AdminPortalPage() {
                           </td>
 
                           <td className="p-3.5">
-                            {s.cv?.fileData ? (
-                              <a
-                                href={s.cv.fileData}
-                                download={s.cv.fileName || `${s.name}_CV.pdf`}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-extrabold text-xs sm:text-sm transition shadow-xs"
+                            {s.cv?.fileData || s.cv?.hasFileData ? (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (s.cv?.fileData) {
+                                    const a = document.createElement('a');
+                                    a.href = s.cv.fileData;
+                                    a.download = s.cv.fileName || `${s.name}_CV.pdf`;
+                                    a.click();
+                                  } else {
+                                    const res = await apiRequest(`/admin/cvs/${s._id}/file`);
+                                    if (res.success && res.data?.fileData) {
+                                      const a = document.createElement('a');
+                                      a.href = res.data.fileData;
+                                      a.download = res.data.fileName || `${s.name}_CV.pdf`;
+                                      a.click();
+                                    } else {
+                                      showAlert('File download error', 'error');
+                                    }
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-extrabold text-xs sm:text-sm transition shadow-xs cursor-pointer"
                               >
-                                <Download className="w-4 h-4 text-emerald-600" /> Download ({s.cv.fileName || 'CV.pdf'})
-                              </a>
+                                <Download className="w-4 h-4 text-emerald-600" /> Download ({s.cv?.fileName || 'CV.pdf'})
+                              </button>
                             ) : s.cv?.fileUrl ? (
                               <a
                                 href={s.cv.fileUrl}
@@ -4143,14 +4161,31 @@ export default function AdminPortalPage() {
 
               {/* Download / Open File Buttons */}
               <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                {viewingStudentCv.cv?.fileData && (
-                  <a
-                    href={viewingStudentCv.cv.fileData}
-                    download={viewingStudentCv.cv.fileName || `${viewingStudentCv.name}_CV.pdf`}
-                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition text-xs sm:text-sm"
+                {(viewingStudentCv.cv?.fileData || viewingStudentCv.cv?.hasFileData) && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (viewingStudentCv.cv?.fileData) {
+                        const a = document.createElement('a');
+                        a.href = viewingStudentCv.cv.fileData;
+                        a.download = viewingStudentCv.cv.fileName || `${viewingStudentCv.name}_CV.pdf`;
+                        a.click();
+                      } else {
+                        const res = await apiRequest(`/admin/cvs/${viewingStudentCv._id}/file`);
+                        if (res.success && res.data?.fileData) {
+                          const a = document.createElement('a');
+                          a.href = res.data.fileData;
+                          a.download = res.data.fileName || `${viewingStudentCv.name}_CV.pdf`;
+                          a.click();
+                        } else {
+                          showAlert('File data not available or already expired.', 'error');
+                        }
+                      }
+                    }}
+                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-center flex items-center justify-center gap-2 shadow-xs transition text-xs sm:text-sm cursor-pointer"
                   >
-                    <Download className="w-4 h-4" /> Download CV ({viewingStudentCv.cv.fileName || 'PDF/DOC'})
-                  </a>
+                    <Download className="w-4 h-4" /> Download CV ({viewingStudentCv.cv?.fileName || 'PDF/DOC'})
+                  </button>
                 )}
                 {viewingStudentCv.cv?.fileUrl && (
                   <a

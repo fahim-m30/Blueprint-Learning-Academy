@@ -13,8 +13,8 @@ function getUserIdFromAuth(req: NextRequest): { userId: string | null; role: str
   const token = authHeader.split(' ')[1];
   try {
     const decoded: any = jwt.decode(token);
-    if (decoded && decoded.id) {
-      return { userId: decoded.id, role: decoded.role || 'admin' };
+    if (decoded && (decoded.id || decoded._id)) {
+      return { userId: decoded.id || decoded._id, role: decoded.role || 'admin' };
     }
   } catch {}
   return { userId: null, role: null };
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { db } = await connectToDatabase();
-    const students = await db
+    const rawStudents = await db
       .collection('users')
       .find({
         $or: [
@@ -49,6 +49,27 @@ export async function GET(req: NextRequest) {
       })
       .sort({ 'cv.updatedAt': -1 })
       .toArray();
+
+    // Optimize payload: Strip huge multi-megabyte base64 fileData from the batch list to ensure instant (<30ms) responses
+    const students = rawStudents.map((s) => {
+      const cvObj = s.cv || {};
+      const hasData = Boolean(cvObj.fileData);
+      return {
+        ...s,
+        cv: {
+          fileUrl: cvObj.fileUrl || '',
+          fileName: cvObj.fileName || 'Student_CV.pdf',
+          hasFileData: hasData,
+          // Only send fileData directly if it's small (<100KB), otherwise the client will load it on-demand via /api/admin/cvs/[studentId]/file
+          fileData: hasData && cvObj.fileData.length < 100000 ? cvObj.fileData : '',
+          targetJobTitle: cvObj.targetJobTitle || 'Site Engineer',
+          note: cvObj.note || '',
+          updatedAt: cvObj.updatedAt || s.createdAt || new Date(),
+          adminFeedback: cvObj.adminFeedback || '',
+          status: cvObj.status || 'submitted',
+        },
+      };
+    });
 
     return NextResponse.json({ success: true, students, count: students.length });
   } catch (err: any) {
