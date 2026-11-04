@@ -42,6 +42,8 @@ import {
   Play,
   Video,
   Radio,
+  Maximize2,
+  X,
 } from 'lucide-react';
 
 function getEmbedVideoInfo(url?: string): { embedUrl: string | null; isDirectVideo: boolean; rawUrl: string } {
@@ -55,7 +57,7 @@ function getEmbedVideoInfo(url?: string): { embedUrl: string | null; isDirectVid
   const ytMatch = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
   if (ytMatch && ytMatch[1]) {
     return {
-      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`,
       isDirectVideo: false,
       rawUrl: trimmed,
     };
@@ -85,6 +87,27 @@ export default function HomePage() {
 
   // Dedicated Course Demo Preview Video selector state
   const [selectedDemoCourseId, setSelectedDemoCourseId] = useState<string>('all');
+  // Theater mode state for watching demo video in full-screen cinema mode inside website
+  const [isTheaterMode, setIsTheaterMode] = useState<boolean>(false);
+
+  // Close theater mode on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsTheaterMode(false);
+      }
+    };
+    if (isTheaterMode) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isTheaterMode]);
 
   // Live Notice Board states
   const [noticeCategoryFilter, setNoticeCategoryFilter] = useState<'all' | 'batch_start' | 'vacation' | 'special_notice'>('all');
@@ -680,9 +703,11 @@ export default function HomePage() {
                   <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-4">
                     <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black tracking-wide flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                      ১০০% ফ্রি সেশন • কোনো ফি নেই
+                      ১টি কমন লাইভ ডেমো ক্লাস
                     </span>
-                    <span className="text-[11px] font-bold text-slate-400">Google Meet / Live</span>
+                    <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                      Google Meet (১টি লিংক)
+                    </span>
                   </div>
 
                   <div>
@@ -690,7 +715,7 @@ export default function HomePage() {
                       সরাসরি লাইভ ডেমো ক্লাসে অংশ নিন
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                      বুয়েট গ্র্যাজুয়েট অভিজ্ঞ প্র্যাকটিসিং ইঞ্জিনিয়ারের সাথে সরাসরি ক্লাসে যুক্ত হয়ে দেখুন কীভাবে বাস্তব সাইটের জটিল বিষয়গুলো সহজে সমাধান শেখানো হয়।
+                      সব বিষয়ের শিক্ষার্থীদের জন্য প্রতি সপ্তাহে <strong>১টি কমন লাইভ গুগল মিট সেশন</strong> অনুষ্ঠিত হয়। আর প্রতিটি কোর্সের আলাদা আলাদা <strong>রেকর্ড করা প্র্যাকটিক্যাল ডেমো ক্লাস</strong> ডানপাশের প্লেয়ার থেকে যেকেউ ওয়েবসাইটেই সরাসরি দেখতে পারবেন।
                     </p>
                   </div>
 
@@ -700,7 +725,7 @@ export default function HomePage() {
                       <CalendarDays className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="block text-[11px] uppercase tracking-wider text-amber-400 font-extrabold">ক্লাস শিডিউল ও সময়</span>
+                      <span className="block text-[11px] uppercase tracking-wider text-amber-400 font-extrabold">সরাসরি লাইভ ক্লাসের শিডিউল</span>
                       <span className="block text-sm sm:text-base font-black text-white mt-0.5">
                         {settings?.demoClassDateText || 'প্রতি শুক্রবার রাত ৯:০০ টা (সরাসরি গুগল মিট)'}
                       </span>
@@ -757,11 +782,11 @@ export default function HomePage() {
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
                       <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-                        {selectedDemoCourse ? `${selectedDemoCourse.title} - ডেমো ভিডিও` : 'একাডেমি মাস্টার ডেমো ক্লাস'}
+                        {selectedDemoCourse ? `${selectedDemoCourse.title} - রেকর্ড করা ডেমো ক্লাস` : 'একাডেমি মাস্টার ডেমো ক্লাস'}
                       </span>
                     </div>
                     <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25">
-                      HD Quality • Real Project Site
+                      HD Quality • 100% In-Site Playback
                     </span>
                   </div>
 
@@ -800,7 +825,18 @@ export default function HomePage() {
                       : (settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস');
 
                     return (
-                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-2xl">
+                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-2xl group/player">
+                        {/* Overlay Theater Mode Button on Player */}
+                        <button
+                          type="button"
+                          onClick={() => setIsTheaterMode(true)}
+                          className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 border border-slate-700/80 text-amber-400 hover:text-amber-300 text-xs font-black flex items-center gap-1.5 backdrop-blur-md shadow-lg transition hover:scale-105 cursor-pointer"
+                          title="বড় পর্দায় (Theater Mode) দেখুন"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                          <span>বড় পর্দায় দেখুন</span>
+                        </button>
+
                         {videoInfo.isDirectVideo ? (
                           <video
                             controls
@@ -814,7 +850,7 @@ export default function HomePage() {
                             src={videoInfo.embedUrl}
                             title={videoTitle}
                             className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                             allowFullScreen
                           ></iframe>
                         ) : (
@@ -851,15 +887,15 @@ export default function HomePage() {
                   {(() => {
                     const videoToPlay = selectedDemoCourse?.demoVideoUrl || settings?.demoVideoUrl;
                     return videoToPlay ? (
-                      <a
-                        href={videoToPlay}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-extrabold hover:underline"
+                      <button
+                        type="button"
+                        onClick={() => setIsTheaterMode(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs transition duration-200 shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 cursor-pointer"
+                        title="ওয়েবসাইটে থেকেই বড় পর্দায় ফুলস্ক্রিনে দেখুন"
                       >
-                        <span>ইউটিউবে বড় পর্দায় দেখুন</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
+                        <Maximize2 className="w-3.5 h-3.5 text-slate-950" />
+                        <span>বড় পর্দায় (Theater Mode) দেখুন</span>
+                      </button>
                     ) : null;
                   })()}
                 </div>
@@ -1402,6 +1438,143 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <Footer settings={settings} />
+
+      {/* =========================================================================
+          IMMERSIVE FULLSCREEN THEATER MODE MODAL (100% On-Site Big Screen Playback)
+      ========================================================================= */}
+      {isTheaterMode && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 md:p-8 animate-in fade-in duration-200 overflow-y-auto">
+          {/* Theater Header */}
+          <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-3 sm:pb-4 max-w-6xl w-full mx-auto shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shrink-0" />
+              <div className="min-w-0">
+                <span className="text-xs uppercase tracking-wider text-amber-400 font-black block">
+                  {selectedDemoCourse ? `${selectedDemoCourse.title} • রেকর্ড করা ডেমো ক্লাস` : 'একাডেমি মাস্টার ডেমো ক্লাস'}
+                </span>
+                <h3 className="text-sm sm:text-lg font-black text-white truncate mt-0.5">
+                  {selectedDemoCourse
+                    ? (selectedDemoCourse.demoVideoTitle || `${selectedDemoCourse.title} - ডেমো ক্লাস ও প্র্যাকটিক্যাল প্রিভিউ`)
+                    : (settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস')}
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsTheaterMode(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs sm:text-sm font-black transition flex items-center gap-2 hover:scale-105 cursor-pointer shadow-md"
+              >
+                <X className="w-4 h-4 text-rose-400" />
+                <span>বন্ধ করুন (Esc)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Theater Player Container */}
+          <div className="max-w-6xl w-full mx-auto my-auto py-3">
+            {(() => {
+              const videoToPlay = selectedDemoCourse?.demoVideoUrl || settings?.demoVideoUrl;
+              const videoInfo = getEmbedVideoInfo(videoToPlay);
+              const videoTitle = selectedDemoCourse
+                ? (selectedDemoCourse.demoVideoTitle || `${selectedDemoCourse.title} - ডেমো ক্লাস`)
+                : (settings?.demoVideoTitle || 'সাইট এক্সিকিউশন ও বিওকিউ (BOQ) প্র্যাকটিক্যাল ডেমো ক্লাস');
+
+              return (
+                <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden bg-black border-2 border-slate-800 shadow-2xl">
+                  {videoInfo.isDirectVideo ? (
+                    <video
+                      controls
+                      autoPlay
+                      className="w-full h-full object-cover"
+                      src={videoInfo.embedUrl || ''}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : videoInfo.embedUrl ? (
+                    <iframe
+                      src={videoInfo.embedUrl}
+                      title={videoTitle}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">
+                      <Video className="w-16 h-16 text-slate-600 mb-2" />
+                      <p className="text-base font-bold">ভিডিও লিংক লোড করা যায়নি।</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Theater Footer: Course Context & Switchers */}
+          <div className="max-w-6xl w-full mx-auto border-t border-slate-800 pt-3 sm:pt-4 shrink-0">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+              {/* Course switch tabs inside theater */}
+              <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 scrollbar-none w-full md:w-auto">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap mr-1">
+                  অন্যান্য কোর্স ডেমো:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDemoCourseId('all')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition border cursor-pointer ${
+                    selectedDemoCourseId === 'all'
+                      ? 'bg-amber-400 text-slate-950 border-amber-400'
+                      : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                  }`}
+                >
+                  🌟 মাস্টার ডেমো
+                </button>
+                {courses.map((c, i) => (
+                  <button
+                    type="button"
+                    key={c._id}
+                    onClick={() => setSelectedDemoCourseId(c._id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
+                      selectedDemoCourseId === c._id
+                        ? 'bg-amber-400 text-slate-950 font-black border-amber-400'
+                        : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                    }`}
+                  >
+                    0{i + 1}. {c.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Action buttons if course is selected */}
+              {selectedDemoCourse && (
+                <div className="flex items-center gap-2.5 shrink-0 self-end md:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTheaterMode(false);
+                      setSelectedCourseForEnroll(selectedDemoCourse);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm hover:scale-105 transition shadow-lg shadow-amber-500/20 cursor-pointer"
+                  >
+                    ভর্তি হন (৳{selectedDemoCourse.price})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTheaterMode(false);
+                      setSelectedCourseForDetails(selectedDemoCourse);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm border border-slate-700 transition cursor-pointer"
+                  >
+                    সিলেবাস দেখুন
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODALS */}
       <CourseModal
