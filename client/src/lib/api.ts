@@ -75,7 +75,7 @@ export async function apiRequest<T = any>(
       cleanEndpoint = cleanEndpoint.substring(4);
     }
 
-    // Route CVs, real-time Chat, Settings, and Public Courses directly through high-speed Vercel serverless API
+    // Route CVs, real-time Chat, Settings, Public Courses, and User Block/Status directly through high-speed Vercel serverless API
     // (guarantees instant ~50ms response, zero timeouts, 100% availability, and direct MongoDB Atlas persistence)
     const isLocalServerlessEndpoint =
       cleanEndpoint.startsWith('/student/cv') ||
@@ -83,7 +83,8 @@ export async function apiRequest<T = any>(
       cleanEndpoint.includes('/chat') ||
       cleanEndpoint.startsWith('/public/settings') ||
       cleanEndpoint.startsWith('/public/courses') ||
-      cleanEndpoint === '/settings';
+      cleanEndpoint === '/settings' ||
+      cleanEndpoint.startsWith('/admin/users');
 
     const targetUrl = isLocalServerlessEndpoint
       ? `/api${cleanEndpoint}`

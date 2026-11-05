@@ -581,8 +581,13 @@ export default function AdminPortalPage() {
 
     if (res.success) {
       showAlert(res.message || `User has been blocked. Notification email sent to ${blockingUser.email}`);
+      const blockedId = blockingUser._id;
+      const appliedReason = blockReasonInput.trim();
       setBlockingUser(null);
       setBlockReasonInput('');
+      setCourseStudents((prev) =>
+        prev.map((s) => (s._id === blockedId ? { ...s, status: 'blocked', blockReason: appliedReason } : s))
+      );
       if (selectedCourseId) loadCourseHub(selectedCourseId);
     } else {
       showAlert(res.message || 'Error blocking user.', 'error');
@@ -597,6 +602,9 @@ export default function AdminPortalPage() {
     });
     if (res.success) {
       showAlert(res.message || `User account reinstated to Active! Confirmation email dispatched${studentEmail ? ` to ${studentEmail}` : ''}.`);
+      setCourseStudents((prev) =>
+        prev.map((s) => (s._id === userId ? { ...s, status: 'active', blockReason: '' } : s))
+      );
       if (selectedCourseId) loadCourseHub(selectedCourseId);
     } else {
       showAlert(res.message || 'Error unblocking user.', 'error');
