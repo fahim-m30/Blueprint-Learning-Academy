@@ -172,9 +172,9 @@ export default function LoginPage() {
             </div>
             <div className="text-center">
               <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 block tracking-tight">
-                Blueprint <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 bg-clip-text text-transparent">Learning Academy</span>
+                Blueprint Learning Academy
               </span>
-              <span className="block text-xs sm:text-sm uppercase tracking-widest text-blue-700 font-extrabold mt-1">
+              <span className="block text-xs sm:text-sm uppercase tracking-widest text-slate-800 font-black mt-1">
                 Real Estate Career Courses for Civil Engineers
               </span>
             </div>

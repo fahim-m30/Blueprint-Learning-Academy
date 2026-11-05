@@ -81,13 +81,9 @@ export default function Navbar({ settings }: NavbarProps) {
             </div>
             <div className="min-w-0">
               <span className="text-base xs:text-lg sm:text-2xl md:text-3xl lg:text-[32px] font-black tracking-tight text-slate-950 block leading-tight">
-                {settings?.siteName || (
-                  <>
-                    Blueprint <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 bg-clip-text text-transparent">Learning Academy</span>
-                  </>
-                )}
+                {settings?.siteName || 'Blueprint Learning Academy'}
               </span>
-              <span className="block text-[10px] sm:text-xs md:text-sm tracking-wider uppercase text-blue-700 font-extrabold mt-0.5 line-clamp-1 sm:line-clamp-none">
+              <span className="block text-[10px] sm:text-xs md:text-sm tracking-wider uppercase text-slate-800 font-black mt-0.5 line-clamp-1 sm:line-clamp-none">
                 {settings?.tagline || 'Real Estate Career Courses for Civil Engineers'}
               </span>
             </div>

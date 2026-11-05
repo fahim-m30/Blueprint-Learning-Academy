@@ -516,7 +516,7 @@ export default function StudentDashboardPage() {
                 className="w-11 h-11 sm:w-12 sm:h-12 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
               />
               <span className="text-lg sm:text-xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
-                Blueprint <span className="text-blue-700">Learning Academy</span>
+                Blueprint Learning Academy
               </span>
             </Link>
             <span className="text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full font-extrabold shrink-0">
