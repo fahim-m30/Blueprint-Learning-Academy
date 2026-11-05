@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { DEFAULT_SETTINGS } from '@/lib/initialData';
+import { verifyAuth } from '@/lib/authGuard';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const { db } = await connectToDatabase();
     const settings = await db.collection('sitesettings').findOne({});
@@ -32,6 +34,21 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  // 1. Rate Limiting Protection (Max 30 settings saves/min)
+  const rateLimit = checkRateLimit(req, 30, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
+
+  // 2. Strict Admin Authentication Guard
+  const auth = await verifyAuth(req, { requiredRole: 'admin' });
+  if (!auth.success) {
+    return auth.response;
+  }
+
   try {
     const body = await req.json();
     const { db } = await connectToDatabase();

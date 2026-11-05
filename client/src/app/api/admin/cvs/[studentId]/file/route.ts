@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { verifyAuth, isValidObjectId } from '@/lib/authGuard';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,22 +11,33 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { studentId: string } }
 ) {
-  try {
-    const { studentId } = params;
-    const { db } = await connectToDatabase();
+  const rateLimit = checkRateLimit(req, 60, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
 
-    let student = null;
-    try {
-      student = await db.collection('users').findOne({ _id: new ObjectId(studentId) });
-    } catch {
-      student = await db.collection('users').findOne({ email: studentId });
-    }
+  // Strict Admin Authentication Guard
+  const auth = await verifyAuth(req, { requiredRole: 'admin' });
+  if (!auth.success) {
+    return auth.response;
+  }
+
+  const { studentId } = params;
+  if (!isValidObjectId(studentId)) {
+    return NextResponse.json({ success: false, message: 'Invalid student ID' }, { status: 400 });
+  }
+
+  try {
+    const { db } = await connectToDatabase();
+    const student = await db.collection('users').findOne({ _id: new ObjectId(studentId) });
 
     if (!student || !student.cv) {
       return NextResponse.json({ success: false, message: 'Student CV not found' }, { status: 404 });
     }
 
-    // Return the full fileData and CV info
     return NextResponse.json({
       success: true,
       cv: student.cv,

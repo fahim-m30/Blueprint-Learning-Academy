@@ -1,32 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import jwt from 'jsonwebtoken';
+import { verifyAuth } from '@/lib/authGuard';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function getUserIdFromAuth(req: NextRequest): { userId: string | null; role: string | null } {
-  const authHeader = req.headers.get('authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) {
-    return { userId: null, role: null };
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.decode(token);
-    if (decoded && (decoded.id || decoded._id)) {
-      return { userId: decoded.id || decoded._id, role: decoded.role || 'admin' };
-    }
-  } catch {}
-  return { userId: null, role: null };
-}
-
 export async function GET(req: NextRequest) {
-  try {
-    const { userId } = getUserIdFromAuth(req);
-    if (!userId) {
-      return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
-    }
+  // 1. Rate Limiting Protection (Max 120 req/min per IP)
+  const rateLimit = checkRateLimit(req, 120, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests. Please slow down.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimit.resetInSec) } }
+    );
+  }
 
+  // 2. Strict Admin Authentication Guard (cryptographic HMAC-SHA256 signature verification)
+  const auth = await verifyAuth(req, { requiredRole: 'admin' });
+  if (!auth.success) {
+    return auth.response;
+  }
+
+  try {
     const { db } = await connectToDatabase();
     const rawStudents = await db
       .collection('users')
@@ -50,7 +46,7 @@ export async function GET(req: NextRequest) {
       .sort({ 'cv.updatedAt': -1 })
       .toArray();
 
-    // Optimize payload: Strip huge multi-megabyte base64 fileData from the batch list to ensure instant (<30ms) responses
+    // Optimize payload: Strip huge multi-megabyte base64 fileData from the batch list
     const students = rawStudents.map((s) => {
       const cvObj = s.cv || {};
       const hasData = Boolean(cvObj.fileData);
@@ -60,7 +56,6 @@ export async function GET(req: NextRequest) {
           fileUrl: cvObj.fileUrl || '',
           fileName: cvObj.fileName || 'Student_CV.pdf',
           hasFileData: hasData,
-          // Only send fileData directly if it's small (<100KB), otherwise the client will load it on-demand via /api/admin/cvs/[studentId]/file
           fileData: hasData && cvObj.fileData.length < 100000 ? cvObj.fileData : '',
           targetJobTitle: cvObj.targetJobTitle || 'Site Engineer',
           note: cvObj.note || '',

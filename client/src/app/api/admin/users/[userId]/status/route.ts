@@ -1,38 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import jwt from 'jsonwebtoken';
+import { verifyAuth, isValidObjectId } from '@/lib/authGuard';
+import { checkRateLimit } from '@/lib/rateLimiter';
 import { sendAccountBlockedEmail, sendAccountUnblockedEmail } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function getUserIdFromAuth(req: NextRequest): { userId: string | null; role: string | null } {
-  const authHeader = req.headers.get('authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) {
-    return { userId: null, role: null };
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.decode(token);
-    if (decoded && (decoded.id || decoded._id)) {
-      return { userId: decoded.id || decoded._id, role: decoded.role || 'admin' };
-    }
-  } catch {}
-  return { userId: null, role: null };
-}
-
 export async function POST(
   req: NextRequest,
   { params }: { params: { userId: string } }
 ) {
-  try {
-    const { userId: authAdminId, role } = getUserIdFromAuth(req);
-    if (!authAdminId || role !== 'admin') {
-      return NextResponse.json({ success: false, message: 'Admin authentication required' }, { status: 401 });
-    }
+  // 1. Rate limiting protection (Max 30 status changes per minute)
+  const rateLimit = checkRateLimit(req, 30, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
 
-    const { userId } = params;
+  // 2. Cryptographic Admin Authentication Guard
+  const auth = await verifyAuth(req, { requiredRole: 'admin' });
+  if (!auth.success) {
+    return auth.response;
+  }
+
+  const { userId } = params;
+  if (!isValidObjectId(userId)) {
+    return NextResponse.json({ success: false, message: 'Invalid target user ID format.' }, { status: 400 });
+  }
+
+  try {
     const body = await req.json();
     const { status, blockReason } = body;
 
@@ -41,16 +41,15 @@ export async function POST(
     }
 
     const { db } = await connectToDatabase();
-
-    let user = null;
-    try {
-      user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-    } catch {
-      user = await db.collection('users').findOne({ email: userId });
-    }
+    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
 
     if (!user) {
       return NextResponse.json({ success: false, message: 'Student user not found' }, { status: 404 });
+    }
+
+    // Security check: Prevent blocking other admins
+    if (user.role === 'admin') {
+      return NextResponse.json({ success: false, message: 'Cannot modify status of administrator accounts.' }, { status: 403 });
     }
 
     let emailDispatched = false;
@@ -100,7 +99,7 @@ export async function POST(
 
     const updatedUser = await db.collection('users').findOne(
       { _id: user._id },
-      { projection: { password: 0 } }
+      { projection: { password: 0, plainPasswordForAdmin: 0 } }
     );
 
     return NextResponse.json({

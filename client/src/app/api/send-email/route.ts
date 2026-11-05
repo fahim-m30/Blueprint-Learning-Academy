@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -7,6 +8,15 @@ export const dynamic = 'force-dynamic';
 const RELAY_SECRET = process.env.EMAIL_RELAY_SECRET || 'blueprint_academy_email_secret_key_2026';
 
 export async function POST(req: NextRequest) {
+  // Rate Limiting Protection (Max 30 emails/min per IP)
+  const rateLimit = checkRateLimit(req, 30, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many email requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { secret, to, subject, html, text, from, config } = body;

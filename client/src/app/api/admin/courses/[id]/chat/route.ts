@@ -1,44 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import jwt from 'jsonwebtoken';
+import { verifyAuth, isValidObjectId } from '@/lib/authGuard';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-function getUserIdFromAuth(req: NextRequest): { userId: string | null; role: string | null } {
-  const authHeader = req.headers.get('authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) {
-    return { userId: null, role: null };
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.decode(token);
-    if (decoded && (decoded.id || decoded._id)) {
-      return { userId: decoded.id || decoded._id, role: decoded.role || 'admin' };
-    }
-  } catch {}
-  return { userId: null, role: null };
-}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ success: false, message: 'Course ID is required' }, { status: 400 });
+  }
+
   try {
-    const { id } = params;
     const { db } = await connectToDatabase();
 
     let courseFilter: any = id;
-    try {
+    if (isValidObjectId(id)) {
       courseFilter = new ObjectId(id);
-    } catch {}
+    }
 
     const messages = await db
       .collection('chatmessages')
       .find({ course: courseFilter })
       .sort({ createdAt: 1 })
-      .limit(200)
+      .limit(300)
       .toArray();
 
     return NextResponse.json({ success: true, messages });
@@ -52,47 +42,72 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // 1. Rate limiting protection (Max 60 messages/minute)
+  const rateLimit = checkRateLimit(req, 60, 60 * 1000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Sending messages too fast. Please slow down.' },
+      { status: 429 }
+    );
+  }
+
+  // 2. Strict Admin Authentication Guard
+  const auth = await verifyAuth(req, { requiredRole: 'admin' });
+  if (!auth.success) {
+    return auth.response;
+  }
+
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ success: false, message: 'Course ID is required' }, { status: 400 });
+  }
+
   try {
-    const { userId } = getUserIdFromAuth(req);
-    if (!userId) {
-      return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
+    const body = await req.json();
+    const { message, recipientId } = body;
+
+    const trimmedMsg = String(message || '').trim();
+    if (!trimmedMsg) {
+      return NextResponse.json({ success: false, message: 'Message cannot be empty' }, { status: 400 });
     }
 
-    const { id } = params;
-    const body = await req.json();
-    const { message } = body;
-
-    if (!message || !String(message).trim()) {
-      return NextResponse.json({ success: false, message: 'Message cannot be empty' }, { status: 400 });
+    // Input sanitization: limit max characters per message to prevent payload bloat
+    if (trimmedMsg.length > 2000) {
+      return NextResponse.json({ success: false, message: 'Message is too long (maximum 2000 characters).' }, { status: 400 });
     }
 
     const { db } = await connectToDatabase();
 
-    let courseObjId: any = id;
-    try {
-      courseObjId = new ObjectId(id);
-    } catch {}
+    let courseFilter: any = id;
+    if (isValidObjectId(id)) {
+      courseFilter = new ObjectId(id);
+    }
 
-    let userObjId: any = userId;
-    try {
-      userObjId = new ObjectId(userId);
-    } catch {}
+    let senderObjId: any = auth.user._id;
+    if (isValidObjectId(auth.user._id)) {
+      senderObjId = new ObjectId(auth.user._id);
+    }
 
-    const newMsg: any = {
-      course: courseObjId,
-      sender: userObjId,
-      senderName: 'Admin / Instructor',
+    const chatDoc = {
+      course: courseFilter,
+      sender: senderObjId,
+      senderName: auth.user.name || 'Admin / Instructor',
       senderRole: 'admin',
-      message: String(message).trim(),
+      message: trimmedMsg,
       createdAt: new Date(),
     };
 
-    const result = await db.collection('chatmessages').insertOne(newMsg);
-    newMsg._id = result.insertedId;
+    const insertRes = await db.collection('chatmessages').insertOne(chatDoc);
 
-    return NextResponse.json({ success: true, message: newMsg });
+    return NextResponse.json({
+      success: true,
+      message: {
+        _id: insertRes.insertedId,
+        ...chatDoc,
+      },
+    });
   } catch (err: any) {
     console.error('API POST /admin/courses/:id/chat error:', err);
-    return NextResponse.json({ success: false, message: 'Error posting admin message' }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'Error dispatching admin message' }, { status: 500 });
   }
 }
