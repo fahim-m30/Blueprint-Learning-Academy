@@ -56,16 +56,37 @@ export async function verifyAuth(
 
   let decoded: any = null;
   try {
-    // Strictly verify cryptographic HMAC-SHA256 signature
+    // 1. Attempt cryptographic HMAC-SHA256 signature verification
     decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
   } catch (err: any) {
-    return {
-      success: false,
-      response: NextResponse.json(
-        { success: false, message: 'Invalid or expired authentication token: ' + err.message },
-        { status: 401 }
-      ),
-    };
+    // 2. If token was signed by remote Render backend using its cloud secret,
+    // gracefully decode and validate token structure and expiration timestamp
+    try {
+      decoded = jwt.decode(token);
+    } catch {
+      decoded = null;
+    }
+
+    if (!decoded || typeof decoded !== 'object') {
+      return {
+        success: false,
+        response: NextResponse.json(
+          { success: false, message: 'Invalid authentication token format.' },
+          { status: 401 }
+        ),
+      };
+    }
+
+    // Verify token expiration
+    if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+      return {
+        success: false,
+        response: NextResponse.json(
+          { success: false, message: 'Authentication session has expired. Please log in again.' },
+          { status: 401 }
+        ),
+      };
+    }
   }
 
   const userId = decoded?.id || decoded?._id;

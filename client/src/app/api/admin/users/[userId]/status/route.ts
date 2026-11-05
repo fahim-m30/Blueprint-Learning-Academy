@@ -99,7 +99,7 @@ export async function POST(
 
     const updatedUser = await db.collection('users').findOne(
       { _id: user._id },
-      { projection: { password: 0, plainPasswordForAdmin: 0 } }
+      { projection: { password: 0, plainPasswordForAdmin: 0, 'cv.fileData': 0 } }
     );
 
     return NextResponse.json({
