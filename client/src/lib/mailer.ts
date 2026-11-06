@@ -269,7 +269,7 @@ Dhaka, Bangladesh`;
 
   return await sendEmail({
     to: studentEmail,
-    subject: `Student Account Status Notice: Action Required - Blueprint Learning Academy`,
+    subject: `আপনার অ্যাকাউন্ট সাময়িকভাবে স্থগিত করা হয়েছে (Account Suspended) - Blueprint Learning Academy`,
     html,
     text,
   });
@@ -287,29 +287,29 @@ export async function sendAccountUnblockedEmail({
 }) {
   const currentYear = new Date().getFullYear();
 
-  const text = `Hello ${studentName},
+  const text = `প্রিয় ${studentName},
 
-Great news! Your Blueprint Learning Academy student account access has been fully restored.
+আপনার Blueprint Learning Academy অ্যাকাউন্টটি অ্যাডমিন কর্তৃক সফলভাবে আনব্লক করা হয়েছে।
 
-You can now log into your student dashboard to access all your enrolled courses, recorded video lessons, live classes, and task submissions.
+এখন আপনি পুনরায় আপনার স্টুডেন্ট ড্যাশবোর্ডে লগইন করে সকল কোর্সের ভিডিও লেকচার, সাইট ড্রয়িং এবং লাইভ ক্লাসে অংশ নিতে পারবেন।
 
-Login to Dashboard: https://blueprint-learning-academy.vercel.app/login
+স্টুডেন্ট লগইন: https://blueprint-learning-academy.vercel.app/login
 
-If you need any assistance, our support team is available:
-• WhatsApp Support: https://wa.me/8801313916161
-• Direct Helpline: +880 1313-916161 | +880 1313-893838
+যে কোনো প্রয়োজনে আমাদের সাথে যোগাযোগ করুন:
+• WhatsApp: https://wa.me/8801313916161
+• Helpline: +880 1313-916161 | +880 1313-893838
 
-Best regards,
-Blueprint Learning Academy Team
-Dhaka, Bangladesh`;
+ধন্যবাদ,
+Blueprint Learning Academy টিম
+ঢাকা, বাংলাদেশ`;
 
   const html = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Restored - Blueprint Learning Academy</title>
+  <title>আপনার অ্যাকাউন্ট আনব্লক করা হয়েছে - Blueprint Learning Academy</title>
   <style>
     body {
       margin: 0;
@@ -362,8 +362,8 @@ Dhaka, Bangladesh`;
       border: 1.5px solid #a7f3d0;
       border-left: 5px solid #10b981;
       border-radius: 12px;
-      padding: 16px 20px;
-      margin: 20px 0;
+      padding: 18px 20px;
+      margin: 22px 0;
     }
     .footer {
       background-color: #091224;
@@ -384,40 +384,49 @@ Dhaka, Bangladesh`;
         <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">
           Blueprint <span style="color: #a7f3d0;">Learning Academy</span>
         </h1>
-        <p style="color: #d1fae5; margin: 6px 0 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
-          Account Reinstated
+        <p style="color: #d1fae5; margin: 6px 0 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+          ACCOUNT UNBLOCKED • অ্যাকাউন্ট আনব্লক করা হয়েছে
         </p>
       </div>
 
       <div class="content-body">
-        <h2 style="color: #065f46; margin-top: 0; font-size: 20px; font-weight: 900;">
-          Welcome Back! Your Access is Restored
+        <h2 style="color: #065f46; margin-top: 0; font-size: 22px; font-weight: 900; line-height: 1.3;">
+          অভিনন্দন! আপনার অ্যাকাউন্ট আনব্লক করা হয়েছে
         </h2>
-        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-          Dear <strong>${studentName}</strong>,
+        <p style="color: #64748b; font-size: 13px; margin: 4px 0 16px; font-weight: 600;">
+          Your Student Account is Now Unblocked &amp; Fully Active
         </p>
-        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-          Your student account at Blueprint Learning Academy has been reviewed and <strong style="color: #059669;">fully reinstated to Active status</strong>.
+        <p style="color: #475569; font-size: 14px; line-height: 1.7;">
+          প্রিয় <strong>${studentName}</strong>,
+        </p>
+        <p style="color: #475569; font-size: 14px; line-height: 1.7;">
+          আপনার Blueprint Learning Academy স্টুডেন্ট অ্যাকাউন্টটি অ্যাডমিন কর্তৃক পর্যালোচনা করে <strong style="color: #059669;">সফলভাবে আনব্লক করা হয়েছে</strong>। এখন আপনার অ্যাকাউন্ট পুরোপুরি সক্রিয় (Active) অবস্থায় রয়েছে।
         </p>
 
         <div class="success-card">
-          <div style="font-size: 12px; font-weight: 800; color: #065f46; text-transform: uppercase; margin-bottom: 4px;">
-            Account Status: Active ✓
+          <div style="font-size: 13px; font-weight: 900; color: #065f46; text-transform: uppercase; margin-bottom: 6px;">
+            ✓ অ্যাকাউন্ট স্ট্যাটাস: আনব্লকড ও সক্রিয় (Active)
           </div>
-          <div style="font-size: 13px; color: #047857; font-weight: 600; line-height: 1.5;">
-            You can now access your enrolled courses, recorded lessons, live classes, and submit your project assignments without interruption.
+          <div style="font-size: 13px; color: #047857; font-weight: 600; line-height: 1.6;">
+            আপনি এখন কোনো বাধা ছাড়াই আপনার ড্যাশবোর্ডে লগইন করে সকল কোর্সের ভিডিও লেকচার, সাইট ড্রয়িং এবং লাইভ ক্লাসে পুনরায় অংশ নিতে পারবেন।
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 26px; margin-bottom: 20px;">
-          <a href="https://blueprint-learning-academy.vercel.app/login" style="display: inline-block; background-color: #1d4ed8; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);" target="_blank">
-            Log In to Your Student Dashboard →
+        <div style="text-align: center; margin-top: 28px; margin-bottom: 22px;">
+          <a href="https://blueprint-learning-academy.vercel.app/login" style="display: inline-block; background-color: #059669; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 800; padding: 14px 34px; border-radius: 12px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);" target="_blank">
+            ড্যাশবোর্ডে লগইন করুন (Login to Dashboard) →
           </a>
         </div>
 
         <p style="color: #64748b; font-size: 12px; line-height: 1.6; text-align: center;">
-          Need help? Reach out directly to our instructor and support team on WhatsApp anytime.
+          যে কোনো প্রয়োজনে সরাসরি আমাদের অফিসিয়াল হোয়াটসঅ্যাপে যোগাযোগ করতে পারেন:
         </p>
+
+        <div style="text-align: center; margin-top: 10px;">
+          <a href="https://wa.me/8801313916161" style="display: inline-block; background-color: #22c55e; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 10px 22px; border-radius: 8px;" target="_blank">
+            💬 WhatsApp Support: +880 1313-916161
+          </a>
+        </div>
       </div>
 
       <div class="footer">
@@ -432,7 +441,7 @@ Dhaka, Bangladesh`;
 
   return await sendEmail({
     to: studentEmail,
-    subject: `Student Account Restored: You can now access your courses - Blueprint Learning Academy`,
+    subject: `আপনার অ্যাকাউন্ট আনব্লক করা হয়েছে (Account Unblocked) - Blueprint Learning Academy`,
     html,
     text,
   });
