@@ -1,5 +1,9 @@
 function getCleanApiBaseUrl(): string {
   let base = (process.env.NEXT_PUBLIC_API_URL || 'https://blueprint-learning-academy-e6hc.onrender.com/api').trim();
+  // Automatically migrate legacy suspended Render URL to the new active service
+  if (base.includes('blueprint-learning-academy.onrender.com') && !base.includes('blueprint-learning-academy-e6hc')) {
+    base = base.replace('blueprint-learning-academy.onrender.com', 'blueprint-learning-academy-e6hc.onrender.com');
+  }
   base = base.replace(/\/+$/, '');
   if (!base.endsWith('/api')) {
     base = `${base}/api`;
