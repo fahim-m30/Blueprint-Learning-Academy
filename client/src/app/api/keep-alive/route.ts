@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const RENDER_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, '') || 'https://blueprint-learning-academy.onrender.com';
+const RENDER_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, '') || 'https://blueprint-learning-academy-e6hc.onrender.com';
 
 /**
  * Public Keep-Alive Ping Service for Render Backend

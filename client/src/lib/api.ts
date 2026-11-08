@@ -1,5 +1,5 @@
 function getCleanApiBaseUrl(): string {
-  let base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').trim();
+  let base = (process.env.NEXT_PUBLIC_API_URL || 'https://blueprint-learning-academy-e6hc.onrender.com/api').trim();
   base = base.replace(/\/+$/, '');
   if (!base.endsWith('/api')) {
     base = `${base}/api`;

@@ -73,7 +73,7 @@ mongoose
       console.log(`🚀 Career Path Academy Server running on http://localhost:${PORT}`);
 
       // Keep-Alive Ping Service to prevent Render Free Tier from sleeping
-      const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://blueprint-learning-academy.onrender.com';
+      const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://blueprint-learning-academy-e6hc.onrender.com';
       const https = require('https');
       const pingServer = () => {
         try {
