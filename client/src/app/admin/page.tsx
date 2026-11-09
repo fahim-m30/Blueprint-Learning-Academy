@@ -50,6 +50,7 @@ export default function AdminPortalPage() {
   const [coursesList, setCoursesList] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [approvingEnrollmentId, setApprovingEnrollmentId] = useState<string | null>(null);
 
   // Student CVs Management state
   const [allStudentCvs, setAllStudentCvs] = useState<any[]>([]);
@@ -502,27 +503,45 @@ export default function AdminPortalPage() {
 
   // 1. Enrollment Approval
   const handleApproveEnrollment = async (enrollmentId: string, en?: any) => {
-    showAlert('Approving enrollment and dispatching email...');
-    const res = await apiRequest(`/admin/enrollments/${enrollmentId}/approve`, {
-      method: 'POST',
-    });
-    if (res.success) {
-      const responseData = (res.data || res) as any;
-      const backendEmailDispatched = responseData?.emailResult?.success;
+    if (approvingEnrollmentId) return;
+    setApprovingEnrollmentId(enrollmentId);
 
-      // Always guarantee email is sent on the very FIRST click:
-      if (!backendEmailDispatched && en) {
-        await handleResendCredentialsEmail({
-          ...en,
-          studentId: responseData?.credentials?.studentId || en.studentId,
-          generatedPassword: responseData?.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
-        });
+    // Instant optimistic visual update in 0ms
+    setEnrollments((prev) =>
+      prev.map((item) =>
+        item._id === enrollmentId
+          ? { ...item, status: 'approved', approvedAt: new Date().toISOString() }
+          : item
+      )
+    );
+
+    showAlert('Approving enrollment & generating student credentials...');
+
+    try {
+      const res = await apiRequest(`/admin/enrollments/${enrollmentId}/approve`, {
+        method: 'POST',
+      });
+      if (res.success) {
+        const responseData = (res.data || res) as any;
+        const backendEmailDispatched = responseData?.emailResult?.success;
+
+        if (!backendEmailDispatched && en) {
+          await handleResendCredentialsEmail({
+            ...en,
+            studentId: responseData?.credentials?.studentId || en.studentId,
+            generatedPassword: responseData?.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
+          });
+        } else {
+          showAlert(res.message || 'Enrollment approved and credentials dispatched!');
+        }
       } else {
-        showAlert(res.message || 'Enrollment approved and email sent successfully!');
+        showAlert(res.message || 'Error approving enrollment.', 'error');
       }
-      loadAdminData();
-    } else {
-      showAlert(res.message || 'Error approving enrollment.', 'error');
+    } catch (err: any) {
+      console.error('Error approving enrollment:', err);
+    } finally {
+      setApprovingEnrollmentId(null);
+      await loadAdminData();
     }
   };
 
@@ -2838,9 +2857,17 @@ export default function AdminPortalPage() {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleApproveEnrollment(en._id, en)}
-                                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm shadow-md transition"
+                                disabled={approvingEnrollmentId === en._id}
+                                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5"
                               >
-                                Approve &amp; Send Email
+                                {approvingEnrollmentId === en._id ? (
+                                  <>
+                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Approving...</span>
+                                  </>
+                                ) : (
+                                  <span>Approve &amp; Send Email</span>
+                                )}
                               </button>
                               <button
                                 onClick={() => handleRejectEnrollment(en._id)}

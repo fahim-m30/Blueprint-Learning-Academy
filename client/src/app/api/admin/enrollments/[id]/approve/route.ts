@@ -149,10 +149,22 @@ export async function POST(
     }
 
     if (enrollment.status === 'approved') {
-      return NextResponse.json({ success: false, message: 'This enrollment is already approved.' }, { status: 400 });
+      return NextResponse.json({
+        success: true,
+        message: 'This enrollment is already approved.',
+        alreadyApproved: true,
+        credentials: {
+          email: enrollment.studentEmail,
+          studentId: enrollment.studentId || 'STUDENT',
+          password: enrollment.generatedPassword || 'BLP-LEARN2026',
+        },
+      });
     }
 
-    const course = await db.collection('courses').findOne({ _id: new ObjectId(enrollment.course) });
+    const courseQuery = ObjectId.isValid(enrollment.course)
+      ? { _id: new ObjectId(enrollment.course) }
+      : { _id: enrollment.course };
+    const course = await db.collection('courses').findOne(courseQuery);
     if (!course) {
       return NextResponse.json({ success: false, message: 'Associated course does not exist.' }, { status: 400 });
     }
