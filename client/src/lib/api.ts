@@ -88,6 +88,7 @@ export async function apiRequest<T = any>(
       cleanEndpoint.startsWith('/public/settings') ||
       cleanEndpoint.startsWith('/public/courses') ||
       cleanEndpoint === '/settings' ||
+      cleanEndpoint === '/auth/login' ||
       cleanEndpoint.startsWith('/admin/profile') ||
       cleanEndpoint.startsWith('/admin/users');
 
