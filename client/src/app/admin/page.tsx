@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest, getAuthToken, removeAuthToken, getCurrentUser, setCurrentUser } from '@/lib/api';
 import { Course, Enrollment, SiteSettings, StudentCV } from '@/lib/types';
+import { DEFAULT_SETTINGS } from '@/lib/initialData';
 import {
   ShieldCheck,
   ArrowLeft,
@@ -48,7 +49,7 @@ export default function AdminPortalPage() {
   const [stats, setStats] = useState<any>(null);
   const [coursesList, setCoursesList] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   // Student CVs Management state
   const [allStudentCvs, setAllStudentCvs] = useState<any[]>([]);
@@ -3083,7 +3084,7 @@ export default function AdminPortalPage() {
         {/* ========================================================
             TAB 3: SITE SETTINGS & PAYMENT NUMBERS
         ======================================================== */}
-        {activeMainTab === 'settings' && siteSettings && (
+        {activeMainTab === 'settings' && (
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>

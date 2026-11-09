@@ -98,6 +98,8 @@ export async function apiRequest<T = any>(
       cleanEndpoint.startsWith('/admin/overview') ||
       cleanEndpoint.startsWith('/admin/enrollments') ||
       cleanEndpoint.startsWith('/admin/courses') ||
+      cleanEndpoint.startsWith('/admin/settings') ||
+      cleanEndpoint.startsWith('/admin/admins') ||
       cleanEndpoint.startsWith('/student/course') ||
       cleanEndpoint.startsWith('/student/dashboard');
 
