@@ -161,23 +161,31 @@ export async function POST(
       });
     }
 
-    const courseQuery = ObjectId.isValid(enrollment.course)
-      ? { _id: new ObjectId(enrollment.course) }
-      : { _id: enrollment.course };
-    const course = await db.collection('courses').findOne(courseQuery);
-    if (!course) {
-      return NextResponse.json({ success: false, message: 'Associated course does not exist.' }, { status: 400 });
+    const courseIds: any[] = [];
+    if (enrollment.course) {
+      if (ObjectId.isValid(enrollment.course)) {
+        try {
+          courseIds.push(new ObjectId(enrollment.course));
+        } catch {}
+      }
+      courseIds.push(String(enrollment.course));
     }
 
+    const course = courseIds.length > 0
+      ? await db.collection('courses').findOne({ _id: { $in: courseIds } })
+      : null;
+
+    const courseTitle = course?.title || enrollment.courseTitle || 'Blueprint Practical Career Course';
+    const courseId = course?._id || enrollment.course || 'default_course';
     const cleanEmail = enrollment.studentEmail.trim().toLowerCase();
     const existingUser = await db.collection('users').findOne({ email: cleanEmail });
 
-    const durationDays = course.durationDays || 30;
+    const durationDays = course?.durationDays || 30;
     const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
 
     let studentId = existingUser?.studentId || enrollment.studentId;
     if (!studentId) {
-      studentId = await generateStudentId(db, course);
+      studentId = await generateStudentId(db, course || { _id: courseId, sessionNumber: '02' });
     }
 
     let rawPassword = '';
@@ -188,7 +196,7 @@ export async function POST(
       const hashedPassword = await bcrypt.hash(rawPassword, salt);
 
       const alreadyEnrolled = (existingUser.enrolledCourses || []).some(
-        (e: any) => e.course?.toString() === course._id.toString()
+        (e: any) => e.course?.toString() === courseId.toString()
       );
 
       const updateOps: any = {
@@ -204,7 +212,7 @@ export async function POST(
       if (!alreadyEnrolled) {
         updateOps.$push = {
           enrolledCourses: {
-            course: course._id,
+            course: courseId,
             enrolledAt: new Date(),
             expiresAt,
             status: 'active',
@@ -230,7 +238,7 @@ export async function POST(
         status: 'active',
         enrolledCourses: [
           {
-            course: course._id,
+            course: courseId,
             enrolledAt: new Date(),
             expiresAt,
             status: 'active',
@@ -256,15 +264,24 @@ export async function POST(
 
     const siteSettings = await db.collection('sitesettings').findOne({});
 
-    const emailResult = await sendWelcomeEmail({
-      studentName: enrollment.studentName,
-      studentEmail: cleanEmail,
-      studentId,
-      courseTitle: course.title,
-      rawPassword,
-      whatsappGroupLink: course.whatsappGroupLink,
-      settings: siteSettings,
-    });
+    let emailResult: any = { success: false };
+    try {
+      const emailPromise = sendWelcomeEmail({
+        studentName: enrollment.studentName,
+        studentEmail: cleanEmail,
+        studentId,
+        courseTitle,
+        rawPassword,
+        whatsappGroupLink: course?.whatsappGroupLink,
+        settings: siteSettings,
+      });
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ success: false, timeout: true }), 3500)
+      );
+      emailResult = await Promise.race([emailPromise, timeoutPromise]);
+    } catch (e: any) {
+      console.warn('Welcome email error (non-blocking):', e?.message);
+    }
 
     return NextResponse.json({
       success: true,

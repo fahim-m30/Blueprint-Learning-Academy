@@ -53,6 +53,7 @@ export default function AdminPortalPage() {
   const [approvingEnrollmentId, setApprovingEnrollmentId] = useState<string | null>(null);
   const [deletingEnrollmentId, setDeletingEnrollmentId] = useState<string | null>(null);
   const [removingStudentId, setRemovingStudentId] = useState<string | null>(null);
+  const [isSubmittingVideo, setIsSubmittingVideo] = useState(false);
 
   // Student CVs Management state
   const [allStudentCvs, setAllStudentCvs] = useState<any[]>([]);
@@ -211,7 +212,7 @@ export default function AdminPortalPage() {
         if (data.stats) setStats(data.stats);
         if (data.courses) setCoursesList(data.courses);
         if (data.enrollments) setEnrollments(data.enrollments);
-        if (data.settings) setSiteSettings(data.settings);
+        if (data.settings) setSiteSettings((prev) => ({ ...DEFAULT_SETTINGS, ...(data.settings || {}) }));
         setLoading(false);
       }
     } catch {}
@@ -258,7 +259,11 @@ export default function AdminPortalPage() {
     }
 
     if (settingsRes.success && settingsRes.data?.settings) {
-      setSiteSettings(settingsRes.data.settings);
+      setSiteSettings((prev) => ({
+        ...DEFAULT_SETTINGS,
+        ...(prev || {}),
+        ...(settingsRes.data.settings || {}),
+      }));
     }
 
     if (adminsRes.success && adminsRes.data?.admins) {
@@ -375,17 +380,27 @@ export default function AdminPortalPage() {
             });
           }
         } else {
+          // If admin is actively uploading a video, skip polling to protect local state
+          if (isSubmittingVideo) return;
+
           const cRes = await apiRequest(`/admin/courses/${selectedCourseId}`);
-          if (cRes.success && cRes.data) {
+          if (cRes.success && cRes.data?.course) {
             setSelectedCourseData((prev: any) => {
+              if (!prev) return cRes.data.course;
+              const serverVideosLen = cRes.data.course?.videos?.length || 0;
+              const localVideosLen = prev?.videos?.length || 0;
+              // Never delete videos locally if server has fewer during in-flight writes
+              if (localVideosLen > serverVideosLen) {
+                return prev;
+              }
               const videosChanged =
-                (prev?.videos?.length || 0) !== (cRes.data.course?.videos?.length || 0) ||
+                serverVideosLen !== localVideosLen ||
                 JSON.stringify(prev?.videos?.map((v: any) => v._id)) !== JSON.stringify(cRes.data.course?.videos?.map((v: any) => v._id));
               const syllabusChanged = JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus);
               const liveChanged = JSON.stringify(prev?.liveClasses) !== JSON.stringify(cRes.data.course?.liveClasses);
               const noticesChanged = JSON.stringify(prev?.notices) !== JSON.stringify(cRes.data.course?.notices);
 
-              if (videosChanged || syllabusChanged || liveChanged || noticesChanged || !prev) {
+              if (videosChanged || syllabusChanged || liveChanged || noticesChanged) {
                 return cRes.data.course;
               }
               return prev;
@@ -406,7 +421,7 @@ export default function AdminPortalPage() {
     };
 
     if (selectedCourseId) {
-      interval = setInterval(pollCourseData, courseSubTab === 'chat' ? 1000 : 1800);
+      interval = setInterval(pollCourseData, courseSubTab === 'chat' ? 1000 : 3500);
     }
     const handleFocus = () => { if (selectedCourseId) pollCourseData(); };
     window.addEventListener('focus', handleFocus);
@@ -537,16 +552,30 @@ export default function AdminPortalPage() {
             generatedPassword: responseData?.credentials?.password || en.generatedPassword || 'BLP-LEARN2026',
           });
         } else {
-          showAlert(res.message || 'Enrollment approved and credentials dispatched!');
+          showAlert(res.message || '✓ Enrollment approved and credentials dispatched!');
         }
       } else {
         showAlert(res.message || 'Error approving enrollment.', 'error');
+        // Rollback optimistic update on error
+        setEnrollments((prev) =>
+          prev.map((item) =>
+            item._id === enrollmentId ? { ...item, status: 'pending' } : item
+          )
+        );
       }
     } catch (err: any) {
       console.error('Error approving enrollment:', err);
     } finally {
       setApprovingEnrollmentId(null);
-      await loadAdminData();
+      // Soft background sync without full-screen loading spinner
+      apiRequest('/admin/enrollments').then((enrollRes) => {
+        if (enrollRes.success && enrollRes.data) {
+          const list = Array.isArray(enrollRes.data)
+            ? enrollRes.data
+            : (enrollRes.data as any).enrollments || [];
+          setEnrollments(list);
+        }
+      }).catch(() => {});
     }
   };
 
@@ -836,6 +865,7 @@ export default function AdminPortalPage() {
   // 3. Add Video
   const handleAddVideo = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingVideo) return;
     if (!selectedCourseId) {
       showAlert('Please select a course first.', 'error');
       return;
@@ -853,31 +883,14 @@ export default function AdminPortalPage() {
     const titleToSave = newVideoTitle.trim();
     const noteToSave = newVideoNote.trim();
 
-    // 1. Instant 0ms optimistic appearance right below
-    const optimisticVid = {
-      _id: 'temp-' + Date.now(),
-      title: titleToSave,
-      youtubeUrl: formattedUrl,
-      duration: '',
-      note: noteToSave,
-      createdAt: new Date().toISOString(),
-    };
-
-    setSelectedCourseData((prev: any) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        videos: [...(prev.videos || []), optimisticVid],
-      };
-    });
+    setIsSubmittingVideo(true);
+    setSavingSection('video');
 
     // Reset inputs immediately
     setNewVideoTitle('');
     setNewVideoUrl('');
     setNewVideoDuration('');
     setNewVideoNote('');
-
-    setSavingSection('video');
 
     try {
       const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos`, {
@@ -900,18 +913,11 @@ export default function AdminPortalPage() {
         showAlert('✓ Class video published live to student portal!');
       } else {
         showAlert(`✕ Error adding video: ${res.message || 'Please check connection.'}`, 'error');
-        // Rollback on error
-        setSelectedCourseData((prev: any) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            videos: (prev.videos || []).filter((v: any) => v._id !== optimisticVid._id),
-          };
-        });
       }
     } catch (err: any) {
       console.error('Error adding video:', err);
     } finally {
+      setIsSubmittingVideo(false);
       setSavingSection(null);
     }
   };
@@ -968,12 +974,17 @@ export default function AdminPortalPage() {
     });
 
     if (res.success) {
-      showAlert('Live class scheduled.');
+      showAlert('✓ Live class scheduled.');
       setNewLiveTitle('');
       setNewLiveDate('');
       setNewLiveLink('');
       setNewLiveNote('');
-      loadCourseHub(selectedCourseId);
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     }
   };
 
@@ -993,11 +1004,16 @@ export default function AdminPortalPage() {
     });
 
     if (res.success) {
-      showAlert('Task created successfully.');
+      showAlert('✓ Task created successfully.');
       setNewTaskTitle('');
       setNewTaskDesc('');
       setNewTaskDeadline('');
-      loadCourseHub(selectedCourseId);
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     }
   };
 
@@ -1094,11 +1110,16 @@ export default function AdminPortalPage() {
     });
     setSubmittingNotice(false);
     if (res.success) {
-      showAlert('Notice published successfully to Course Hub & Landing Page Notice Board!');
+      showAlert('✓ Notice published successfully to Course Hub & Landing Page Notice Board!');
       setNoticeTitle('');
       setNoticeContent('');
       setNoticeDate('');
-      loadCourseHub(selectedCourseId);
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     } else {
       showAlert(res.message || 'Failed to publish notice.', 'error');
     }
@@ -1111,8 +1132,13 @@ export default function AdminPortalPage() {
       method: 'DELETE',
     });
     if (res.success) {
-      showAlert('Notice deleted successfully.');
-      loadCourseHub(selectedCourseId);
+      showAlert('✓ Notice deleted successfully.');
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     } else {
       showAlert(res.message || 'Failed to delete notice.', 'error');
     }
@@ -1124,8 +1150,13 @@ export default function AdminPortalPage() {
       method: 'PUT',
     });
     if (res.success) {
-      showAlert('Notice pin status toggled successfully.');
-      loadCourseHub(selectedCourseId);
+      showAlert('✓ Notice pin status toggled successfully.');
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     } else {
       showAlert(res.message || 'Failed to toggle notice pin status.', 'error');
     }
@@ -1144,10 +1175,15 @@ export default function AdminPortalPage() {
     });
     setSavingBatchInfo(false);
     if (res.success) {
-      showAlert('Batch start date and weekly class schedule updated successfully!');
-      loadCourseHub(selectedCourseId);
+      showAlert('✓ Batch start date and weekly class schedule updated successfully!');
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+      }
     } else {
-      showAlert(res.message || 'Failed to update batch schedule.', 'error');
+      showAlert(res.message || 'Failed to update batch info.', 'error');
     }
   };
 
@@ -1526,18 +1562,23 @@ export default function AdminPortalPage() {
         </div>
       </header>
 
-      {/* Floating Alert Banner */}
+      {/* Floating Alert Banner - Fixed Bottom-Right Toast (Zero Layout Shift) */}
       {alertBanner && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 mt-3 sm:mt-4">
+        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200 max-w-sm pointer-events-auto">
           <div
-            className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
+            className={`p-3.5 px-4 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold flex items-center gap-3 backdrop-blur-md ${
               alertBanner.type === 'success'
-                ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
-                : 'bg-red-50 border-red-300 text-red-700'
+                ? 'bg-slate-900/95 border-emerald-500/50 text-emerald-200 shadow-emerald-950/40'
+                : 'bg-slate-900/95 border-red-500/50 text-red-200 shadow-red-950/40'
             }`}
           >
             <span>{alertBanner.text}</span>
-            <button onClick={() => setAlertBanner(null)} className="text-sm">×</button>
+            <button
+              onClick={() => setAlertBanner(null)}
+              className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs ml-auto shrink-0"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
@@ -1603,7 +1644,10 @@ export default function AdminPortalPage() {
           </button>
 
           <button
-            onClick={() => setActiveMainTab('settings')}
+            onClick={() => {
+              setActiveMainTab('settings');
+              setSelectedCourseId(null);
+            }}
             className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs shrink-0 ${
               activeMainTab === 'settings'
                 ? 'bg-blue-700 text-white shadow-md'
@@ -1615,7 +1659,10 @@ export default function AdminPortalPage() {
           </button>
 
           <button
-            onClick={() => setActiveMainTab('security')}
+            onClick={() => {
+              setActiveMainTab('security');
+              setSelectedCourseId(null);
+            }}
             className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
               activeMainTab === 'security'
                 ? 'bg-blue-700 text-white shadow-md'
@@ -2087,9 +2134,17 @@ export default function AdminPortalPage() {
                       <div className="flex justify-end pt-2">
                         <button
                           type="submit"
-                          className="px-5 py-2 bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-bold text-xs rounded-lg shadow transition"
+                          disabled={isSubmittingVideo}
+                          className="px-5 py-2.5 bg-[#ffb531] hover:bg-[#ffb531]/90 disabled:opacity-50 text-[#1a1100] font-bold text-xs rounded-xl shadow transition flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                         >
-                          Push Video to Student Dashboard
+                          {isSubmittingVideo ? (
+                            <>
+                              <div className="w-3.5 h-3.5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                              <span>Publishing Video...</span>
+                            </>
+                          ) : (
+                            <span>Push Video to Student Dashboard</span>
+                          )}
                         </button>
                       </div>
                     </form>
