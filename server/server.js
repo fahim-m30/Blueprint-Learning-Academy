@@ -39,6 +39,7 @@ app.get(['/', '/api', '/api/health', '/health', '/ping', '/keep-alive', '/status
     status: 'healthy',
     service: 'Blueprint Learning Academy API',
     uptime: Math.floor(process.uptime()),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     time: new Date().toISOString(),
   });
 });
@@ -60,7 +61,9 @@ app.use((err, req, res, next) => {
 
 // Database connection & Server initialization
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/careerpathacademy';
+const MONGO_URI =
+  process.env.MONGO_URI ||
+  'mongodb+srv://blueprint_admin:rezavai123@cluster0.pxlqkiw.mongodb.net/blueprint?retryWrites=true&w=majority';
 
 mongoose
   .connect(MONGO_URI)
