@@ -88,6 +88,7 @@ export async function apiRequest<T = any>(
       cleanEndpoint.startsWith('/student/cv') ||
       cleanEndpoint.startsWith('/admin/cvs') ||
       cleanEndpoint.includes('/chat') ||
+      cleanEndpoint.includes('/videos') ||
       cleanEndpoint.startsWith('/public/settings') ||
       cleanEndpoint.startsWith('/public/courses') ||
       cleanEndpoint === '/settings' ||
@@ -96,6 +97,7 @@ export async function apiRequest<T = any>(
       cleanEndpoint.startsWith('/admin/users') ||
       cleanEndpoint.startsWith('/admin/overview') ||
       cleanEndpoint.startsWith('/admin/enrollments') ||
+      cleanEndpoint.startsWith('/student/course') ||
       cleanEndpoint.startsWith('/student/dashboard');
 
     const targetUrl = isLocalServerlessEndpoint

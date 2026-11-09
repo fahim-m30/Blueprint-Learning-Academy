@@ -176,12 +176,22 @@ export default function StudentDashboardPage() {
             });
           }
         } else if (selectedCourseId) {
-          // If in another tab, poll course details quietly
+          // If in videos, tasks, live classes, or notices tab, poll course details and keep videos fresh
           const cRes = await apiRequest(`/student/course/${selectedCourseId}`);
           if (cRes.success && cRes.data?.course) {
-            setCourseDetails((prev) =>
-              JSON.stringify(prev?.notices) !== JSON.stringify(cRes.data.course?.notices) ? cRes.data.course : prev
-            );
+            setCourseDetails((prev: any) => {
+              const videosChanged =
+                (prev?.videos?.length || 0) !== (cRes.data.course?.videos?.length || 0) ||
+                JSON.stringify(prev?.videos?.map((v: any) => v._id)) !== JSON.stringify(cRes.data.course?.videos?.map((v: any) => v._id));
+              const noticesChanged = JSON.stringify(prev?.notices) !== JSON.stringify(cRes.data.course?.notices);
+              const liveChanged = JSON.stringify(prev?.liveClasses) !== JSON.stringify(cRes.data.course?.liveClasses);
+              const tasksChanged = (prev?.tasks?.length || 0) !== (cRes.data.course?.tasks?.length || 0);
+
+              if (videosChanged || noticesChanged || liveChanged || tasksChanged || !prev) {
+                return cRes.data.course;
+              }
+              return prev;
+            });
             if (cRes.data.mySubmissions) {
               setMySubmissions((prev) =>
                 prev.length !== cRes.data.mySubmissions.length ? cRes.data.mySubmissions : prev

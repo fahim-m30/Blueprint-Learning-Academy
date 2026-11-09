@@ -374,7 +374,14 @@ export default function AdminPortalPage() {
           const cRes = await apiRequest(`/admin/courses/${selectedCourseId}`);
           if (cRes.success && cRes.data) {
             setSelectedCourseData((prev: any) => {
-              if (JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus)) {
+              const videosChanged =
+                (prev?.videos?.length || 0) !== (cRes.data.course?.videos?.length || 0) ||
+                JSON.stringify(prev?.videos?.map((v: any) => v._id)) !== JSON.stringify(cRes.data.course?.videos?.map((v: any) => v._id));
+              const syllabusChanged = JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus);
+              const liveChanged = JSON.stringify(prev?.liveClasses) !== JSON.stringify(cRes.data.course?.liveClasses);
+              const noticesChanged = JSON.stringify(prev?.notices) !== JSON.stringify(cRes.data.course?.notices);
+
+              if (videosChanged || syllabusChanged || liveChanged || noticesChanged || !prev) {
                 return cRes.data.course;
               }
               return prev;
@@ -764,9 +771,42 @@ export default function AdminPortalPage() {
       setNewVideoUrl('');
       setNewVideoDuration('');
       setNewVideoNote('');
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+      }
       loadCourseHub(selectedCourseId);
     } else {
       showAlert(`✕ Error adding video: ${res.message || 'Please check connection.'}`, 'error');
+    }
+  };
+
+  // 3.1 Delete Video
+  const handleDeleteVideo = async (videoId: string, videoTitle: string) => {
+    if (!selectedCourseId) return;
+    if (!confirm(`Are you sure you want to delete the video lecture "${videoTitle}"?`)) return;
+
+    // Optimistic UI update
+    setSelectedCourseData((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        videos: (prev.videos || []).filter((v: any) => v._id?.toString() !== videoId?.toString()),
+      };
+    });
+
+    const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos/${videoId}`, {
+      method: 'DELETE',
+    });
+
+    if (res.success) {
+      showAlert('✓ Video deleted successfully.');
+      if (res.data?.course) {
+        setSelectedCourseData(res.data.course);
+      }
+      loadCourseHub(selectedCourseId);
+    } else {
+      showAlert(res.message || 'Error deleting video.', 'error');
+      loadCourseHub(selectedCourseId);
     }
   };
 
@@ -1931,12 +1971,12 @@ export default function AdminPortalPage() {
                                 {vid.youtubeUrl}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                               <span className="text-slate-600 text-[11px]">{vid.duration}</span>
                               <button
                                 type="button"
                                 onClick={() => handleSetVideoAsDemo(vid)}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+                                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
                                   isCurrentDemo
                                     ? 'bg-amber-200 text-amber-900 hover:bg-amber-300'
                                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
@@ -1944,7 +1984,16 @@ export default function AdminPortalPage() {
                                 title="Set this video as the homepage demo preview for this course"
                               >
                                 <span>⭐</span>
-                                <span>{isCurrentDemo ? 'Reset as Demo' : 'Set as Course Demo'}</span>
+                                <span className="hidden sm:inline">{isCurrentDemo ? 'Reset Demo' : 'Set as Demo'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteVideo(vid._id, vid.title)}
+                                className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 hover:text-red-700 text-[11px] font-bold transition flex items-center gap-1 shadow-2xs"
+                                title="Delete this video lecture"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
                               </button>
                             </div>
                           </div>
