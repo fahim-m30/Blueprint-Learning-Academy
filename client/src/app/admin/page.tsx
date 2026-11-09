@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiRequest, getAuthToken, removeAuthToken } from '@/lib/api';
+import { apiRequest, getAuthToken, removeAuthToken, getCurrentUser, setCurrentUser } from '@/lib/api';
 import { Course, Enrollment, SiteSettings, StudentCV } from '@/lib/types';
 import {
   ShieldCheck,
@@ -33,6 +33,11 @@ import {
   Pin,
   PinOff,
   Clock,
+  User,
+  Key,
+  Lock,
+  Shield,
+  Edit3,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -57,7 +62,19 @@ export default function AdminPortalPage() {
   const [savingSection, setSavingSection] = useState<string | null>(null);
 
   // Active view
-  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security'>('overview');
+  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security' | 'profile'>('overview');
+
+  // Administrator Self-Profile States
+  const [adminProfile, setAdminProfile] = useState<any>(null);
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileAddress, setProfileAddress] = useState('');
+  const [profileCurrentPassword, setProfileCurrentPassword] = useState('');
+  const [profileNewPassword, setProfileNewPassword] = useState('');
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
   // Course Messenger States
   const [selectedChatStudentId, setSelectedChatStudentId] = useState<string | null>(null);
@@ -214,12 +231,13 @@ export default function AdminPortalPage() {
 
   const loadAdminData = async () => {
     setLoading(true);
-    const [overviewRes, enrollRes, settingsRes, adminsRes, cvsRes] = await Promise.all([
+    const [overviewRes, enrollRes, settingsRes, adminsRes, cvsRes, profileRes] = await Promise.all([
       apiRequest('/admin/overview'),
       apiRequest('/admin/enrollments'),
       apiRequest('/admin/settings'),
       apiRequest('/admin/admins'),
       apiRequest('/admin/cvs'),
+      apiRequest('/admin/profile'),
     ]);
 
     if (overviewRes.success && overviewRes.data) {
@@ -245,6 +263,24 @@ export default function AdminPortalPage() {
 
     if (cvsRes.success && cvsRes.data?.students) {
       setAllStudentCvs(cvsRes.data.students);
+    }
+
+    if (profileRes.success && profileRes.data?.profile) {
+      const p = profileRes.data.profile;
+      setAdminProfile(p);
+      setProfileName(p.name || '');
+      setProfileEmail(p.email || '');
+      setProfilePhone(p.phone || '');
+      setProfileAddress(p.address || '');
+    } else {
+      const stored = getCurrentUser();
+      if (stored) {
+        setAdminProfile(stored);
+        setProfileName(stored.name || '');
+        setProfileEmail(stored.email || '');
+        setProfilePhone(stored.phone || '');
+        setProfileAddress(stored.address || '');
+      }
     }
 
     try {
@@ -1094,6 +1130,78 @@ export default function AdminPortalPage() {
     }
   };
 
+  // 12.5 Update Administrator Own Profile
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileName.trim() || !profileEmail.trim() || !profilePhone.trim()) {
+      showAlert('Name, Email, and Phone number are required.', 'error');
+      return;
+    }
+
+    setSavingProfile(true);
+    const res = await apiRequest('/admin/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: profileName.trim(),
+        email: profileEmail.trim(),
+        phone: profilePhone.trim(),
+        address: profileAddress.trim(),
+      }),
+    });
+    setSavingProfile(false);
+
+    if (res.success) {
+      showAlert(res.message || 'Administrator profile updated successfully!');
+      if (res.data?.user) {
+        setAdminProfile((prev: any) => ({ ...prev, ...res.data.user }));
+        setCurrentUser(res.data.user);
+      }
+      // Refresh admin list to reflect updated name/email
+      const adminsRes = await apiRequest('/admin/admins');
+      if (adminsRes.success && adminsRes.data?.admins) {
+        setAdminsList(adminsRes.data.admins);
+      }
+    } else {
+      showAlert(res.message || 'Error updating administrator profile.', 'error');
+    }
+  };
+
+  // 12.6 Direct Password Change (from Profile)
+  const handleChangePasswordDirect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileCurrentPassword) {
+      showAlert('Please enter your current password.', 'error');
+      return;
+    }
+    if (profileNewPassword.length < 6) {
+      showAlert('New password must be at least 6 characters long.', 'error');
+      return;
+    }
+    if (profileNewPassword !== profileConfirmPassword) {
+      showAlert('New password and confirmation password do not match.', 'error');
+      return;
+    }
+
+    setUpdatingPassword(true);
+    const res = await apiRequest('/admin/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        currentPassword: profileCurrentPassword,
+        newPassword: profileNewPassword,
+      }),
+    });
+    setUpdatingPassword(false);
+
+    if (res.success) {
+      showAlert('Password updated successfully! Please keep your new password safe.');
+      setProfileCurrentPassword('');
+      setProfileNewPassword('');
+      setProfileConfirmPassword('');
+    } else {
+      showAlert(res.message || 'Failed to update password. Please check your current password.', 'error');
+    }
+  };
+
   // 13. Add New Administrator
   const handleAddNewAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1181,6 +1289,26 @@ export default function AdminPortalPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Admin Profile Pill */}
+            <button
+              onClick={() => {
+                setActiveMainTab('profile');
+                setSelectedCourseId(null);
+              }}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-2 transition shadow-xs ${
+                activeMainTab === 'profile'
+                  ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                  : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-800'
+              }`}
+              title="Edit your administrator profile"
+            >
+              <div className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 font-black text-[10px] flex items-center justify-center">
+                {profileName?.charAt(0) || adminProfile?.name?.charAt(0) || 'A'}
+              </div>
+              <span className="hidden sm:inline max-w-[130px] truncate">{profileName || adminProfile?.name || 'My Profile'}</span>
+              <span className="sm:hidden">Profile</span>
+            </button>
+
             <button
               onClick={handleTriggerCleanup}
               className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
@@ -1295,6 +1423,20 @@ export default function AdminPortalPage() {
             }`}
           >
             🔐 Security &amp; Admin Team
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveMainTab('profile');
+              setSelectedCourseId(null);
+            }}
+            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
+              activeMainTab === 'profile'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
+            }`}
+          >
+            👤 My Admin Profile
           </button>
         </div>
 
@@ -3845,6 +3987,236 @@ export default function AdminPortalPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 6: MY ADMINISTRATOR PROFILE & SETTINGS
+        ======================================================== */}
+        {activeMainTab === 'profile' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            {/* Profile Overview Header Card */}
+            <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-blue-900/40 relative overflow-hidden">
+              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="relative shrink-0">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg shadow-amber-500/20">
+                      {profileName?.charAt(0) || adminProfile?.name?.charAt(0) || 'A'}
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm border-2 border-slate-900">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white truncate">
+                        {profileName || adminProfile?.name || 'Administrator'}
+                      </h2>
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                        {adminProfile?.role === 'admin' ? 'Master Admin' : 'Admin'}
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-2 truncate">
+                      <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                      <span className="truncate">{profileEmail || adminProfile?.email || 'admin@blueprint.com'}</span>
+                    </p>
+                    {profilePhone && (
+                      <p className="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
+                        <span>📞 {profilePhone}</span>
+                        {profileAddress && <span>• 📍 {profileAddress}</span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs text-slate-300 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shrink-0">
+                  <span className="text-[11px] uppercase tracking-wider text-amber-400 font-black">Portal Access Level</span>
+                  <span className="font-extrabold text-white text-sm">Full Administrative Privileges</span>
+                  <span className="text-[11px] text-slate-400">
+                    Member Since: {adminProfile?.createdAt ? new Date(adminProfile.createdAt).toLocaleDateString() : 'Active'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Two-Column Editor Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* CARD 1: EDIT PERSONAL DETAILS */}
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5">
+                <div className="border-b border-slate-100 pb-4">
+                  <span className="text-xs font-extrabold text-blue-700 uppercase tracking-wider block">
+                    Account Information
+                  </span>
+                  <h3 className="text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
+                    <User className="w-5 h-5 text-blue-700" />
+                    Personal &amp; Contact Details
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Update your administrator display name, official login email, phone number, and designation.
+                  </p>
+                </div>
+
+                <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={profileName}
+                      onChange={(e) => setProfileName(e.target.value)}
+                      placeholder="e.g. Master Administrator"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">
+                      Login Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={profileEmail}
+                      onChange={(e) => setProfileEmail(e.target.value)}
+                      placeholder="admin@blueprint.com"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      This email is used to log in to the administrator portal.
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1.5">
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        placeholder="017XXXXXXXX"
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1.5">
+                        Office Location / Designation
+                      </label>
+                      <input
+                        type="text"
+                        value={profileAddress}
+                        onChange={(e) => setProfileAddress(e.target.value)}
+                        placeholder="Dhaka, Bangladesh"
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-3 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={savingProfile}
+                      className="px-6 py-2.5 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* CARD 2: PASSWORD CHANGE & SECURITY */}
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5">
+                <div className="border-b border-slate-100 pb-4">
+                  <span className="text-xs font-extrabold text-amber-600 uppercase tracking-wider block">
+                    Security Credentials
+                  </span>
+                  <h3 className="text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
+                    <Key className="w-5 h-5 text-amber-500" />
+                    Direct Password Update
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Quickly update your login password directly without requiring email OTP verification.
+                  </p>
+                </div>
+
+                <form onSubmit={handleChangePasswordDirect} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">
+                      Current Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={profileCurrentPassword}
+                      onChange={(e) => setProfileCurrentPassword(e.target.value)}
+                      placeholder="Enter your current password"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">
+                      New Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={profileNewPassword}
+                      onChange={(e) => setProfileNewPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Choose a strong password containing letters and numbers.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">
+                      Confirm New Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={profileConfirmPassword}
+                      onChange={(e) => setProfileConfirmPassword(e.target.value)}
+                      placeholder="Re-enter new password"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                    />
+                  </div>
+
+                  <div className="pt-3 flex items-center justify-between gap-3 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setActiveMainTab('security')}
+                      className="text-xs text-blue-700 hover:underline font-bold"
+                    >
+                      Forgot password? Use Email OTP Reset →
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={updatingPassword}
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+                    >
+                      <Lock className="w-4 h-4" />
+                      {updatingPassword ? 'Updating Password...' : 'Update Password'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

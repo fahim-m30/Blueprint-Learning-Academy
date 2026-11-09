@@ -1090,6 +1090,91 @@ router.post('/trigger-cleanup', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/profile
+ * Get current administrator profile
+ */
+router.get('/profile', async (req, res) => {
+  try {
+    const admin = await User.findById(req.user._id).select('-password -plainPasswordForAdmin');
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator profile not found.' });
+    }
+    res.json({ success: true, profile: admin });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching admin profile.' });
+  }
+});
+
+/**
+ * PUT /api/admin/profile
+ * Update current administrator profile (name, email, phone, address, password)
+ */
+router.put('/profile', async (req, res) => {
+  try {
+    const { name, email, phone, address, currentPassword, newPassword } = req.body;
+    const admin = await User.findById(req.user._id);
+
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator profile not found.' });
+    }
+
+    if (name) admin.name = name.trim();
+    if (phone) admin.phone = phone.trim();
+    if (address !== undefined) admin.address = address.trim();
+
+    if (email && email.toLowerCase().trim() !== admin.email) {
+      const emailLower = email.toLowerCase().trim();
+      const existing = await User.findOne({ email: emailLower, _id: { $ne: admin._id } });
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'This email is already in use by another account.' });
+      }
+      admin.email = emailLower;
+    }
+
+    let passwordChanged = false;
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+      }
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: 'Please enter your current password to authorize this change.' });
+      }
+
+      const isMatch = await admin.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Current password does not match.' });
+      }
+
+      admin.password = newPassword; // Hashed by pre-save hook
+      admin.plainPasswordForAdmin = newPassword;
+      passwordChanged = true;
+    }
+
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: passwordChanged
+        ? 'Profile and password updated successfully!'
+        : 'Profile updated successfully!',
+      passwordChanged,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        phone: admin.phone,
+        address: admin.address,
+        role: admin.role,
+        status: admin.status,
+      },
+    });
+  } catch (err) {
+    console.error('Update Admin Profile Error:', err);
+    res.status(500).json({ success: false, message: 'Error updating profile.' });
+  }
+});
+
+/**
  * GET /api/admin/admins
  * List all registered administrators
  */
