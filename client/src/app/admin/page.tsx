@@ -1283,62 +1283,63 @@ export default function AdminPortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 overflow-x-hidden">
       {/* Top Admin Navbar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
               <img
                 src="/logo.png?v=6"
                 alt="Blueprint Learning Academy"
-                className="w-11 h-11 sm:w-12 sm:h-12 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
+                className="w-9 h-9 sm:w-11 sm:h-11 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
               />
-              <span className="text-xl font-black text-slate-900 hidden sm:inline">
+              <span className="text-base sm:text-xl font-black text-slate-900 hidden md:inline truncate">
                 Blueprint <span className="text-[#ffb531]">Learning Academy</span>
               </span>
             </Link>
-            <span className="text-xs bg-red-50 border border-red-200 text-red-700 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Master Admin Portal
+            <span className="text-[11px] sm:text-xs bg-red-50 border border-red-200 text-red-700 px-2 sm:px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <span className="hidden sm:inline">Master </span>Admin<span className="hidden md:inline"> Portal</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Admin Profile Pill */}
             <button
               onClick={() => {
                 setActiveMainTab('profile');
                 setSelectedCourseId(null);
               }}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-2 transition shadow-xs ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 sm:gap-2 transition shadow-xs ${
                 activeMainTab === 'profile'
                   ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
                   : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-800'
               }`}
               title="Edit your administrator profile"
             >
-              <div className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 font-black text-[10px] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 font-black text-[10px] flex items-center justify-center shrink-0">
                 {profileName?.charAt(0) || adminProfile?.name?.charAt(0) || 'A'}
               </div>
-              <span className="hidden sm:inline max-w-[130px] truncate">{profileName || adminProfile?.name || 'My Profile'}</span>
-              <span className="sm:hidden">Profile</span>
+              <span className="hidden sm:inline max-w-[110px] truncate">{profileName || adminProfile?.name || 'Profile'}</span>
+              <span className="sm:hidden text-[11px]">Profile</span>
             </button>
 
             <button
               onClick={handleTriggerCleanup}
-              className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
               title="Permanently remove expired courses from database"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-[#ffb531]" />
-              <span className="hidden sm:inline">Run Auto-Cleanup</span><span className="sm:hidden">Cleanup</span>
+              <RefreshCw className="w-3.5 h-3.5 text-[#ffb531] shrink-0" />
+              <span className="hidden md:inline">Run Auto-Cleanup</span>
+              <span className="hidden xs:inline md:hidden">Cleanup</span>
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white transition"
+              className="p-1.5 sm:p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white transition"
               title="Logout"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 shrink-0" />
             </button>
           </div>
         </div>
@@ -1346,9 +1347,7 @@ export default function AdminPortalPage() {
 
       {/* Floating Alert Banner */}
       {alertBanner && (
-        <div
-          className={`max-w-7xl mx-auto px-4 mt-4`}
-        >
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 mt-3 sm:mt-4">
           <div
             className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
               alertBanner.type === 'success'
@@ -1363,21 +1362,22 @@ export default function AdminPortalPage() {
       )}
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 gap-2.5 overflow-x-auto pb-1.5">
+        <div className="flex border-b border-slate-200 gap-1.5 sm:gap-2.5 overflow-x-auto pb-2 scrollbar-none touch-pan-x -mx-3 px-3 sm:mx-0 sm:px-0">
           <button
             onClick={() => {
               setActiveMainTab('overview');
               setSelectedCourseId(null);
             }}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs shrink-0 ${
               activeMainTab === 'overview'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            📊 Analytics &amp; Courses Overview
+            <span className="hidden sm:inline">📊 Analytics &amp; Courses Overview</span>
+            <span className="sm:hidden">📊 Overview</span>
           </button>
 
           <button
@@ -1385,13 +1385,14 @@ export default function AdminPortalPage() {
               setActiveMainTab('enrollments');
               setSelectedCourseId(null);
             }}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
               activeMainTab === 'enrollments'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            💳 Pending Enrollments
+            <span className="hidden sm:inline">💳 Pending Enrollments</span>
+            <span className="sm:hidden">💳 Enrollments</span>
             {stats?.pendingEnrollments > 0 && (
               <span className="min-w-5 h-5 px-1.5 rounded-full bg-[#ffb531] text-[#1a1100] text-xs font-black flex items-center justify-center">
                 {stats.pendingEnrollments}
@@ -1405,13 +1406,14 @@ export default function AdminPortalPage() {
               setSelectedCourseId(null);
               loadStudentCvs();
             }}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
               activeMainTab === 'cvs'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            📄 Student CVs &amp; Resumes
+            <span className="hidden sm:inline">📄 Student CVs &amp; Resumes</span>
+            <span className="sm:hidden">📄 Student CVs</span>
             {allStudentCvs.length > 0 && (
               <span className="min-w-5 h-5 px-1.5 rounded-full bg-emerald-500 text-white text-xs font-black flex items-center justify-center shadow-xs">
                 {allStudentCvs.length}
@@ -1421,24 +1423,26 @@ export default function AdminPortalPage() {
 
           <button
             onClick={() => setActiveMainTab('settings')}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap shadow-xs shrink-0 ${
               activeMainTab === 'settings'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            ⚙️ Payment &amp; Site Settings
+            <span className="hidden sm:inline">⚙️ Payment &amp; Site Settings</span>
+            <span className="sm:hidden">⚙️ Settings</span>
           </button>
 
           <button
             onClick={() => setActiveMainTab('security')}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
               activeMainTab === 'security'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            🔐 Security &amp; Admin Team
+            <span className="hidden sm:inline">🔐 Security &amp; Admin Team</span>
+            <span className="sm:hidden">🔐 Security</span>
           </button>
 
           <button
@@ -1446,13 +1450,14 @@ export default function AdminPortalPage() {
               setActiveMainTab('profile');
               setSelectedCourseId(null);
             }}
-            className={`py-3 sm:py-3.5 px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs ${
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
               activeMainTab === 'profile'
                 ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            👤 My Admin Profile
+            <span className="hidden sm:inline">👤 My Admin Profile</span>
+            <span className="sm:hidden">👤 Profile</span>
           </button>
         </div>
 
@@ -4012,48 +4017,48 @@ export default function AdminPortalPage() {
             TAB 6: MY ADMINISTRATOR PROFILE & SETTINGS
         ======================================================== */}
         {activeMainTab === 'profile' && (
-          <div className="space-y-8 animate-in fade-in duration-200">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
             {/* Profile Overview Header Card */}
-            <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-blue-900/40 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl border border-blue-900/40 relative overflow-hidden">
               <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-                <div className="flex items-center gap-4 sm:gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 relative z-10">
+                <div className="flex items-center gap-3 sm:gap-6 min-w-0">
                   <div className="relative shrink-0">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg shadow-amber-500/20">
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center text-2xl sm:text-4xl font-black shadow-lg shadow-amber-500/20">
                       {profileName?.charAt(0) || adminProfile?.name?.charAt(0) || 'A'}
                     </div>
-                    <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm border-2 border-slate-900">
+                    <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider shadow-sm border-2 border-slate-900">
                       Active
                     </span>
                   </div>
 
-                  <div className="space-y-1 min-w-0">
+                  <div className="space-y-0.5 sm:space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white truncate">
+                      <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white truncate">
                         {profileName || adminProfile?.name || 'Administrator'}
                       </h2>
-                      <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
                         <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                         {adminProfile?.role === 'admin' ? 'Master Admin' : 'Admin'}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-2 truncate">
+                    <p className="text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-1.5 truncate">
                       <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                       <span className="truncate">{profileEmail || adminProfile?.email || 'admin@blueprint.com'}</span>
                     </p>
                     {profilePhone && (
-                      <p className="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
+                      <p className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1.5 flex-wrap">
                         <span>📞 {profilePhone}</span>
-                        {profileAddress && <span>• 📍 {profileAddress}</span>}
+                        {profileAddress && <span className="truncate">• 📍 {profileAddress}</span>}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs text-slate-300 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shrink-0">
-                  <span className="text-[11px] uppercase tracking-wider text-amber-400 font-black">Portal Access Level</span>
-                  <span className="font-extrabold text-white text-sm">Full Administrative Privileges</span>
-                  <span className="text-[11px] text-slate-400">
+                <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1 text-xs text-slate-300 bg-white/5 backdrop-blur-sm p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 shrink-0 w-full sm:w-auto">
+                  <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-amber-400 font-black">Portal Access Level</span>
+                  <span className="font-extrabold text-white text-xs sm:text-sm">Full Administrative Privileges</span>
+                  <span className="text-[10px] sm:text-[11px] text-slate-400">
                     Member Since: {adminProfile?.createdAt ? new Date(adminProfile.createdAt).toLocaleDateString() : 'Active'}
                   </span>
                 </div>
@@ -4061,14 +4066,14 @@ export default function AdminPortalPage() {
             </div>
 
             {/* Two-Column Editor Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
               {/* CARD 1: EDIT PERSONAL DETAILS */}
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5">
-                <div className="border-b border-slate-100 pb-4">
-                  <span className="text-xs font-extrabold text-blue-700 uppercase tracking-wider block">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-7 shadow-xl space-y-4 sm:space-y-5">
+                <div className="border-b border-slate-100 pb-3 sm:pb-4">
+                  <span className="text-[11px] sm:text-xs font-extrabold text-blue-700 uppercase tracking-wider block">
                     Account Information
                   </span>
-                  <h3 className="text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
                     <User className="w-5 h-5 text-blue-700" />
                     Personal &amp; Contact Details
                   </h3>
@@ -4077,9 +4082,9 @@ export default function AdminPortalPage() {
                   </p>
                 </div>
 
-                <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+                <form onSubmit={handleUpdateProfile} className="space-y-3.5 sm:space-y-4 text-xs sm:text-sm">
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">
+                    <label className="block text-slate-700 font-bold mb-1">
                       Full Name *
                     </label>
                     <input
@@ -4088,12 +4093,12 @@ export default function AdminPortalPage() {
                       value={profileName}
                       onChange={(e) => setProfileName(e.target.value)}
                       placeholder="e.g. Master Administrator"
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">
+                    <label className="block text-slate-700 font-bold mb-1">
                       Login Email Address *
                     </label>
                     <input
@@ -4102,16 +4107,16 @@ export default function AdminPortalPage() {
                       value={profileEmail}
                       onChange={(e) => setProfileEmail(e.target.value)}
                       placeholder="admin@blueprint.com"
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium outline-none transition"
                     />
                     <span className="text-[11px] text-slate-500 mt-1 block">
                       This email is used to log in to the administrator portal.
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-slate-700 font-bold mb-1.5">
+                      <label className="block text-slate-700 font-bold mb-1">
                         Phone Number *
                       </label>
                       <input
@@ -4120,12 +4125,12 @@ export default function AdminPortalPage() {
                         value={profilePhone}
                         onChange={(e) => setProfilePhone(e.target.value)}
                         placeholder="017XXXXXXXX"
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium outline-none transition"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-slate-700 font-bold mb-1.5">
+                      <label className="block text-slate-700 font-bold mb-1">
                         Office Location / Designation
                       </label>
                       <input
@@ -4133,16 +4138,16 @@ export default function AdminPortalPage() {
                         value={profileAddress}
                         onChange={(e) => setProfileAddress(e.target.value)}
                         placeholder="Dhaka, Bangladesh"
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium outline-none transition"
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium outline-none transition"
                       />
                     </div>
                   </div>
 
-                  <div className="pt-3 flex justify-end">
+                  <div className="pt-2 sm:pt-3 flex justify-end">
                     <button
                       type="submit"
                       disabled={savingProfile}
-                      className="px-6 py-2.5 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+                      className="w-full sm:w-auto justify-center px-6 py-3 sm:py-2.5 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center gap-2"
                     >
                       <Save className="w-4 h-4" />
                       {savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
@@ -4152,12 +4157,12 @@ export default function AdminPortalPage() {
               </div>
 
               {/* CARD 2: PASSWORD CHANGE & SECURITY */}
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5">
-                <div className="border-b border-slate-100 pb-4">
-                  <span className="text-xs font-extrabold text-amber-600 uppercase tracking-wider block">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-7 shadow-xl space-y-4 sm:space-y-5">
+                <div className="border-b border-slate-100 pb-3 sm:pb-4">
+                  <span className="text-[11px] sm:text-xs font-extrabold text-amber-600 uppercase tracking-wider block">
                     Security Credentials
                   </span>
-                  <h3 className="text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-black text-slate-950 mt-1 flex items-center gap-2">
                     <Key className="w-5 h-5 text-amber-500" />
                     Direct Password Update
                   </h3>
@@ -4166,9 +4171,9 @@ export default function AdminPortalPage() {
                   </p>
                 </div>
 
-                <form onSubmit={handleChangePasswordDirect} className="space-y-4 text-xs">
+                <form onSubmit={handleChangePasswordDirect} className="space-y-3.5 sm:space-y-4 text-xs sm:text-sm">
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">
+                    <label className="block text-slate-700 font-bold mb-1">
                       Current Password *
                     </label>
                     <input
@@ -4177,12 +4182,12 @@ export default function AdminPortalPage() {
                       value={profileCurrentPassword}
                       onChange={(e) => setProfileCurrentPassword(e.target.value)}
                       placeholder="Enter your current password"
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">
+                    <label className="block text-slate-700 font-bold mb-1">
                       New Password *
                     </label>
                     <input
@@ -4192,7 +4197,7 @@ export default function AdminPortalPage() {
                       value={profileNewPassword}
                       onChange={(e) => setProfileNewPassword(e.target.value)}
                       placeholder="Minimum 6 characters"
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 outline-none transition"
                     />
                     <span className="text-[11px] text-slate-500 mt-1 block">
                       Choose a strong password containing letters and numbers.
@@ -4200,7 +4205,7 @@ export default function AdminPortalPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">
+                    <label className="block text-slate-700 font-bold mb-1">
                       Confirm New Password *
                     </label>
                     <input
@@ -4210,15 +4215,15 @@ export default function AdminPortalPage() {
                       value={profileConfirmPassword}
                       onChange={(e) => setProfileConfirmPassword(e.target.value)}
                       placeholder="Re-enter new password"
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none transition"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 outline-none transition"
                     />
                   </div>
 
-                  <div className="pt-3 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="pt-2 sm:pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <button
                       type="button"
                       onClick={() => setActiveMainTab('security')}
-                      className="text-xs text-blue-700 hover:underline font-bold"
+                      className="text-xs text-blue-700 hover:underline font-bold text-center sm:text-left"
                     >
                       Forgot password? Use Email OTP Reset →
                     </button>
@@ -4226,9 +4231,9 @@ export default function AdminPortalPage() {
                     <button
                       type="submit"
                       disabled={updatingPassword}
-                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+                      className="w-full sm:w-auto justify-center px-6 py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center gap-2"
                     >
-                      <Lock className="w-4 h-4" />
+                      <Key className="w-4 h-4" />
                       {updatingPassword ? 'Updating Password...' : 'Update Password'}
                     </button>
                   </div>

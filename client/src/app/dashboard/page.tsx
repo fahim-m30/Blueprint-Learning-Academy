@@ -511,21 +511,21 @@ export default function StudentDashboardPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 selection:bg-amber-400 selection:text-slate-950">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3.5 shadow-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
               <img
                 src="/logo.png?v=6"
                 alt="Blueprint Learning Academy"
-                className="w-11 h-11 sm:w-12 sm:h-12 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
+                className="w-9 h-9 sm:w-11 sm:h-11 object-contain rounded-full shadow-xs group-hover:scale-105 transition"
               />
-              <span className="text-lg sm:text-xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
+              <span className="text-base sm:text-xl font-black text-slate-950 hidden md:inline truncate tracking-tight">
                 Blueprint Learning Academy
               </span>
             </Link>
-            <span className="text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full font-extrabold shrink-0">
-              Student Dashboard
+            <span className="text-[11px] sm:text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-extrabold shrink-0">
+              <span className="hidden xs:inline">Student </span>Dashboard
             </span>
           </div>
 
@@ -675,10 +675,10 @@ export default function StudentDashboardPage() {
             )}
 
             {/* Main Tabs Navigation */}
-            <div className="flex border-b border-slate-200 gap-2 sm:gap-3 overflow-x-auto pb-1 text-sm sm:text-base">
+            <div className="flex border-b border-slate-200 gap-1.5 sm:gap-3 overflow-x-auto pb-1 text-xs sm:text-sm -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-none touch-pan-x">
               <button
                 onClick={() => setActiveTab('videos')}
-                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
+                className={`py-2.5 sm:py-3.5 px-3 sm:px-6 font-extrabold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap shrink-0 ${
                   activeTab === 'videos'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -699,19 +699,19 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('live')}
-                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
+                className={`py-2.5 sm:py-3.5 px-3 sm:px-6 font-extrabold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap shrink-0 ${
                   activeTab === 'live'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <Calendar className="w-4 h-4 shrink-0" />
-                Live Classes ({courseDetails?.liveClasses?.length || 0})
+                <span><span className="hidden sm:inline">Live </span>Classes ({courseDetails?.liveClasses?.length || 0})</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('tasks')}
-                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
+                className={`py-2.5 sm:py-3.5 px-3 sm:px-6 font-extrabold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap shrink-0 ${
                   activeTab === 'tasks'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -732,7 +732,7 @@ export default function StudentDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`py-3 sm:py-3.5 px-4 sm:px-6 font-extrabold flex items-center gap-2 border-b-2 transition whitespace-nowrap text-xs sm:text-sm ${
+                className={`py-2.5 sm:py-3.5 px-3 sm:px-6 font-extrabold flex items-center gap-1.5 sm:gap-2 border-b-2 transition whitespace-nowrap shrink-0 ${
                   activeTab === 'chat'
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
