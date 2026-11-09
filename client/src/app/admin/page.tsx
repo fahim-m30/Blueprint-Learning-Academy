@@ -461,22 +461,36 @@ export default function AdminPortalPage() {
 
   const loadCourseHub = async (courseId: string) => {
     setSelectedCourseId(courseId);
-    const [cRes, chatRes] = await Promise.all([
-      apiRequest(`/admin/courses/${courseId}`),
-      apiRequest(`/admin/courses/${courseId}/chat`),
-    ]);
-
-    if (cRes.success && cRes.data) {
-      const crs = cRes.data.course;
-      setSelectedCourseData(crs);
-      setCourseStudents(cRes.data.students || []);
-      setCourseSubmissions(cRes.data.taskSubmissions || []);
-      setCourseDemoUrl(crs?.demoVideoUrl || '');
-      setCourseDemoTitle(crs?.demoVideoTitle || '');
-      setCourseDemoDescription(crs?.demoVideoDescription || '');
+    // Optimistic instant navigation: enter course workspace in 0ms
+    const existing = coursesList.find((c: any) => c._id === courseId);
+    if (existing) {
+      setSelectedCourseData(existing);
+      setCourseDemoUrl(existing?.demoVideoUrl || '');
+      setCourseDemoTitle(existing?.demoVideoTitle || '');
+      setCourseDemoDescription(existing?.demoVideoDescription || '');
     }
-    if (chatRes.success && chatRes.data) {
-      setCourseChat(chatRes.data.messages || []);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+      const [cRes, chatRes] = await Promise.all([
+        apiRequest(`/admin/courses/${courseId}`),
+        apiRequest(`/admin/courses/${courseId}/chat`),
+      ]);
+
+      if (cRes.success && cRes.data) {
+        const crs = cRes.data.course;
+        setSelectedCourseData(crs);
+        setCourseStudents(cRes.data.students || []);
+        setCourseSubmissions(cRes.data.taskSubmissions || []);
+        setCourseDemoUrl(crs?.demoVideoUrl || '');
+        setCourseDemoTitle(crs?.demoVideoTitle || '');
+        setCourseDemoDescription(crs?.demoVideoDescription || '');
+      }
+      if (chatRes.success && chatRes.data) {
+        setCourseChat(chatRes.data.messages || []);
+      }
+    } catch (err) {
+      console.error('Error loading course hub:', err);
     }
   };
 
@@ -1505,7 +1519,12 @@ export default function AdminPortalPage() {
             TAB 1: ANALYTICS & COURSE BUTTONS HUB
         ======================================================== */}
         {activeMainTab === 'overview' && (
-          selectedCourseId && selectedCourseData ? (
+          selectedCourseId && !selectedCourseData ? (
+            <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4 animate-in fade-in">
+              <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-sm font-bold text-slate-700">Opening Course Workspace...</p>
+            </div>
+          ) : selectedCourseId && selectedCourseData ? (
             /* DEDICATED COURSE HUB (ENTERED INSIDE COURSE) */
             <div className="space-y-6 animate-in fade-in duration-200">
               {/* Top Navigation & Back Button */}

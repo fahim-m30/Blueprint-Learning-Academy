@@ -353,6 +353,10 @@ export default function StudentDashboardPage() {
 
   const handleSelectCourse = async (courseId: string) => {
     setSelectedCourseId(courseId);
+    const item = enrolledList.find((e: any) => e.course?._id === courseId);
+    if (item?.course) {
+      setCourseDetails(item.course);
+    }
     await loadCourseData(courseId);
   };
 
