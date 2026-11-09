@@ -51,6 +51,8 @@ export default function AdminPortalPage() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [approvingEnrollmentId, setApprovingEnrollmentId] = useState<string | null>(null);
+  const [deletingEnrollmentId, setDeletingEnrollmentId] = useState<string | null>(null);
+  const [removingStudentId, setRemovingStudentId] = useState<string | null>(null);
 
   // Student CVs Management state
   const [allStudentCvs, setAllStudentCvs] = useState<any[]>([]);
@@ -654,6 +656,64 @@ export default function AdminPortalPage() {
     if (res.success) {
       showAlert('Enrollment rejected.');
       loadAdminData();
+    }
+  };
+
+  const handleDeleteEnrollment = async (enrollmentId: string, studentName: string) => {
+    if (!confirm(`Are you sure you want to permanently delete student "${studentName}"? This will delete the enrollment and automatically remove the student from the course.`)) {
+      return;
+    }
+
+    setDeletingEnrollmentId(enrollmentId);
+    setEnrollments((prev) => prev.filter((item) => item._id !== enrollmentId));
+    showAlert(`Deleting student "${studentName}" and removing from course...`);
+
+    try {
+      const res = await apiRequest(`/admin/enrollments/${enrollmentId}`, {
+        method: 'DELETE',
+      });
+      if (res.success) {
+        showAlert(res.message || 'Student enrollment and course access deleted successfully!');
+      } else {
+        showAlert(res.message || 'Error deleting student enrollment.', 'error');
+      }
+    } catch (err: any) {
+      console.error('Error deleting enrollment:', err);
+    } finally {
+      setDeletingEnrollmentId(null);
+      await loadAdminData();
+      if (selectedCourseId) {
+        await loadCourseHub(selectedCourseId);
+      }
+    }
+  };
+
+  const handleRemoveCourseStudent = async (studentId: string, studentName: string) => {
+    if (!confirm(`Are you sure you want to remove student "${studentName}" from this course?`)) {
+      return;
+    }
+
+    setRemovingStudentId(studentId);
+    setCourseStudents((prev) => prev.filter((s) => s._id !== studentId));
+    showAlert(`Removing student "${studentName}" from this course...`);
+
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/students/${studentId}`, {
+        method: 'DELETE',
+      });
+      if (res.success) {
+        showAlert(res.message || 'Student removed from course successfully!');
+      } else {
+        showAlert(res.message || 'Error removing student from course.', 'error');
+      }
+    } catch (err: any) {
+      console.error('Error removing student:', err);
+    } finally {
+      setRemovingStudentId(null);
+      if (selectedCourseId) {
+        await loadCourseHub(selectedCourseId);
+      }
+      await loadAdminData();
     }
   };
 
@@ -1797,30 +1857,44 @@ export default function AdminPortalPage() {
                                   )}
                                 </td>
                                 <td className="p-3.5 text-right">
-                                  {st.status === 'blocked' ? (
+                                  <div className="flex items-center justify-end gap-2">
+                                    {st.status === 'blocked' ? (
+                                      <button
+                                        type="button"
+                                        disabled={unblockingUserId === st._id}
+                                        onClick={() => handleUnblockUser(st._id, st.name, st.email)}
+                                        className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-lg text-xs font-extrabold transition shadow-xs flex items-center gap-1.5"
+                                      >
+                                        {unblockingUserId === st._id ? (
+                                          <>
+                                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Unblocking...
+                                          </>
+                                        ) : (
+                                          'Unblock'
+                                        )}
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setBlockingUser(st)}
+                                        className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-lg text-xs font-extrabold transition"
+                                      >
+                                        Block
+                                      </button>
+                                    )}
+
                                     <button
                                       type="button"
-                                      disabled={unblockingUserId === st._id}
-                                      onClick={() => handleUnblockUser(st._id, st.name, st.email)}
-                                      className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-lg text-xs font-extrabold transition shadow-xs flex items-center gap-1.5 ml-auto"
+                                      disabled={removingStudentId === st._id}
+                                      onClick={() => handleRemoveCourseStudent(st._id, st.name)}
+                                      className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded-lg text-xs font-extrabold transition flex items-center gap-1 shadow-xs"
+                                      title="Remove student from this course"
                                     >
-                                      {unblockingUserId === st._id ? (
-                                        <>
-                                          <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                          Unblocking...
-                                        </>
-                                      ) : (
-                                        'Unblock'
-                                      )}
+                                      <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                                      <span>{removingStudentId === st._id ? 'Removing...' : 'Delete'}</span>
                                     </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => setBlockingUser(st)}
-                                      className="px-3.5 py-1.5 bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 rounded-lg text-xs font-extrabold transition"
-                                    >
-                                      Block Student
-                                    </button>
-                                  )}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -2875,6 +2949,15 @@ export default function AdminPortalPage() {
                               >
                                 Reject
                               </button>
+                              <button
+                                onClick={() => handleDeleteEnrollment(en._id, en.studentName)}
+                                disabled={deletingEnrollmentId === en._id}
+                                className="px-3 py-2 rounded-xl border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-bold transition flex items-center gap-1 shadow-xs"
+                                title="Permanently delete enrollment and remove student from course"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{deletingEnrollmentId === en._id ? 'Deleting...' : 'Delete'}</span>
+                              </button>
                             </div>
                           ) : en.status === 'approved' ? (
                             <div className="flex items-center justify-end gap-2">
@@ -2885,8 +2968,29 @@ export default function AdminPortalPage() {
                               >
                                 <Mail className="w-3.5 h-3.5" /> Resend Email
                               </button>
+                              <button
+                                onClick={() => handleDeleteEnrollment(en._id, en.studentName)}
+                                disabled={deletingEnrollmentId === en._id}
+                                className="px-3 py-1.5 rounded-xl border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                                title="Delete student and remove from course"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{deletingEnrollmentId === en._id ? 'Deleting...' : 'Delete'}</span>
+                              </button>
                             </div>
-                          ) : null}
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleDeleteEnrollment(en._id, en.studentName)}
+                                disabled={deletingEnrollmentId === en._id}
+                                className="px-3 py-1.5 rounded-xl border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                                title="Delete enrollment record"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{deletingEnrollmentId === en._id ? 'Deleting...' : 'Delete'}</span>
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
