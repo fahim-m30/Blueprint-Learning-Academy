@@ -46,13 +46,12 @@ export async function POST(
       createdAt: new Date(),
     };
 
-    const updateResult = await db.collection('courses').findOneAndUpdate(
+    await db.collection('courses').updateOne(
       { _id: new ObjectId(courseId) },
-      { $push: { videos: newVideo as any } },
-      { returnDocument: 'after' }
+      { $push: { videos: newVideo as any } }
     );
 
-    const updatedCourse = updateResult?.value || await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
+    const updatedCourse = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
 
     if (!updatedCourse) {
       return NextResponse.json({ success: false, message: 'Course not found.' }, { status: 404 });

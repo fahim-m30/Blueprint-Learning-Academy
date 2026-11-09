@@ -465,15 +465,18 @@ export default function AdminPortalPage() {
 
   const loadCourseHub = async (courseId: string) => {
     setSelectedCourseId(courseId);
-    // Optimistic instant navigation: enter course workspace in 0ms
-    const existing = coursesList.find((c: any) => c._id === courseId);
-    if (existing) {
-      setSelectedCourseData(existing);
-      setCourseDemoUrl(existing?.demoVideoUrl || '');
-      setCourseDemoTitle(existing?.demoVideoTitle || '');
-      setCourseDemoDescription(existing?.demoVideoDescription || '');
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Optimistic instant navigation: enter course workspace in 0ms without overwriting newer local state
+    setSelectedCourseData((prev: any) => {
+      if (prev && prev._id === courseId) return prev;
+      const existing = coursesList.find((c: any) => c._id === courseId);
+      if (existing) {
+        setCourseDemoUrl(existing?.demoVideoUrl || '');
+        setCourseDemoTitle(existing?.demoVideoTitle || '');
+        setCourseDemoDescription(existing?.demoVideoDescription || '');
+        return existing;
+      }
+      return prev;
+    });
 
     try {
       const [cRes, chatRes] = await Promise.all([
@@ -847,30 +850,69 @@ export default function AdminPortalPage() {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    setSavingSection('video');
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos`, {
-      method: 'POST',
-      body: JSON.stringify({
-        title: newVideoTitle.trim(),
-        youtubeUrl: formattedUrl,
-        duration: newVideoDuration.trim(),
-        note: newVideoNote.trim(),
-      }),
-    });
-    setSavingSection(null);
+    const titleToSave = newVideoTitle.trim();
+    const noteToSave = newVideoNote.trim();
 
-    if (res.success) {
-      showAlert('✓ Class video added successfully and published to student dashboard.');
-      setNewVideoTitle('');
-      setNewVideoUrl('');
-      setNewVideoDuration('');
-      setNewVideoNote('');
-      if (res.data?.course) {
+    // 1. Instant 0ms optimistic appearance right below
+    const optimisticVid = {
+      _id: 'temp-' + Date.now(),
+      title: titleToSave,
+      youtubeUrl: formattedUrl,
+      duration: '',
+      note: noteToSave,
+      createdAt: new Date().toISOString(),
+    };
+
+    setSelectedCourseData((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        videos: [...(prev.videos || []), optimisticVid],
+      };
+    });
+
+    // Reset inputs immediately
+    setNewVideoTitle('');
+    setNewVideoUrl('');
+    setNewVideoDuration('');
+    setNewVideoNote('');
+
+    setSavingSection('video');
+
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos`, {
+        method: 'POST',
+        body: JSON.stringify({
+          title: titleToSave,
+          youtubeUrl: formattedUrl,
+          duration: '',
+          note: noteToSave,
+        }),
+      });
+
+      if (res.success && res.data?.course) {
         setSelectedCourseData(res.data.course);
+        setCoursesList((prev) =>
+          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+        );
+        showAlert('✓ Class video published live to student portal!');
+      } else if (res.success) {
+        showAlert('✓ Class video published live to student portal!');
+      } else {
+        showAlert(`✕ Error adding video: ${res.message || 'Please check connection.'}`, 'error');
+        // Rollback on error
+        setSelectedCourseData((prev: any) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            videos: (prev.videos || []).filter((v: any) => v._id !== optimisticVid._id),
+          };
+        });
       }
-      loadCourseHub(selectedCourseId);
-    } else {
-      showAlert(`✕ Error adding video: ${res.message || 'Please check connection.'}`, 'error');
+    } catch (err: any) {
+      console.error('Error adding video:', err);
+    } finally {
+      setSavingSection(null);
     }
   };
 
@@ -879,7 +921,7 @@ export default function AdminPortalPage() {
     if (!selectedCourseId) return;
     if (!confirm(`Are you sure you want to delete the video lecture "${videoTitle}"?`)) return;
 
-    // Optimistic UI update
+    // Optimistic UI update in 0ms
     setSelectedCourseData((prev: any) => {
       if (!prev) return prev;
       return {
@@ -888,19 +930,24 @@ export default function AdminPortalPage() {
       };
     });
 
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos/${videoId}`, {
-      method: 'DELETE',
-    });
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos/${videoId}`, {
+        method: 'DELETE',
+      });
 
-    if (res.success) {
-      showAlert('✓ Video deleted successfully.');
-      if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
+      if (res.success) {
+        showAlert('✓ Video deleted successfully.');
+        if (res.data?.course) {
+          setSelectedCourseData(res.data.course);
+          setCoursesList((prev) =>
+            prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          );
+        }
+      } else {
+        showAlert(res.message || 'Error deleting video.', 'error');
       }
-      loadCourseHub(selectedCourseId);
-    } else {
-      showAlert(res.message || 'Error deleting video.', 'error');
-      loadCourseHub(selectedCourseId);
+    } catch (err: any) {
+      console.error('Error deleting video:', err);
     }
   };
 
@@ -2026,18 +2073,8 @@ export default function AdminPortalPage() {
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
                           />
                         </div>
-                        <div>
-                          <label className="block text-slate-600 mb-1">Duration (Optional)</label>
-                          <input
-                            type="text"
-                            value={newVideoDuration}
-                            onChange={(e) => setNewVideoDuration(e.target.value)}
-                            placeholder="e.g. 1 hr 15 mins"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-slate-600 mb-1">Lecture Note / Instructions</label>
+                        <div className="sm:col-span-2">
+                          <label className="block text-slate-600 mb-1">Lecture Note / Instructions (Optional)</label>
                           <input
                             type="text"
                             value={newVideoNote}
@@ -2085,7 +2122,9 @@ export default function AdminPortalPage() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                              <span className="text-slate-600 text-[11px]">{vid.duration}</span>
+                              {vid.duration && vid.duration !== 'Auto' && (
+                                <span className="text-slate-600 text-[11px] font-medium">{vid.duration}</span>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleSetVideoAsDemo(vid)}
