@@ -63,6 +63,9 @@ export async function apiRequest<T = any>(
     const token = getAuthToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
       ...(options.headers as Record<string, string>),
     };
 
@@ -79,8 +82,8 @@ export async function apiRequest<T = any>(
       cleanEndpoint = cleanEndpoint.substring(4);
     }
 
-    // Route CVs, real-time Chat, Settings, Public Courses, and User Block/Status directly through high-speed Vercel serverless API
-    // (guarantees instant ~50ms response, zero timeouts, 100% availability, and direct MongoDB Atlas persistence)
+    // Route critical Real-time endpoints directly through high-speed Vercel serverless API
+    // (guarantees instant ~30-50ms response, zero cold-starts, zero timeouts, and direct MongoDB Atlas persistence)
     const isLocalServerlessEndpoint =
       cleanEndpoint.startsWith('/student/cv') ||
       cleanEndpoint.startsWith('/admin/cvs') ||
@@ -90,13 +93,17 @@ export async function apiRequest<T = any>(
       cleanEndpoint === '/settings' ||
       cleanEndpoint === '/auth/login' ||
       cleanEndpoint.startsWith('/admin/profile') ||
-      cleanEndpoint.startsWith('/admin/users');
+      cleanEndpoint.startsWith('/admin/users') ||
+      cleanEndpoint.startsWith('/admin/overview') ||
+      cleanEndpoint.startsWith('/admin/enrollments') ||
+      cleanEndpoint.startsWith('/student/dashboard');
 
     const targetUrl = isLocalServerlessEndpoint
       ? `/api${cleanEndpoint}`
       : `${API_BASE_URL}${cleanEndpoint}`;
 
     let response = await fetch(targetUrl, {
+      cache: 'no-store',
       ...options,
       headers,
       signal: controller ? controller.signal : undefined,

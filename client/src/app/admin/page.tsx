@@ -314,10 +314,9 @@ export default function AdminPortalPage() {
     }
   }, [courseSubTab, selectedChatStudentId]);
 
-  // Live Auto-Polling for Pending Enrollments, Payments & Overview Stats (every 3.5s)
+  // Live Auto-Polling for Pending Enrollments, Payments & Overview Stats (every 2.0s + immediate on window focus)
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    interval = setInterval(async () => {
+    const fetchLiveStats = async () => {
       try {
         const [enrollRes, overviewRes] = await Promise.all([
           apiRequest('/admin/enrollments'),
@@ -331,7 +330,8 @@ export default function AdminPortalPage() {
             if (
               !prev ||
               prev.pendingEnrollments !== overviewRes.data.stats.pendingEnrollments ||
-              prev.totalRevenue !== overviewRes.data.stats.totalRevenue
+              prev.totalRevenue !== overviewRes.data.stats.totalRevenue ||
+              prev.totalStudents !== overviewRes.data.stats.totalStudents
             ) {
               return overviewRes.data.stats;
             }
@@ -339,66 +339,76 @@ export default function AdminPortalPage() {
           });
         }
       } catch {}
-    }, 3500);
+    };
+
+    const interval = setInterval(fetchLiveStats, 2000);
+    const handleFocus = () => { fetchLiveStats(); };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
-      if (interval) clearInterval(interval);
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
-  // Live Smooth Real-Time Auto-Polling inside Course Hub (Non-Flickering, Messenger Smoothness)
+  // Live Smooth Real-Time Auto-Polling inside Course Hub (1.0s in Chat for Messenger-instant feel)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (selectedCourseId) {
-      interval = setInterval(async () => {
-        try {
-          if (courseSubTab === 'chat') {
-            const chatRes = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
-            const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
-            if (chatRes.success && Array.isArray(msgs)) {
-              setCourseChat((prev) => {
-                const prevLen = prev.length;
-                const newLen = msgs.length;
-                if (prevLen !== newLen || (prevLen > 0 && prev[prevLen - 1]?._id !== msgs[newLen - 1]?._id)) {
-                  setTimeout(() => scrollAdminChatToBottom(false), 50);
-                  return msgs;
-                }
-                return prev; // Same data -> NO re-render, ZERO screen jump!
-              });
+    const pollCourseData = async () => {
+      try {
+        if (courseSubTab === 'chat') {
+          const chatRes = await apiRequest(`/admin/courses/${selectedCourseId}/chat`);
+          const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
+          if (chatRes.success && Array.isArray(msgs)) {
+            setCourseChat((prev) => {
+              const prevLen = prev.length;
+              const newLen = msgs.length;
+              if (prevLen !== newLen || (prevLen > 0 && prev[prevLen - 1]?._id !== msgs[newLen - 1]?._id)) {
+                setTimeout(() => scrollAdminChatToBottom(false), 30);
+                return msgs;
+              }
+              return prev; // Same data -> NO re-render, ZERO screen jump!
+            });
+          }
+        } else {
+          const cRes = await apiRequest(`/admin/courses/${selectedCourseId}`);
+          if (cRes.success && cRes.data) {
+            setSelectedCourseData((prev: any) => {
+              if (JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus)) {
+                return cRes.data.course;
+              }
+              return prev;
+            });
+            if (cRes.data.students) {
+              setCourseStudents((prev: any[]) =>
+                prev.length !== cRes.data.students.length ? cRes.data.students : prev
+              );
             }
-          } else {
-            const cRes = await apiRequest(`/admin/courses/${selectedCourseId}`);
-            if (cRes.success && cRes.data) {
-              setSelectedCourseData((prev: any) => {
-                if (JSON.stringify(prev?.syllabus) !== JSON.stringify(cRes.data.course?.syllabus)) {
-                  return cRes.data.course;
-                }
-                return prev;
-              });
-              if (cRes.data.students) {
-                setCourseStudents((prev: any[]) =>
-                  prev.length !== cRes.data.students.length ? cRes.data.students : prev
-                );
-              }
-              if (cRes.data.taskSubmissions) {
-                setCourseSubmissions((prev: any[]) =>
-                  prev.length !== cRes.data.taskSubmissions.length ? cRes.data.taskSubmissions : prev
-                );
-              }
+            if (cRes.data.taskSubmissions) {
+              setCourseSubmissions((prev: any[]) =>
+                prev.length !== cRes.data.taskSubmissions.length ? cRes.data.taskSubmissions : prev
+              );
             }
           }
-        } catch {}
-      }, 1800);
+        }
+      } catch {}
+    };
+
+    if (selectedCourseId) {
+      interval = setInterval(pollCourseData, courseSubTab === 'chat' ? 1000 : 1800);
     }
+    const handleFocus = () => { if (selectedCourseId) pollCourseData(); };
+    window.addEventListener('focus', handleFocus);
+
     return () => {
       if (interval) clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [selectedCourseId, courseSubTab]);
 
-  // Live Real-Time Auto-Polling for Student CVs (every 2.5s, keeps badge & student lists fresh)
+  // Live Real-Time Auto-Polling for Student CVs (every 2.0s, keeps badge & student lists fresh)
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    interval = setInterval(async () => {
+    const pollCvs = async () => {
       try {
         const res = await apiRequest('/admin/cvs');
         const list = res.data?.students || (res as any)?.students;
@@ -406,9 +416,15 @@ export default function AdminPortalPage() {
           setAllStudentCvs(list);
         }
       } catch {}
-    }, 2500);
+    };
+
+    const interval = setInterval(pollCvs, 2000);
+    const handleFocus = () => { pollCvs(); };
+    window.addEventListener('focus', handleFocus);
+
     return () => {
-      if (interval) clearInterval(interval);
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 

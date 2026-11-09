@@ -155,13 +155,13 @@ export default function StudentDashboardPage() {
     };
   }, [activeTheaterVideo]);
 
-  // Live Real-Time Auto-Polling for Student Dashboard (Optimized & Non-Flickering)
+  // Live Real-Time Auto-Polling for Student Dashboard (1.0s in Chat for instant WhatsApp-like feel + window focus sync)
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    interval = setInterval(async () => {
+    const pollStudentData = async () => {
       try {
         if (selectedCourseId && activeTab === 'chat') {
-          // If in chat tab, poll only chat messages every 1.8s
+          // If in chat tab, poll chat messages every 1.0s
           const chatRes = await apiRequest(`/student/course/${selectedCourseId}/chat`);
           const msgs = (chatRes.data as any)?.messages || (chatRes as any)?.messages;
           if (chatRes.success && Array.isArray(msgs)) {
@@ -169,7 +169,7 @@ export default function StudentDashboardPage() {
               const prevLen = prev.length;
               const newLen = msgs.length;
               if (prevLen !== newLen || (prevLen > 0 && prev[prevLen - 1]?._id !== msgs[newLen - 1]?._id)) {
-                setTimeout(() => scrollStudentChatToBottom(false), 50);
+                setTimeout(() => scrollStudentChatToBottom(false), 30);
                 return msgs;
               }
               return prev; // Identical messages -> ZERO re-render, ZERO screen jumping!
@@ -203,10 +203,15 @@ export default function StudentDashboardPage() {
           }
         }
       } catch {}
-    }, 2000);
+    };
+
+    interval = setInterval(pollStudentData, (selectedCourseId && activeTab === 'chat') ? 1000 : 1800);
+    const handleFocus = () => { pollStudentData(); };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       if (interval) clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [selectedCourseId, activeTab]);
 
