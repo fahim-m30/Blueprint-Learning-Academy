@@ -91,6 +91,8 @@ export async function apiRequest<T = any>(
       cleanEndpoint.includes('/videos') ||
       cleanEndpoint.startsWith('/public/settings') ||
       cleanEndpoint.startsWith('/public/courses') ||
+      cleanEndpoint.startsWith('/public/enroll') ||
+      cleanEndpoint.startsWith('/public/notices') ||
       cleanEndpoint === '/settings' ||
       cleanEndpoint === '/auth/login' ||
       cleanEndpoint.startsWith('/admin/profile') ||
