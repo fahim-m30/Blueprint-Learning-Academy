@@ -488,6 +488,8 @@ export default function AdminPortalPage() {
         setCourseDemoUrl(existing?.demoVideoUrl || '');
         setCourseDemoTitle(existing?.demoVideoTitle || '');
         setCourseDemoDescription(existing?.demoVideoDescription || '');
+        setBatchStartDateInput(existing?.batchStartDate || '');
+        setBatchScheduleInput(existing?.batchSchedule || '');
         return existing;
       }
       return prev;
@@ -507,6 +509,8 @@ export default function AdminPortalPage() {
         setCourseDemoUrl(crs?.demoVideoUrl || '');
         setCourseDemoTitle(crs?.demoVideoTitle || '');
         setCourseDemoDescription(crs?.demoVideoDescription || '');
+        setBatchStartDateInput(crs?.batchStartDate || '');
+        setBatchScheduleInput(crs?.batchSchedule || '');
       }
       if (chatRes.success && chatRes.data) {
         setCourseChat(chatRes.data.messages || []);
@@ -988,6 +992,27 @@ export default function AdminPortalPage() {
     }
   };
 
+  const handleDeleteLiveClass = async (classId: string) => {
+    if (!selectedCourseId) return;
+    if (!confirm('Are you sure you want to delete this live class session?')) return;
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/live-classes/${classId}`, {
+        method: 'DELETE',
+      });
+      if (res.success) {
+        showAlert('✓ Live class deleted.');
+        if (res.data?.course) {
+          setSelectedCourseData(res.data.course);
+          setCoursesList((prev) => prev.map((c) => (c._id === selectedCourseId ? res.data.course : c)));
+        }
+      } else {
+        showAlert(res.message || 'Error deleting live class.', 'error');
+      }
+    } catch (err) {
+      console.error('Error deleting live class:', err);
+    }
+  };
+
   // 5. Add Task
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1014,6 +1039,27 @@ export default function AdminPortalPage() {
           prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
         );
       }
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!selectedCourseId) return;
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+      const res = await apiRequest(`/admin/courses/${selectedCourseId}/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+      if (res.success) {
+        showAlert('✓ Task deleted.');
+        if (res.data?.course) {
+          setSelectedCourseData(res.data.course);
+          setCoursesList((prev) => prev.map((c) => (c._id === selectedCourseId ? res.data.course : c)));
+        }
+      } else {
+        showAlert(res.message || 'Error deleting task.', 'error');
+      }
+    } catch (err) {
+      console.error('Error deleting task:', err);
     }
   };
 
@@ -1731,7 +1777,33 @@ export default function AdminPortalPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setCourseSubTab('notices')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition hover:scale-105 ${
+                        courseSubTab === 'notices'
+                          ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400'
+                          : 'bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900'
+                      }`}
+                    >
+                      <Bell className="w-3.5 h-3.5 text-amber-600" />
+                      <span>📢 নোটিশ দিন (Notice)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCourseSubTab('live')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition hover:scale-105 ${
+                        courseSubTab === 'live'
+                          ? 'bg-blue-700 text-white shadow-md ring-2 ring-blue-500'
+                          : 'bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-800'
+                      }`}
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                      <span>🌐 অনলাইন ক্লাস (Online Class)</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -1742,15 +1814,16 @@ export default function AdminPortalPage() {
                         setAddStudentPassword('BLP-' + Math.random().toString(36).substring(2, 8).toUpperCase());
                         setShowAddStudentModal(true);
                       }}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition hover:scale-105"
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition hover:scale-105"
                     >
                       <UserPlus className="w-3.5 h-3.5" /> + Add Student
                     </button>
+
                     <button
                       onClick={() => handleDeleteCourse(selectedCourseData._id)}
-                      className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-1.5 transition"
+                      className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-1.5 transition"
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Delete Course
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 </div>
@@ -1758,53 +1831,67 @@ export default function AdminPortalPage() {
                 {/* Sub Tabs Inside Course Hub */}
                 <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1.5 text-xs sm:text-sm">
                   <button
-                    onClick={() => setCourseSubTab('students')}
-                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
-                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+                    onClick={() => setCourseSubTab('notices')}
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
+                      courseSubTab === 'notices'
+                        ? 'bg-[#ffb531] text-[#1a1100] shadow-sm'
+                        : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Users className="w-4 h-4" />
-                    Enrolled Students &amp; Passwords ({courseStudents.length})
-                  </button>
-
-                  <button
-                    onClick={() => setCourseSubTab('videos')}
-                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
-                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Video className="w-4 h-4" />
-                    Push Video Links ({selectedCourseData.videos?.length || 0})
+                    <Bell className="w-4 h-4 text-amber-600" />
+                    📢 Notice Board ({selectedCourseData.notices?.length || 0})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('live')}
-                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
-                      courseSubTab === 'live' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
+                      courseSubTab === 'live'
+                        ? 'bg-[#ffb531] text-[#1a1100] shadow-sm'
+                        : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Calendar className="w-4 h-4" />
-                    Schedule Live Class ({selectedCourseData.liveClasses?.length || 0})
+                    <Calendar className="w-4 h-4 text-blue-700" />
+                    🌐 Online Live Class ({selectedCourseData.liveClasses?.length || 0})
+                  </button>
+
+                  <button
+                    onClick={() => setCourseSubTab('videos')}
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
+                      courseSubTab === 'videos' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Video className="w-4 h-4 text-amber-600" />
+                    📹 Push Video Links ({selectedCourseData.videos?.length || 0})
+                  </button>
+
+                  <button
+                    onClick={() => setCourseSubTab('students')}
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
+                      courseSubTab === 'students' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Users className="w-4 h-4 text-blue-700" />
+                    👥 Enrolled Students ({courseStudents.length})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('tasks')}
-                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
                       courseSubTab === 'tasks' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <ClipboardList className="w-4 h-4" />
-                    Tasks &amp; Homework ({selectedCourseData.tasks?.length || 0})
+                    <ClipboardList className="w-4 h-4 text-amber-600" />
+                    📝 Tasks &amp; Homework ({selectedCourseData.tasks?.length || 0})
                   </button>
 
                   <button
                     onClick={() => setCourseSubTab('chat')}
-                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 ${
+                    className={`py-2.5 px-4 rounded-xl font-extrabold transition flex items-center gap-2 shrink-0 ${
                       courseSubTab === 'chat' ? 'bg-[#ffb531] text-[#1a1100] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <MessageSquare className="w-4 h-4" />
-                    Student Discussion Messenger
+                    <MessageSquare className="w-4 h-4 text-blue-700" />
+                    💬 Student Discussion
                     {courseChat.length > 0 && (
                       <span className="min-w-5 h-5 px-1.5 rounded-full bg-blue-700 text-white text-[10px] font-black flex items-center justify-center">
                         {courseChat.length}
@@ -2275,28 +2362,263 @@ export default function AdminPortalPage() {
 
                     {/* Existing Live Classes */}
                     <div className="space-y-2">
-                      <h4 className="text-xs font-bold text-slate-600">Scheduled Sessions:</h4>
-                      {selectedCourseData.liveClasses?.map((item) => (
-                        <div
-                          key={item._id}
-                          className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between text-xs"
-                        >
-                          <div>
-                            <span className="font-bold text-slate-900">{item.title}</span>
-                            <span className="text-slate-600 block text-[11px]">
-                              {new Date(item.classDate).toLocaleDateString()} at {item.classTime}
-                            </span>
-                          </div>
-                          <a
-                            href={item.meetingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-700 underline flex items-center gap-1"
+                      <h4 className="text-xs font-bold text-slate-600">Scheduled Sessions ({selectedCourseData.liveClasses?.length || 0}):</h4>
+                      {(!selectedCourseData.liveClasses || selectedCourseData.liveClasses.length === 0) ? (
+                        <p className="text-xs text-slate-500 italic p-3 bg-white rounded-xl border border-dashed border-slate-200">No live sessions scheduled yet.</p>
+                      ) : (
+                        selectedCourseData.liveClasses.map((item: any) => (
+                          <div
+                            key={item._id}
+                            className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-center justify-between text-xs"
                           >
-                            Meet Link <ExternalLink className="w-3 h-3" />
-                          </a>
+                            <div>
+                              <span className="font-bold text-slate-900 text-sm block">{item.title}</span>
+                              <span className="text-slate-600 block text-[11px] mt-0.5">
+                                📅 {new Date(item.classDate).toLocaleDateString()} at {item.classTime}
+                              </span>
+                              {item.note && (
+                                <span className="text-amber-800 bg-amber-100/60 px-2 py-0.5 rounded text-[10px] mt-1 inline-block">
+                                  {item.note}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={item.meetingLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold flex items-center gap-1.5 shadow-xs transition text-xs"
+                              >
+                                Join Meet <ExternalLink className="w-3 h-3" />
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteLiveClass(item._id)}
+                                className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition"
+                                title="Delete Live Class"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* HUB TAB: NOTICE BOARD & BATCH SCHEDULE */}
+                {courseSubTab === 'notices' && (
+                  <div className="space-y-6">
+                    {/* 1. Form to Publish New Notice */}
+                    <form onSubmit={handlePublishNotice} className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                          <Bell className="w-4 h-4 text-amber-500" />
+                          Publish Notice for {selectedCourseData.title}
+                        </h4>
+                        <span className="text-[11px] font-bold text-slate-500">
+                          Appears on Landing Page Notice Board &amp; Student Dashboard
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="sm:col-span-2">
+                          <label className="block text-slate-700 font-bold mb-1">Notice Headline / Title *</label>
+                          <input
+                            type="text"
+                            required
+                            value={noticeTitle}
+                            onChange={(e) => setNoticeTitle(e.target.value)}
+                            placeholder="e.g. Batch 05 Live Orientation on Google Meet"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-amber-500 font-medium"
+                          />
                         </div>
-                      ))}
+
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">Notice Category</label>
+                          <select
+                            value={noticeCategory}
+                            onChange={(e: any) => setNoticeCategory(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-amber-500 font-bold"
+                          >
+                            <option value="batch_start">🚀 Batch Start Date</option>
+                            <option value="vacation">🌴 Vacation / Holiday</option>
+                            <option value="special">📢 Special Announcement</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">Date / Badge Tag (Optional)</label>
+                          <input
+                            type="text"
+                            value={noticeDate}
+                            onChange={(e) => setNoticeDate(e.target.value)}
+                            placeholder="e.g. Starts 10 Nov 2026 or 16 Dec"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-amber-500"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 flex items-center pt-5">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={noticeIsPinned}
+                              onChange={(e) => setNoticeIsPinned(e.target.checked)}
+                              className="w-4 h-4 text-amber-500 rounded focus:ring-amber-400"
+                            />
+                            <span className="text-xs font-bold text-slate-800">
+                              📌 Pin this notice to the top of the Notice Board
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <label className="block text-slate-700 font-bold mb-1">Notice Detailed Content *</label>
+                          <textarea
+                            rows={3}
+                            required
+                            value={noticeContent}
+                            onChange={(e) => setNoticeContent(e.target.value)}
+                            placeholder="Write full notice details for students..."
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-amber-500 text-xs sm:text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={submittingNotice}
+                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>{submittingNotice ? 'Publishing...' : 'Publish Notice to Board'}</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* 2. Batch Start Date & Weekly Schedule Settings Card */}
+                    <form onSubmit={handleUpdateBatchInfo} className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-blue-700" />
+                          Batch Schedule &amp; Start Date Configuration
+                        </h4>
+                        <span className="text-[11px] text-slate-500 font-bold">
+                          Displayed on course card and notice board
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">Batch Start Date Text</label>
+                          <input
+                            type="text"
+                            value={batchStartDateInput}
+                            onChange={(e) => setBatchStartDateInput(e.target.value)}
+                            placeholder={selectedCourseData.batchStartDate || "e.g. 10 November 2026"}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-blue-700 font-semibold"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-slate-700 font-bold mb-1">Weekly Live Class Days &amp; Time</label>
+                          <input
+                            type="text"
+                            value={batchScheduleInput}
+                            onChange={(e) => setBatchScheduleInput(e.target.value)}
+                            placeholder={selectedCourseData.batchSchedule || "e.g. Friday & Saturday (8:30 PM - 10:30 PM)"}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 outline-none focus:border-blue-700 font-semibold"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={savingBatchInfo}
+                          className="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>{savingBatchInfo ? 'Saving Schedule...' : 'Save Batch Schedule'}</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* 3. Existing Course Notices List */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                          Published Notices ({selectedCourseData.notices?.length || 0}):
+                        </h4>
+                      </div>
+
+                      {(!selectedCourseData.notices || selectedCourseData.notices.length === 0) ? (
+                        <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-xs text-slate-500">
+                          No notices published yet for this course. Use the form above to post announcements, holiday breaks, or batch starting dates.
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {selectedCourseData.notices.map((n: any) => (
+                            <div
+                              key={n._id}
+                              className={`p-4 rounded-2xl border transition ${
+                                n.isPinned
+                                  ? 'bg-amber-50/70 border-amber-300 shadow-sm'
+                                  : 'bg-white border-slate-200'
+                              }`}
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {n.isPinned && (
+                                    <span className="px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-black flex items-center gap-1">
+                                      <Pin className="w-3 h-3" /> PINNED
+                                    </span>
+                                  )}
+                                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${
+                                    n.category === 'batch_start'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : n.category === 'vacation'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-purple-100 text-purple-800'
+                                  }`}>
+                                    {n.category === 'batch_start' ? 'Batch Start' : n.category === 'vacation' ? 'Holiday' : 'Special'}
+                                  </span>
+                                  {n.date && (
+                                    <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                      📅 {n.date}
+                                    </span>
+                                  )}
+                                  <h5 className="font-bold text-sm text-slate-900">{n.title}</h5>
+                                </div>
+
+                                <div className="flex items-center gap-2 self-end sm:self-auto">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleTogglePinNotice(n._id)}
+                                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition"
+                                    title={n.isPinned ? 'Unpin Notice' : 'Pin Notice to Top'}
+                                  >
+                                    {n.isPinned ? <PinOff className="w-3.5 h-3.5 text-amber-600" /> : <Pin className="w-3.5 h-3.5" />}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteNotice(n._id)}
+                                    className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition"
+                                    title="Delete Notice"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed mt-2 whitespace-pre-line">
+                                {n.content}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -2346,12 +2668,49 @@ export default function AdminPortalPage() {
                       <div className="flex justify-end pt-2">
                         <button
                           type="submit"
-                          className="px-5 py-2 bg-[#ffb531] text-[#1a1100] font-bold text-xs rounded-lg shadow transition"
+                          className="px-5 py-2 bg-[#ffb531] hover:bg-[#ffb531]/90 text-[#1a1100] font-bold text-xs rounded-lg shadow transition"
                         >
                           Post Task to Batch
                         </button>
                       </div>
                     </form>
+
+                    {/* Assigned Tasks List */}
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Assigned Tasks ({selectedCourseData.tasks?.length || 0}):
+                      </h4>
+                      {(!selectedCourseData.tasks || selectedCourseData.tasks.length === 0) ? (
+                        <p className="text-xs text-slate-500 italic p-3 bg-white rounded-xl border border-dashed border-slate-200">
+                          No tasks posted yet.
+                        </p>
+                      ) : (
+                        selectedCourseData.tasks.map((task: any) => (
+                          <div
+                            key={task._id}
+                            className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-center justify-between text-xs"
+                          >
+                            <div className="space-y-1">
+                              <span className="font-bold text-slate-900 text-sm block">{task.title}</span>
+                              <span className="text-slate-600 block text-[11px]">
+                                📅 Deadline: {new Date(task.deadline).toLocaleDateString()}
+                              </span>
+                              {task.description && (
+                                <p className="text-slate-600 text-xs mt-1">{task.description}</p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTask(task._id)}
+                              className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition"
+                              title="Delete Task"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
 
                     {/* Student Submissions List */}
                     <div className="space-y-3">
