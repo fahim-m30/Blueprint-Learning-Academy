@@ -23,11 +23,24 @@ export async function POST(
     }
 
     const body = await req.json().catch(() => ({}));
-    const { title, classDate, classTime, meetingLink, platform, note } = body;
+    const {
+      title,
+      classDate,
+      classTime,
+      meetingLink,
+      googleMeetLink,
+      youtubeLink,
+      facebookLink,
+      additionalLinks,
+      platform,
+      note,
+    } = body;
 
-    if (!title || !classDate || !classTime || !meetingLink) {
+    const primaryLink = googleMeetLink || meetingLink || youtubeLink || facebookLink;
+
+    if (!title || !classDate || !classTime || !primaryLink) {
       return NextResponse.json(
-        { success: false, message: 'Please provide live class title, date, time, and meeting link.' },
+        { success: false, message: 'Please provide live class title, date, time, and at least one meeting/stream link (Google Meet, YouTube, or Facebook).' },
         { status: 400 }
       );
     }
@@ -38,8 +51,12 @@ export async function POST(
       title: String(title).trim(),
       classDate: new Date(classDate),
       classTime: String(classTime).trim(),
-      meetingLink: String(meetingLink).trim(),
-      platform: platform || 'Google Meet',
+      meetingLink: String(primaryLink).trim(),
+      googleMeetLink: googleMeetLink ? String(googleMeetLink).trim() : (meetingLink ? String(meetingLink).trim() : ''),
+      youtubeLink: youtubeLink ? String(youtubeLink).trim() : '',
+      facebookLink: facebookLink ? String(facebookLink).trim() : '',
+      additionalLinks: Array.isArray(additionalLinks) ? additionalLinks : [],
+      platform: platform || (googleMeetLink ? 'Google Meet' : (youtubeLink ? 'YouTube Live' : (facebookLink ? 'Facebook Live' : 'Online Session'))),
       note: note ? String(note).trim() : '',
       isCompleted: false,
       createdAt: new Date(),

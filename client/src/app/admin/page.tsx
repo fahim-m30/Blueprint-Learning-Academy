@@ -39,6 +39,12 @@ import {
   Lock,
   Shield,
   Edit3,
+  Radio,
+  Plus,
+  X,
+  Play,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
@@ -67,7 +73,27 @@ export default function AdminPortalPage() {
   const [savingSection, setSavingSection] = useState<string | null>(null);
 
   // Active view
-  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'enrollments' | 'cvs' | 'settings' | 'security' | 'profile'>('overview');
+  const [activeMainTab, setActiveMainTab] = useState<'overview' | 'notices' | 'classes' | 'enrollments' | 'cvs' | 'settings' | 'security' | 'profile'>('overview');
+
+  // Dedicated Notice Board Hub states
+  const [selectedNoticeCourseId, setSelectedNoticeCourseId] = useState<string>('all');
+
+  // Dedicated Live Classes & Videos Hub states
+  const [selectedClassesCourseId, setSelectedClassesCourseId] = useState<string>('');
+  const [classesSubTab, setClassesSubTab] = useState<'live' | 'videos' | 'demo'>('live');
+
+  // Multi-link Live Class states
+  const [newLiveMeetLink, setNewLiveMeetLink] = useState('');
+  const [newLiveYoutubeLink, setNewLiveYoutubeLink] = useState('');
+  const [newLiveFacebookLink, setNewLiveFacebookLink] = useState('');
+  const [newLiveAdditionalLinks, setNewLiveAdditionalLinks] = useState<{ label: string; url: string }[]>([]);
+  const [isSubmittingLive, setIsSubmittingLive] = useState(false);
+
+  // Batch Video Upload states
+  const [batchVideoRows, setBatchVideoRows] = useState<{ id: string; title: string; youtubeUrl: string; note: string }[]>([
+    { id: '1', title: '', youtubeUrl: '', note: '' }
+  ]);
+  const [isSubmittingBatchVideos, setIsSubmittingBatchVideos] = useState(false);
 
   // Administrator Self-Profile States
   const [adminProfile, setAdminProfile] = useState<any>(null);
@@ -247,7 +273,11 @@ export default function AdminPortalPage() {
 
     if (overviewRes.success && overviewRes.data) {
       setStats(overviewRes.data.stats);
-      setCoursesList(overviewRes.data.courses || []);
+      const courses = overviewRes.data.courses || [];
+      setCoursesList(courses);
+      if (courses.length > 0) {
+        setSelectedClassesCourseId((prev) => prev || courses[0]._id);
+      }
     } else {
       removeAuthToken();
       router.push('/login');
@@ -811,9 +841,10 @@ export default function AdminPortalPage() {
   };
 
   // 2.5 Course Demo Preview Video (Homepage Carousel)
-  const handleSaveCourseDemoVideo = async (e?: React.FormEvent) => {
+  const handleSaveCourseDemoVideo = async (e?: React.FormEvent, targetCourseId?: string) => {
     if (e) e.preventDefault();
-    if (!selectedCourseId) {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) {
       showAlert('Please select a course first.', 'error');
       return;
     }
@@ -823,7 +854,7 @@ export default function AdminPortalPage() {
     }
 
     setSavingCourseDemo(true);
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}`, {
+    const res = await apiRequest(`/admin/courses/${courseId}`, {
       method: 'PUT',
       body: JSON.stringify({
         demoVideoUrl: formattedUrl,
@@ -835,20 +866,26 @@ export default function AdminPortalPage() {
 
     if (res.success) {
       showAlert('✓ Public Demo Video updated for this course! It is now live on the homepage demo carousel.');
-      loadCourseHub(selectedCourseId);
+      if (selectedCourseId === courseId) {
+        loadCourseHub(courseId);
+      }
+      if (res.data?.course) {
+        setCoursesList((prev) => prev.map((c) => (c._id === courseId ? res.data.course : c)));
+      }
     } else {
       showAlert(`✕ Error saving course demo video: ${res.message || 'Please check connection.'}`, 'error');
     }
   };
 
-  const handleSetVideoAsDemo = async (vid: { title: string; youtubeUrl: string; note?: string }) => {
-    if (!selectedCourseId) return;
+  const handleSetVideoAsDemo = async (vid: { title: string; youtubeUrl: string; note?: string }, targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) return;
     setCourseDemoUrl(vid.youtubeUrl || '');
     setCourseDemoTitle(vid.title || '');
     setCourseDemoDescription(vid.note || '');
 
     setSavingCourseDemo(true);
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}`, {
+    const res = await apiRequest(`/admin/courses/${courseId}`, {
       method: 'PUT',
       body: JSON.stringify({
         demoVideoUrl: vid.youtubeUrl || '',
@@ -860,17 +897,23 @@ export default function AdminPortalPage() {
 
     if (res.success) {
       showAlert(`✓ Video "${vid.title}" is now set as the Homepage Demo Preview for this course!`);
-      loadCourseHub(selectedCourseId);
+      if (selectedCourseId === courseId) {
+        loadCourseHub(courseId);
+      }
+      if (res.data?.course) {
+        setCoursesList((prev) => prev.map((c) => (c._id === courseId ? res.data.course : c)));
+      }
     } else {
       showAlert(`✕ Error setting video as demo: ${res.message || 'Please check connection.'}`, 'error');
     }
   };
 
-  // 3. Add Video
-  const handleAddVideo = async (e: React.FormEvent) => {
+  // 3. Add Single Video
+  const handleAddVideo = async (e: React.FormEvent, targetCourseId?: string) => {
     e.preventDefault();
     if (isSubmittingVideo) return;
-    if (!selectedCourseId) {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) {
       showAlert('Please select a course first.', 'error');
       return;
     }
@@ -897,7 +940,7 @@ export default function AdminPortalPage() {
     setNewVideoNote('');
 
     try {
-      const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos`, {
+      const res = await apiRequest(`/admin/courses/${courseId}/videos`, {
         method: 'POST',
         body: JSON.stringify({
           title: titleToSave,
@@ -908,9 +951,11 @@ export default function AdminPortalPage() {
       });
 
       if (res.success && res.data?.course) {
-        setSelectedCourseData(res.data.course);
+        if (selectedCourseId === courseId) {
+          setSelectedCourseData(res.data.course);
+        }
         setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          prev.map((c) => (c._id === courseId ? res.data.course : c))
         );
         showAlert('✓ Class video published live to student portal!');
       } else if (res.success) {
@@ -926,31 +971,84 @@ export default function AdminPortalPage() {
     }
   };
 
+  // 3.0 Batch Video Upload (Multiple Links at once)
+  const handlePushBatchVideos = async (targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) {
+      showAlert('Please select a course to push videos.', 'error');
+      return;
+    }
+
+    const validVideos = batchVideoRows
+      .map((row) => ({
+        title: row.title.trim(),
+        youtubeUrl: row.youtubeUrl.trim(),
+        note: row.note.trim(),
+      }))
+      .filter((row) => row.title && row.youtubeUrl);
+
+    if (validVideos.length === 0) {
+      showAlert('Please provide at least one Video Title and YouTube Link before uploading.', 'error');
+      return;
+    }
+
+    setIsSubmittingBatchVideos(true);
+    try {
+      const res = await apiRequest(`/admin/courses/${courseId}/videos`, {
+        method: 'POST',
+        body: JSON.stringify({ videos: validVideos }),
+      });
+
+      if (res.success) {
+        showAlert(`✓ ${validVideos.length} video(s) published live to student portal!`);
+        setBatchVideoRows([{ id: Date.now().toString(), title: '', youtubeUrl: '', note: '' }]);
+        if (res.data?.course) {
+          if (selectedCourseId === courseId) {
+            setSelectedCourseData(res.data.course);
+          }
+          setCoursesList((prev) =>
+            prev.map((c) => (c._id === courseId ? res.data.course : c))
+          );
+        }
+      } else {
+        showAlert(res.message || 'Failed to push videos.', 'error');
+      }
+    } catch (err: any) {
+      showAlert(err.message || 'Network error pushing videos.', 'error');
+    } finally {
+      setIsSubmittingBatchVideos(false);
+    }
+  };
+
   // 3.1 Delete Video
-  const handleDeleteVideo = async (videoId: string, videoTitle: string) => {
-    if (!selectedCourseId) return;
+  const handleDeleteVideo = async (videoId: string, videoTitle: string, targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) return;
     if (!confirm(`Are you sure you want to delete the video lecture "${videoTitle}"?`)) return;
 
-    // Optimistic UI update in 0ms
-    setSelectedCourseData((prev: any) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        videos: (prev.videos || []).filter((v: any) => v._id?.toString() !== videoId?.toString()),
-      };
-    });
+    if (selectedCourseId === courseId) {
+      setSelectedCourseData((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          videos: (prev.videos || []).filter((v: any) => v._id?.toString() !== videoId?.toString()),
+        };
+      });
+    }
 
     try {
-      const res = await apiRequest(`/admin/courses/${selectedCourseId}/videos/${videoId}`, {
+      const res = await apiRequest(`/admin/courses/${courseId}/videos/${videoId}`, {
         method: 'DELETE',
       });
 
       if (res.success) {
         showAlert('✓ Video deleted successfully.');
         if (res.data?.course) {
-          setSelectedCourseData(res.data.course);
+          if (selectedCourseId === courseId) {
+            setSelectedCourseData(res.data.course);
+          }
           setCoursesList((prev) =>
-            prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+            prev.map((c) => (c._id === courseId ? res.data.course : c))
           );
         }
       } else {
@@ -961,49 +1059,86 @@ export default function AdminPortalPage() {
     }
   };
 
-  // 4. Add Live Class
-  const handleAddLiveClass = async (e: React.FormEvent) => {
+  // 4. Add Live Class (Multi-Link Supported)
+  const handleAddLiveClass = async (e: React.FormEvent, targetCourseId?: string) => {
     e.preventDefault();
-    if (!selectedCourseId || !newLiveTitle || !newLiveDate || !newLiveLink) return;
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) {
+      showAlert('Please select a course to schedule a live class.', 'error');
+      return;
+    }
 
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/live-classes`, {
-      method: 'POST',
-      body: JSON.stringify({
-        title: newLiveTitle,
-        classDate: newLiveDate,
-        classTime: newLiveTime,
-        meetingLink: newLiveLink,
-        note: newLiveNote,
-      }),
-    });
+    const primaryLink =
+      newLiveMeetLink.trim() ||
+      newLiveLink.trim() ||
+      newLiveYoutubeLink.trim() ||
+      newLiveFacebookLink.trim();
 
-    if (res.success) {
-      showAlert('✓ Live class scheduled.');
-      setNewLiveTitle('');
-      setNewLiveDate('');
-      setNewLiveLink('');
-      setNewLiveNote('');
-      if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
-        setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
-        );
+    if (!newLiveTitle.trim() || !newLiveDate.trim() || !primaryLink) {
+      showAlert('Please provide Live Class Title, Date, and at least one Link (Google Meet, YouTube Live, or Facebook Live).', 'error');
+      return;
+    }
+
+    setIsSubmittingLive(true);
+    try {
+      const res = await apiRequest(`/admin/courses/${courseId}/live-classes`, {
+        method: 'POST',
+        body: JSON.stringify({
+          title: newLiveTitle.trim(),
+          classDate: newLiveDate.trim(),
+          classTime: newLiveTime.trim(),
+          meetingLink: primaryLink,
+          googleMeetLink: newLiveMeetLink.trim() || (primaryLink.includes('meet.google.com') ? primaryLink : ''),
+          youtubeLink: newLiveYoutubeLink.trim(),
+          facebookLink: newLiveFacebookLink.trim(),
+          additionalLinks: newLiveAdditionalLinks.filter((l) => l.url.trim()),
+          note: newLiveNote.trim(),
+        }),
+      });
+
+      if (res.success) {
+        showAlert('✓ Online Live class scheduled successfully with multi-platform links.');
+        setNewLiveTitle('');
+        setNewLiveDate('');
+        setNewLiveMeetLink('');
+        setNewLiveYoutubeLink('');
+        setNewLiveFacebookLink('');
+        setNewLiveAdditionalLinks([]);
+        setNewLiveLink('');
+        setNewLiveNote('');
+        if (res.data?.course) {
+          if (selectedCourseId === courseId) {
+            setSelectedCourseData(res.data.course);
+          }
+          setCoursesList((prev) =>
+            prev.map((c) => (c._id === courseId ? res.data.course : c))
+          );
+        }
+      } else {
+        showAlert(res.message || 'Error scheduling live class.', 'error');
       }
+    } catch (err: any) {
+      showAlert(err.message || 'Error scheduling live class.', 'error');
+    } finally {
+      setIsSubmittingLive(false);
     }
   };
 
-  const handleDeleteLiveClass = async (classId: string) => {
-    if (!selectedCourseId) return;
+  const handleDeleteLiveClass = async (classId: string, targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedClassesCourseId || selectedCourseId;
+    if (!courseId) return;
     if (!confirm('Are you sure you want to delete this live class session?')) return;
     try {
-      const res = await apiRequest(`/admin/courses/${selectedCourseId}/live-classes/${classId}`, {
+      const res = await apiRequest(`/admin/courses/${courseId}/live-classes/${classId}`, {
         method: 'DELETE',
       });
       if (res.success) {
         showAlert('✓ Live class deleted.');
         if (res.data?.course) {
-          setSelectedCourseData(res.data.course);
-          setCoursesList((prev) => prev.map((c) => (c._id === selectedCourseId ? res.data.course : c)));
+          if (selectedCourseId === courseId) {
+            setSelectedCourseData(res.data.course);
+          }
+          setCoursesList((prev) => prev.map((c) => (c._id === courseId ? res.data.course : c)));
         }
       } else {
         showAlert(res.message || 'Error deleting live class.', 'error');
@@ -1136,15 +1271,19 @@ export default function AdminPortalPage() {
   };
 
   // Course Hub Notice & Batch Info Handlers
-  const handlePublishNotice = async (e: React.FormEvent) => {
+  const handlePublishNotice = async (e: React.FormEvent, targetCourseId?: string) => {
     e.preventDefault();
-    if (!selectedCourseId) return;
+    const courseId = targetCourseId || selectedNoticeCourseId || selectedCourseId;
+    if (!courseId) {
+      showAlert('Please select a course to publish the notice.', 'error');
+      return;
+    }
     if (!noticeTitle.trim() || !noticeContent.trim()) {
       showAlert('Notice title and content are required.', 'error');
       return;
     }
     setSubmittingNotice(true);
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices`, {
+    const res = await apiRequest(`/admin/courses/${courseId}/notices`, {
       method: 'POST',
       body: JSON.stringify({
         title: noticeTitle.trim(),
@@ -1156,14 +1295,22 @@ export default function AdminPortalPage() {
     });
     setSubmittingNotice(false);
     if (res.success) {
-      showAlert('✓ Notice published successfully to Course Hub & Landing Page Notice Board!');
+      showAlert('✓ Notice published successfully to Notice Board & Landing Page!');
       setNoticeTitle('');
       setNoticeContent('');
       setNoticeDate('');
-      if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
+      if (res.data?.courses) {
+        setCoursesList(res.data.courses);
+        if (selectedCourseId) {
+          const updated = res.data.courses.find((c: any) => c._id === selectedCourseId);
+          if (updated) setSelectedCourseData(updated);
+        }
+      } else if (res.data?.course) {
+        if (selectedCourseId === courseId) {
+          setSelectedCourseData(res.data.course);
+        }
         setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          prev.map((c) => (c._id === courseId ? res.data.course : c))
         );
       }
     } else {
@@ -1171,18 +1318,27 @@ export default function AdminPortalPage() {
     }
   };
 
-  const handleDeleteNotice = async (noticeId: string) => {
-    if (!selectedCourseId) return;
+  const handleDeleteNotice = async (noticeId: string, targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedNoticeCourseId || selectedCourseId;
+    if (!courseId) return;
     if (!confirm('Are you sure you want to delete this notice?')) return;
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices/${noticeId}`, {
+    const res = await apiRequest(`/admin/courses/${courseId}/notices/${noticeId}`, {
       method: 'DELETE',
     });
     if (res.success) {
       showAlert('✓ Notice deleted successfully.');
-      if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
+      if (res.data?.courses) {
+        setCoursesList(res.data.courses);
+        if (selectedCourseId) {
+          const updated = res.data.courses.find((c: any) => c._id === selectedCourseId);
+          if (updated) setSelectedCourseData(updated);
+        }
+      } else if (res.data?.course) {
+        if (selectedCourseId === courseId) {
+          setSelectedCourseData(res.data.course);
+        }
         setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          prev.map((c) => (c._id === courseId ? res.data.course : c))
         );
       }
     } else {
@@ -1190,17 +1346,26 @@ export default function AdminPortalPage() {
     }
   };
 
-  const handleTogglePinNotice = async (noticeId: string) => {
-    if (!selectedCourseId) return;
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/notices/${noticeId}/pin`, {
+  const handleTogglePinNotice = async (noticeId: string, targetCourseId?: string) => {
+    const courseId = targetCourseId || selectedNoticeCourseId || selectedCourseId;
+    if (!courseId) return;
+    const res = await apiRequest(`/admin/courses/${courseId}/notices/${noticeId}`, {
       method: 'PUT',
     });
     if (res.success) {
       showAlert('✓ Notice pin status toggled successfully.');
-      if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
+      if (res.data?.courses) {
+        setCoursesList(res.data.courses);
+        if (selectedCourseId) {
+          const updated = res.data.courses.find((c: any) => c._id === selectedCourseId);
+          if (updated) setSelectedCourseData(updated);
+        }
+      } else if (res.data?.course) {
+        if (selectedCourseId === courseId) {
+          setSelectedCourseData(res.data.course);
+        }
         setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          prev.map((c) => (c._id === courseId ? res.data.course : c))
         );
       }
     } else {
@@ -1208,11 +1373,15 @@ export default function AdminPortalPage() {
     }
   };
 
-  const handleUpdateBatchInfo = async (e: React.FormEvent) => {
+  const handleUpdateBatchInfo = async (e: React.FormEvent, targetCourseId?: string) => {
     e.preventDefault();
-    if (!selectedCourseId) return;
+    const courseId = targetCourseId || selectedNoticeCourseId || selectedCourseId;
+    if (!courseId || courseId === 'all') {
+      showAlert('Please select a specific course to update its batch schedule.', 'error');
+      return;
+    }
     setSavingBatchInfo(true);
-    const res = await apiRequest(`/admin/courses/${selectedCourseId}/batch-info`, {
+    const res = await apiRequest(`/admin/courses/${courseId}/batch-info`, {
       method: 'PUT',
       body: JSON.stringify({
         batchStartDate: batchStartDateInput.trim(),
@@ -1223,9 +1392,11 @@ export default function AdminPortalPage() {
     if (res.success) {
       showAlert('✓ Batch start date and weekly class schedule updated successfully!');
       if (res.data?.course) {
-        setSelectedCourseData(res.data.course);
+        if (selectedCourseId === courseId) {
+          setSelectedCourseData(res.data.course);
+        }
         setCoursesList((prev) =>
-          prev.map((c) => (c._id === selectedCourseId ? res.data.course : c))
+          prev.map((c) => (c._id === courseId ? res.data.course : c))
         );
       }
     } else {
@@ -1650,6 +1821,37 @@ export default function AdminPortalPage() {
 
           <button
             onClick={() => {
+              setActiveMainTab('notices');
+              setSelectedCourseId(null);
+            }}
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
+              activeMainTab === 'notices'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
+            }`}
+          >
+            <span>📢 Notice Board Hub</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveMainTab('classes');
+              setSelectedCourseId(null);
+              if (!selectedClassesCourseId && coursesList.length > 0) {
+                setSelectedClassesCourseId(coursesList[0]._id);
+              }
+            }}
+            className={`py-2.5 sm:py-3.5 px-3.5 sm:px-5 text-xs sm:text-sm font-extrabold rounded-xl transition whitespace-nowrap flex items-center gap-2 shadow-xs shrink-0 ${
+              activeMainTab === 'classes'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
+            }`}
+          >
+            <span>🔴 Live Classes &amp; Videos</span>
+          </button>
+
+          <button
+            onClick={() => {
               setActiveMainTab('enrollments');
               setSelectedCourseId(null);
             }}
@@ -1700,8 +1902,8 @@ export default function AdminPortalPage() {
                 : 'text-slate-700 hover:bg-white border border-transparent hover:border-slate-200'
             }`}
           >
-            <span className="hidden sm:inline">⚙️ Payment &amp; Site Settings</span>
-            <span className="sm:hidden">⚙️ Settings</span>
+            <span className="hidden sm:inline">🖼️ Homepage, Instructor &amp; Settings</span>
+            <span className="sm:hidden">🖼️ Homepage &amp; Profile</span>
           </button>
 
           <button
@@ -3302,6 +3504,1083 @@ export default function AdminPortalPage() {
             </div>
             </div>
           )
+        )}
+
+        {/* ========================================================
+            TAB: NOTICE BOARD & BATCH SCHEDULES HUB
+        ======================================================== */}
+        {activeMainTab === 'notices' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-3xl p-6 sm:p-7 shadow-xs">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-900 text-xs font-black">
+                  <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                  <span>Notice &amp; Schedule Hub</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  📢 Academy Notice Board &amp; Batch Schedules
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
+                  পাবলিক ল্যান্ডিং পেজ ও স্টুডেন্ট ড্যাশবোর্ডের জন্য নতুন ব্যাচ শুরুর তারিখ, ছুটির নোটিশ ও জরুরি ক্লাস ঘোষণা এখান থেকেই সরাসরি প্রকাশ করুন।
+                </p>
+              </div>
+
+              {/* Course Selector Filter */}
+              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs shrink-0 sm:w-72">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  কোর্স অনুযায়ী ফিল্টার (Filter by Course)
+                </label>
+                <select
+                  value={selectedNoticeCourseId}
+                  onChange={(e) => setSelectedNoticeCourseId(e.target.value)}
+                  className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="all">🌐 All Courses / Global Landing Page</option>
+                  {coursesList.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      📚 {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column (5 cols): Notice Form & Batch Info Editor */}
+              <div className="lg:col-span-5 space-y-6">
+                {/* Form 1: Publish New Notice */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-5">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <Pin className="w-4 h-4 text-amber-500" />
+                    <h3 className="text-sm sm:text-base font-black text-slate-900">
+                      নতুন নোটিশ প্রকাশ করুন (Publish Notice)
+                    </h3>
+                  </div>
+
+                  <form onSubmit={(e) => handlePublishNotice(e, selectedNoticeCourseId)} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        টার্গেট কোর্স (Target Course) *
+                      </label>
+                      <select
+                        value={selectedNoticeCourseId}
+                        onChange={(e) => setSelectedNoticeCourseId(e.target.value)}
+                        className="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-600"
+                      >
+                        <option value="all">🌐 All Courses / Global Landing Page</option>
+                        {coursesList.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            📚 {c.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        নোটিশের শিরোনাম (Title) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={noticeTitle}
+                        onChange={(e) => setNoticeTitle(e.target.value)}
+                        placeholder="e.g. ব্যাচ ০৪-এর অরিয়েন্টেশন ক্লাস শিডিউল"
+                        className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        ক্যাটেগরি (Category) *
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'batch_start', label: '🚀 ব্যাচ শিডিউল' },
+                          { id: 'special', label: '📢 নোটিশ / ঘোষণা' },
+                          { id: 'vacation', label: '🌴 ছুটির বিজ্ঞপ্তি' },
+                        ].map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setNoticeCategory(cat.id as any)}
+                            className={`py-2 px-2 text-[11px] font-black rounded-xl border text-center transition ${
+                              noticeCategory === cat.id
+                                ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-xs'
+                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            {cat.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        তারিখ বা শিডিউল ট্যাগ (Date / Tag Display)
+                      </label>
+                      <input
+                        type="text"
+                        value={noticeDate}
+                        onChange={(e) => setNoticeDate(e.target.value)}
+                        placeholder="e.g. ১৫ নভেম্বর ২০২৪ অথবা শুক্রবার রাত ৯:০০ টা"
+                        className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        বিস্তারিত বিবরণ (Notice Details) *
+                      </label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={noticeContent}
+                        onChange={(e) => setNoticeContent(e.target.value)}
+                        placeholder="নোটিশের বিস্তারিত বার্তা এখানে লিখুন..."
+                        className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="hubNoticePinned"
+                        checked={noticeIsPinned}
+                        onChange={(e) => setNoticeIsPinned(e.target.checked)}
+                        className="w-4 h-4 rounded text-amber-500 focus:ring-amber-400 border-slate-300"
+                      />
+                      <label htmlFor="hubNoticePinned" className="text-xs font-bold text-slate-700 cursor-pointer">
+                        📌 পিন করে সবার উপরে রাখুন (Pin to Top)
+                      </label>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submittingNotice}
+                      className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-amber-500/20 disabled:opacity-60"
+                    >
+                      {submittingNotice ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Publishing Notice...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Pin className="w-4 h-4" />
+                          <span>Publish Notice to Board</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Form 2: Quick Batch Schedule & Date Updater */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <Calendar className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <h3 className="text-sm sm:text-base font-black text-slate-900">
+                        ব্যাচ শিডিউল কুইক আপডেট (Batch Schedule)
+                      </h3>
+                      <p className="text-[11px] text-slate-500">
+                        কোর্সের ল্যান্ডিং পেজে দেখানো ব্যাচ শুরু ও ক্লাসের সাপ্তাহিক রুটিন
+                      </p>
+                    </div>
+                  </div>
+
+                  <form
+                    onSubmit={(e) =>
+                      handleUpdateBatchInfo(
+                        e,
+                        selectedNoticeCourseId === 'all'
+                          ? coursesList[0]?._id
+                          : selectedNoticeCourseId
+                      )
+                    }
+                    className="space-y-3.5"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        কোর্স (Select Course) *
+                      </label>
+                      <select
+                        value={selectedNoticeCourseId === 'all' ? (coursesList[0]?._id || '') : selectedNoticeCourseId}
+                        onChange={(e) => setSelectedNoticeCourseId(e.target.value)}
+                        className="w-full text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      >
+                        {coursesList.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            📚 {c.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        ব্যাচ শুরুর তারিখ (Batch Start Date)
+                      </label>
+                      <input
+                        type="text"
+                        value={batchStartDateInput}
+                        onChange={(e) => setBatchStartDateInput(e.target.value)}
+                        placeholder="e.g. ১৫ ডিসেম্বর ২০২৪"
+                        className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        সাপ্তাহিক ক্লাসের শিডিউল (Weekly Schedule)
+                      </label>
+                      <input
+                        type="text"
+                        value={batchScheduleInput}
+                        onChange={(e) => setBatchScheduleInput(e.target.value)}
+                        placeholder="e.g. প্রতি শনি, সোম ও বুধবার রাত ৮:৩০ টা"
+                        className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={savingBatchInfo}
+                      className="w-full py-2.5 px-4 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition disabled:opacity-60"
+                    >
+                      {savingBatchInfo ? 'Saving...' : '✓ Save Batch Schedule'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Right Column (7 cols): Active Published Notices List */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-black text-slate-900">
+                      প্রকাশিত নোটিশসমূহ (Active Notices)
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-900 font-black text-xs">
+                      {
+                        coursesList.flatMap((c) =>
+                          (c.notices || []).map((n: any) => ({ ...n, courseId: c._id }))
+                        ).filter((n: any) => selectedNoticeCourseId === 'all' || n.courseId === selectedNoticeCourseId).length
+                      }
+                    </span>
+                  </div>
+
+                  {selectedNoticeCourseId !== 'all' && (
+                    <button
+                      onClick={() => setSelectedNoticeCourseId('all')}
+                      className="text-xs font-bold text-blue-700 hover:underline"
+                    >
+                      Show All Courses
+                    </button>
+                  )}
+                </div>
+
+                {(() => {
+                  const noticesToDisplay = coursesList
+                    .flatMap((c) =>
+                      (c.notices || []).map((n: any) => ({
+                        ...n,
+                        courseId: c._id,
+                        courseTitle: c.title,
+                      }))
+                    )
+                    .filter((n: any) => selectedNoticeCourseId === 'all' || n.courseId === selectedNoticeCourseId);
+
+                  if (noticesToDisplay.length === 0) {
+                    return (
+                      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-xs">
+                        <Bell className="w-10 h-10 text-slate-300 mx-auto" />
+                        <h4 className="text-sm font-bold text-slate-700">কোন নোটিশ পাওয়া যায়নি</h4>
+                        <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                          বামপাশের ফর্ম থেকে নতুন নোটিশ প্রকাশ করুন। এটি সরাসরি পাবলিক ল্যান্ডিং পেজের নোটিশ বোর্ডে চলে যাবে।
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3.5">
+                      {noticesToDisplay.map((item: any, idx: number) => {
+                        const isPinned = item.isPinned !== false;
+                        const catBadge =
+                          item.category === 'batch_start'
+                            ? { label: '🚀 ব্যাচ শিডিউল', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+                            : item.category === 'vacation'
+                            ? { label: '🌴 ছুটি', bg: 'bg-rose-50 text-rose-800 border-rose-200' }
+                            : { label: '📢 নোটিশ', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+
+                        return (
+                          <div
+                            key={item._id || idx}
+                            className={`p-5 rounded-3xl border transition shadow-xs space-y-3 ${
+                              isPinned
+                                ? 'bg-amber-50/40 border-amber-300/80 shadow-amber-500/5'
+                                : 'bg-white border-slate-200'
+                            }`}
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <div className="space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {isPinned && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">
+                                      <Pin className="w-2.5 h-2.5" /> PINNED
+                                    </span>
+                                  )}
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${catBadge.bg}`}>
+                                    {catBadge.label}
+                                  </span>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                    📚 {item.courseTitle || 'Course Notice'}
+                                  </span>
+                                  {item.date && (
+                                    <span className="text-[11px] font-bold text-slate-500">
+                                      • {item.date}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="text-base font-black text-slate-900 pt-0.5">
+                                  {item.title}
+                                </h4>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTogglePinNotice(item._id, item.courseId)}
+                                  className={`p-2 rounded-xl border text-xs font-bold transition flex items-center gap-1 ${
+                                    isPinned
+                                      ? 'bg-amber-100 border-amber-300 text-amber-900 hover:bg-amber-200'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                  title={isPinned ? 'Unpin Notice' : 'Pin Notice to top'}
+                                >
+                                  {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteNotice(item._id, item.courseId)}
+                                  className="p-2 rounded-xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 transition"
+                                  title="Delete Notice"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <p className="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed font-normal bg-white/60 p-3 rounded-2xl border border-slate-100">
+                              {item.content}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB: ONLINE LIVE CLASSES & VIDEO LECTURES HUB
+        ======================================================== */}
+        {activeMainTab === 'classes' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header with Course Selector */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-red-600/10 via-rose-500/5 to-transparent border border-red-500/30 rounded-3xl p-6 sm:p-7 shadow-xs">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-900 text-xs font-black">
+                  <Radio className="w-3.5 h-3.5 text-red-600 animate-pulse" />
+                  <span>Live Sessions &amp; Lecture Vault</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  🔴 Online Live Classes &amp; Video Lectures Hub
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
+                  লাইভ ক্লাস শিডিউল (Google Meet, YouTube Live, Facebook Live) তৈরি করুন এবং স্টুডেন্টদের জন্য ব্যাচভিত্তিক ভিডিও লেকচার এক ক্লিকে আপলোড করুন।
+                </p>
+              </div>
+
+              {/* Active Course Selector */}
+              <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs shrink-0 sm:w-80">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  কোর্স নির্বাচন করুন (Select Course) *
+                </label>
+                <select
+                  value={selectedClassesCourseId || (coursesList[0]?._id || '')}
+                  onChange={(e) => {
+                    const cid = e.target.value;
+                    setSelectedClassesCourseId(cid);
+                    const found = coursesList.find((c) => c._id === cid);
+                    if (found) {
+                      setCourseDemoUrl(found.demoVideoUrl || '');
+                      setCourseDemoTitle(found.demoVideoTitle || '');
+                      setCourseDemoDescription(found.demoVideoDescription || '');
+                    }
+                  }}
+                  className="w-full text-xs sm:text-sm font-black text-blue-900 bg-blue-50/60 border border-blue-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  {coursesList.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      📚 {c.title} ({(c.videos || []).length} vids, {(c.liveClasses || []).length} live)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Sub-tab navigation: Live Classes | Video Push | Homepage Demo */}
+            {(() => {
+              const currentCourse =
+                coursesList.find((c) => c._id === selectedClassesCourseId) || coursesList[0];
+
+              return (
+                <div className="space-y-6">
+                  <div className="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    <button
+                      type="button"
+                      onClick={() => setClassesSubTab('live')}
+                      className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition flex items-center gap-2 whitespace-nowrap ${
+                        classesSubTab === 'live'
+                          ? 'bg-red-600 text-white shadow-md shadow-red-600/20'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Radio className="w-4 h-4 animate-pulse" />
+                      <span>অনলাইন লাইভ ক্লাস (Multi-Link)</span>
+                      {currentCourse?.liveClasses?.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-xs font-black">
+                          {currentCourse.liveClasses.length}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setClassesSubTab('videos')}
+                      className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition flex items-center gap-2 whitespace-nowrap ${
+                        classesSubTab === 'videos'
+                          ? 'bg-blue-700 text-white shadow-md shadow-blue-700/20'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Video className="w-4 h-4" />
+                      <span>ভিডিও লেকচার আপলোড (Batch Upload)</span>
+                      {currentCourse?.videos?.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-xs font-black">
+                          {currentCourse.videos.length}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setClassesSubTab('demo')}
+                      className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition flex items-center gap-2 whitespace-nowrap ${
+                        classesSubTab === 'demo'
+                          ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Play className="w-4 h-4" />
+                      <span>হোমপেজ কোর্স ডেমো ভিডিও</span>
+                    </button>
+                  </div>
+
+                  {/* SUBTAB 1: LIVE CLASSES WITH MULTI-LINK */}
+                  {classesSubTab === 'live' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Left: Schedule Form */}
+                      <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-5">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+                            <Radio className="w-4 h-4 text-red-600" />
+                            লাইভ ক্লাস শিডিউল করুন (Multi-Platform)
+                          </h3>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            Google Meet, YouTube Live ও Facebook Live লিংক একসাথে দিতে পারবেন।
+                          </p>
+                        </div>
+
+                        <form
+                          onSubmit={(e) => handleAddLiveClass(e, currentCourse?._id)}
+                          className="space-y-4"
+                        >
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              লাইভ ক্লাসের শিরোনাম (Class Title) *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={newLiveTitle}
+                              onChange={(e) => setNewLiveTitle(e.target.value)}
+                              placeholder="e.g. Class 05: Practical BBS & Site Drawing Details"
+                              className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-red-500"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                তারিখ (Class Date) *
+                              </label>
+                              <input
+                                type="date"
+                                required
+                                value={newLiveDate}
+                                onChange={(e) => setNewLiveDate(e.target.value)}
+                                className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                সময় (Time) *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={newLiveTime}
+                                onChange={(e) => setNewLiveTime(e.target.value)}
+                                placeholder="e.g. 08:30 PM"
+                                className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Multi-Link Inputs */}
+                          <div className="space-y-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                            <span className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                              🔗 স্ট্রিমিং ও ক্লাসের লিংকসমূহ (কমপক্ষে ১টি লিংক দিন):
+                            </span>
+
+                            {/* Google Meet */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Google Meet Link
+                              </label>
+                              <input
+                                type="url"
+                                value={newLiveMeetLink}
+                                onChange={(e) => setNewLiveMeetLink(e.target.value)}
+                                placeholder="https://meet.google.com/xyz-abcd-efg"
+                                className="w-full text-xs font-medium text-slate-800 bg-white border border-emerald-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                              />
+                            </div>
+
+                            {/* YouTube Live */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-bold text-red-800 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                YouTube Live Stream Link
+                              </label>
+                              <input
+                                type="url"
+                                value={newLiveYoutubeLink}
+                                onChange={(e) => setNewLiveYoutubeLink(e.target.value)}
+                                placeholder="https://youtube.com/live/... or https://youtu.be/..."
+                                className="w-full text-xs font-medium text-slate-800 bg-white border border-red-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                              />
+                            </div>
+
+                            {/* Facebook Live */}
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-bold text-blue-800 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                Facebook Live / Private Group Link
+                              </label>
+                              <input
+                                type="url"
+                                value={newLiveFacebookLink}
+                                onChange={(e) => setNewLiveFacebookLink(e.target.value)}
+                                placeholder="https://facebook.com/groups/... or facebook.com/live/..."
+                                className="w-full text-xs font-medium text-slate-800 bg-white border border-blue-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              ক্লাস নোট বা দিকনির্দেশনা (Note / Instructions)
+                            </label>
+                            <input
+                              type="text"
+                              value={newLiveNote}
+                              onChange={(e) => setNewLiveNote(e.target.value)}
+                              placeholder="e.g. ক্লাস শুরুর ৫ মিনিট আগে জয়েন করুন ও ড্রয়িং শিট সাথে রাখুন"
+                              className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={isSubmittingLive}
+                            className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-red-600/20 disabled:opacity-60"
+                          >
+                            {isSubmittingLive ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                <span>Scheduling Session...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Radio className="w-4 h-4" />
+                                <span>Schedule Live Class Session</span>
+                              </>
+                            )}
+                          </button>
+                        </form>
+                      </div>
+
+                      {/* Right: Scheduled Sessions List */}
+                      <div className="lg:col-span-7 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-base sm:text-lg font-black text-slate-900">
+                            শিডিউলকৃত লাইভ সেশনসমূহ (Scheduled Live Sessions)
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full bg-red-100 text-red-900 font-black text-xs">
+                            {currentCourse?.liveClasses?.length || 0} Sessions
+                          </span>
+                        </div>
+
+                        {(!currentCourse?.liveClasses || currentCourse.liveClasses.length === 0) ? (
+                          <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-xs">
+                            <Radio className="w-10 h-10 text-slate-300 mx-auto" />
+                            <h4 className="text-sm font-bold text-slate-700">কোন লাইভ ক্লাস শিডিউল করা নেই</h4>
+                            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                              বামপাশের ফর্ম থেকে Google Meet, YouTube Live বা Facebook Live লিংক দিয়ে ক্লাস শিডিউল করুন।
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3.5">
+                            {currentCourse.liveClasses.map((item: any, idx: number) => (
+                              <div
+                                key={item._id || idx}
+                                className="bg-white border border-slate-200 hover:border-red-300 rounded-3xl p-5 sm:p-6 shadow-xs space-y-3.5 transition"
+                              >
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                                      <span className="text-[11px] font-black uppercase tracking-wider text-red-600">
+                                        Live Class #{idx + 1}
+                                      </span>
+                                      <span className="text-xs font-semibold text-slate-500">
+                                        • {new Date(item.classDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                      </span>
+                                      <span className="text-xs font-bold text-blue-700">
+                                        • {item.classTime}
+                                      </span>
+                                    </div>
+                                    <h4 className="text-base font-black text-slate-900">
+                                      {item.title}
+                                    </h4>
+                                    {item.note && (
+                                      <p className="text-xs text-slate-600 italic">
+                                        📌 {item.note}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteLiveClass(item._id, currentCourse?._id)}
+                                    className="p-2 rounded-xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 transition shrink-0"
+                                    title="Delete Live Class"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+
+                                {/* Multi-Link Test Buttons */}
+                                <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                                  <span className="text-[11px] font-bold text-slate-500 mr-1">
+                                    Join Links:
+                                  </span>
+                                  {(item.googleMeetLink || (item.meetingLink && item.meetingLink.includes('meet.google.com'))) && (
+                                    <a
+                                      href={item.googleMeetLink || item.meetingLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition shadow-2xs hover:scale-105"
+                                    >
+                                      <span>Google Meet</span> <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                  {item.youtubeLink && (
+                                    <a
+                                      href={item.youtubeLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition shadow-2xs hover:scale-105"
+                                    >
+                                      <span>YouTube Live</span> <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                  {item.facebookLink && (
+                                    <a
+                                      href={item.facebookLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition shadow-2xs hover:scale-105"
+                                    >
+                                      <span>Facebook Live</span> <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                  {(!item.googleMeetLink && !item.youtubeLink && !item.facebookLink && item.meetingLink) && (
+                                    <a
+                                      href={item.meetingLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3.5 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 transition shadow-2xs hover:scale-105"
+                                    >
+                                      <span>Live Session Link</span> <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUBTAB 2: BATCH VIDEO UPLOAD */}
+                  {classesSubTab === 'videos' && (
+                    <div className="space-y-6">
+                      {/* Batch Video Form */}
+                      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                          <div>
+                            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                              <Video className="w-5 h-5 text-blue-700" />
+                              ভিডিও লেকচার আপলোড (Upload / Push Multiple Videos)
+                            </h3>
+                            <p className="text-xs text-slate-600 mt-0.5">
+                              কোর্সের জন্য এক বা একাধিক ভিডিও লেকচার একসাথে যোগ করুন। Duration দেয়া বাধ্যতামূলক নয়, সরাসরি ভিডিও প্লেয়ারেই দেখাবে।
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setBatchVideoRows((prev) => [
+                                ...prev,
+                                { id: Date.now().toString(), title: '', youtubeUrl: '', note: '' },
+                              ])
+                            }
+                            className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-extrabold text-xs flex items-center gap-1.5 transition self-start sm:self-auto shrink-0"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>+ Add Another Video Row</span>
+                          </button>
+                        </div>
+
+                        {/* Video Rows */}
+                        <div className="space-y-4">
+                          {batchVideoRows.map((row, idx) => (
+                            <div
+                              key={row.id}
+                              className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative group"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-blue-800 bg-blue-100/70 px-2.5 py-0.5 rounded-full">
+                                  <span>Video #{idx + 1}</span>
+                                </span>
+
+                                {batchVideoRows.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setBatchVideoRows((prev) => prev.filter((r) => r.id !== row.id))
+                                    }
+                                    className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 transition"
+                                    title="Remove this video row"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                                <div className="md:col-span-5">
+                                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                    ভিডিও টাইটেল (Video Title) *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    required
+                                    value={row.title}
+                                    onChange={(e) =>
+                                      setBatchVideoRows((prev) =>
+                                        prev.map((r) =>
+                                          r.id === row.id ? { ...r, title: e.target.value } : r
+                                        )
+                                      )
+                                    }
+                                    placeholder="e.g. Class 03: Rebar Detailing & BBS"
+                                    className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                  />
+                                </div>
+
+                                <div className="md:col-span-4">
+                                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                    YouTube URL / Link *
+                                  </label>
+                                  <input
+                                    type="url"
+                                    required
+                                    value={row.youtubeUrl}
+                                    onChange={(e) =>
+                                      setBatchVideoRows((prev) =>
+                                        prev.map((r) =>
+                                          r.id === row.id ? { ...r, youtubeUrl: e.target.value } : r
+                                        )
+                                      )
+                                    }
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                  />
+                                </div>
+
+                                <div className="md:col-span-3">
+                                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                    নোট / নির্দেশিকা (Optional)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={row.note}
+                                    onChange={(e) =>
+                                      setBatchVideoRows((prev) =>
+                                        prev.map((r) =>
+                                          r.id === row.id ? { ...r, note: e.target.value } : r
+                                        )
+                                      )
+                                    }
+                                    placeholder="e.g. BBS excel sheet attached"
+                                    className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Push Button Bar */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setBatchVideoRows((prev) => [
+                                ...prev,
+                                { id: Date.now().toString(), title: '', youtubeUrl: '', note: '' },
+                              ])
+                            }
+                            className="px-4 py-2.5 rounded-xl border border-dashed border-slate-300 hover:border-blue-400 text-slate-700 hover:text-blue-700 font-bold text-xs flex items-center gap-1.5 transition w-full sm:w-auto justify-center"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>Add Another Video Link</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={isSubmittingBatchVideos}
+                            onClick={() => handlePushBatchVideos(currentCourse?._id)}
+                            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-amber-500/20 disabled:opacity-60"
+                          >
+                            {isSubmittingBatchVideos ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                <span>Publishing Videos to Portal...</span>
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="w-4 h-4 text-slate-950" />
+                                <span>Push {batchVideoRows.length} Video(s) to Student Dashboard</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Published Videos List */}
+                      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-black text-slate-900">
+                              কোর্সে বর্তমানে প্রকাশিত ভিডিও লেকচার (Published Videos)
+                            </h3>
+                            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 font-black text-xs">
+                              {currentCourse?.videos?.length || 0}
+                            </span>
+                          </div>
+                        </div>
+
+                        {(!currentCourse?.videos || currentCourse.videos.length === 0) ? (
+                          <div className="p-10 text-center text-slate-500 text-xs sm:text-sm">
+                            এই কোর্সে এখনও কোন ভিডিও লেকচার আপলোড করা হয়নি। ওপরের ফর্ম ব্যবহার করে ভিডিও লিংক যুক্ত করুন।
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {currentCourse.videos.map((vid: any, vIdx: number) => {
+                              const isDemo = currentCourse?.demoVideoUrl && vid.youtubeUrl && currentCourse.demoVideoUrl === vid.youtubeUrl;
+                              return (
+                                <div
+                                  key={vid._id || vIdx}
+                                  className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+                                >
+                                  <div className="space-y-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-black text-slate-500">#{vIdx + 1}</span>
+                                      <h4 className="text-sm font-extrabold text-slate-900 truncate">
+                                        {vid.title}
+                                      </h4>
+                                      {isDemo && (
+                                        <span className="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">
+                                          ★ ACTIVE HOMEPAGE DEMO
+                                        </span>
+                                      )}
+                                    </div>
+                                    <a
+                                      href={vid.youtubeUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-mono truncate max-w-md"
+                                    >
+                                      <span>{vid.youtubeUrl}</span>
+                                      <ExternalLink className="w-3 h-3 shrink-0" />
+                                    </a>
+                                    {vid.note && (
+                                      <p className="text-xs text-slate-500 italic">
+                                        📌 {vid.note}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetVideoAsDemo(vid, currentCourse?._id)}
+                                      className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center gap-1 transition"
+                                      title="Set this video as the homepage course demo preview"
+                                    >
+                                      <span>★ Set as Demo</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteVideo(vid._id, vid.title, currentCourse?._id)}
+                                      className="p-2 rounded-xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 transition"
+                                      title="Delete video"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUBTAB 3: HOMEPAGE COURSE DEMO VIDEO */}
+                  {classesSubTab === 'demo' && (
+                    <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-5 max-w-3xl">
+                      <div className="border-b border-slate-100 pb-3">
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                          <Play className="w-5 h-5 text-amber-500" />
+                          হোমপেজ কোর্স ডেমো ভিডিও (Homepage Demo Preview)
+                        </h3>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          এই কোর্সের জন্য ল্যান্ডিং পেজে যে ভিডিওটি ফ্রি ডেমো হিসেবে দেখানো হবে সেটি সেট করুন।
+                        </p>
+                      </div>
+
+                      <form
+                        onSubmit={(e) => handleSaveCourseDemoVideo(e, currentCourse?._id)}
+                        className="space-y-4"
+                      >
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            YouTube URL / Link *
+                          </label>
+                          <input
+                            type="url"
+                            required
+                            value={courseDemoUrl}
+                            onChange={(e) => setCourseDemoUrl(e.target.value)}
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Demo Headline / Title (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={courseDemoTitle}
+                            onChange={(e) => setCourseDemoTitle(e.target.value)}
+                            placeholder="e.g. বাস্তব প্রজেক্টের ড্রয়িং বিশ্লেষণ ও সাইট গাইড"
+                            className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Short Summary / Description (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={courseDemoDescription}
+                            onChange={(e) => setCourseDemoDescription(e.target.value)}
+                            placeholder="e.g. রড কাটিং ও ঢালাই চেকিংয়ের বাস্তব সেশন"
+                            className="w-full text-xs sm:text-sm font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                          {courseDemoUrl ? (
+                            <a
+                              href={courseDemoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1"
+                            >
+                              <span>▶ Test Preview Link</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <div></div>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={savingCourseDemo}
+                            className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-amber-500/20 disabled:opacity-60"
+                          >
+                            {savingCourseDemo ? 'Saving...' : '✓ Save Course Demo Video'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
         )}
 
         {/* ========================================================

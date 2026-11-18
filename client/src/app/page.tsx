@@ -778,6 +778,30 @@ export default function HomePage() {
                     <ExternalLink className="w-4 h-4 text-slate-950" />
                   </a>
 
+                  {settings?.demoClassYoutubeLink && (
+                    <a
+                      href={settings.demoClassYoutubeLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 px-5 rounded-2xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 hover:text-red-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
+                    >
+                      <Radio className="w-4 h-4 text-red-400" />
+                      <span>YouTube Live-এ ডেমো ক্লাস দেখুন</span>
+                    </a>
+                  )}
+
+                  {settings?.demoClassFacebookLink && (
+                    <a
+                      href={settings.demoClassFacebookLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 px-5 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 hover:text-blue-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
+                    >
+                      <Radio className="w-4 h-4 text-blue-400" />
+                      <span>Facebook Live-এ ডেমো ক্লাসে যোগ দিন</span>
+                    </a>
+                  )}
+
                   <a
                     href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('আসসালামু আলাইকুম, আমি ব্লুপ্রিন্ট লার্নিং একাডেমির ফ্রি লাইভ ডেমো ক্লাসের লিংক ও শিডিউল পেতে চাই।')}`}
                     target="_blank"

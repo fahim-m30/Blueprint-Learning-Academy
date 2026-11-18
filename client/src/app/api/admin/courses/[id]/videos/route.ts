@@ -27,28 +27,44 @@ export async function POST(
     }
 
     const body = await req.json().catch(() => ({}));
-    const { title, youtubeUrl, duration, note } = body;
+    let videosToAdd: any[] = [];
 
-    if (!title || !youtubeUrl) {
+    if (Array.isArray(body.videos) && body.videos.length > 0) {
+      videosToAdd = body.videos
+        .filter((v: any) => v && (v.title || '').trim() && (v.youtubeUrl || '').trim())
+        .map((v: any) => ({
+          _id: new ObjectId(),
+          title: String(v.title).trim(),
+          youtubeUrl: String(v.youtubeUrl).trim(),
+          duration: v.duration ? String(v.duration).trim() : '',
+          note: v.note ? String(v.note).trim() : '',
+          createdAt: new Date(),
+        }));
+    } else if (body.title && body.youtubeUrl) {
+      videosToAdd = [
+        {
+          _id: new ObjectId(),
+          title: String(body.title).trim(),
+          youtubeUrl: String(body.youtubeUrl).trim(),
+          duration: body.duration ? String(body.duration).trim() : '',
+          note: body.note ? String(body.note).trim() : '',
+          createdAt: new Date(),
+        },
+      ];
+    }
+
+    if (videosToAdd.length === 0) {
       return NextResponse.json(
-        { success: false, message: 'Please provide both video title and YouTube URL.' },
+        { success: false, message: 'Please provide at least one video title and YouTube URL.' },
         { status: 400 }
       );
     }
 
     const { db } = await connectToDatabase();
-    const newVideo = {
-      _id: new ObjectId(),
-      title: String(title).trim(),
-      youtubeUrl: String(youtubeUrl).trim(),
-      duration: duration ? String(duration).trim() : '',
-      note: note ? String(note).trim() : '',
-      createdAt: new Date(),
-    };
 
     await db.collection('courses').updateOne(
       { _id: new ObjectId(courseId) },
-      { $push: { videos: newVideo as any } }
+      { $push: { videos: { $each: videosToAdd as any } as any } as any }
     );
 
     const updatedCourse = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
@@ -59,8 +75,9 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Video added successfully.',
-      video: newVideo,
+      message: `${videosToAdd.length} video(s) added successfully to student portal.`,
+      videos: videosToAdd,
+      video: videosToAdd[0],
       course: updatedCourse,
     });
   } catch (err: any) {

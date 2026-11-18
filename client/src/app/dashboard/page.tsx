@@ -934,14 +934,59 @@ export default function StudentDashboardPage() {
                         )}
                       </div>
 
-                      <a
-                        href={item.meetingLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-6 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-blue-700/20 shrink-0 hover:scale-105"
-                      >
-                        Join Live Class <ExternalLink className="w-4 h-4" />
-                      </a>
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        {(item.googleMeetLink || (item.meetingLink && item.meetingLink.includes('meet.google.com'))) && (
+                          <a
+                            href={item.googleMeetLink || item.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-xs hover:scale-105"
+                          >
+                            <span>Google Meet</span> <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {item.youtubeLink && (
+                          <a
+                            href={item.youtubeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-xs hover:scale-105"
+                          >
+                            <span>YouTube Live</span> <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {item.facebookLink && (
+                          <a
+                            href={item.facebookLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-xs hover:scale-105"
+                          >
+                            <span>Facebook Live</span> <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {(!item.googleMeetLink && !item.youtubeLink && !item.facebookLink && item.meetingLink) && (
+                          <a
+                            href={item.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-6 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-md shadow-blue-700/20 hover:scale-105"
+                          >
+                            <span>Join Live Class</span> <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        {Array.isArray(item.additionalLinks) && item.additionalLinks.map((al, alIdx) => (
+                          <a
+                            key={alIdx}
+                            href={al.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition"
+                          >
+                            <span>{al.label || 'Extra Link'}</span> <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   ))
                 ) : (

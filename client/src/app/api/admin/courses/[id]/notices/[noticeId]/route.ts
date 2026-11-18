@@ -18,12 +18,27 @@ export async function DELETE(
 
   try {
     const { id, noticeId } = params;
-    if (!ObjectId.isValid(id)) {
+    if (id !== 'all' && !ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, message: 'Invalid course ID.' }, { status: 400 });
     }
 
     const { db } = await connectToDatabase();
     const noticeIdObj = ObjectId.isValid(noticeId) ? new ObjectId(noticeId) : noticeId;
+
+    if (id === 'all') {
+      await db.collection('courses').updateMany(
+        {},
+        {
+          $pull: {
+            notices: {
+              $or: [{ _id: noticeIdObj }, { _id: noticeId }]
+            }
+          }
+        } as any
+      );
+      const allCourses = await db.collection('courses').find({}).toArray();
+      return NextResponse.json({ success: true, message: 'Notice deleted across courses.', courses: allCourses });
+    }
 
     await db.collection('courses').updateOne(
       { _id: new ObjectId(id) },
@@ -55,12 +70,27 @@ export async function PUT(
 
   try {
     const { id, noticeId } = params;
-    if (!ObjectId.isValid(id)) {
+    if (id !== 'all' && !ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, message: 'Invalid course ID.' }, { status: 400 });
     }
 
     const { db } = await connectToDatabase();
     const noticeIdObj = ObjectId.isValid(noticeId) ? new ObjectId(noticeId) : noticeId;
+
+    if (id === 'all') {
+      await db.collection('courses').updateMany(
+        {},
+        {
+          $pull: {
+            notices: {
+              $or: [{ _id: noticeIdObj }, { _id: noticeId }]
+            }
+          }
+        } as any
+      );
+      const allCourses = await db.collection('courses').find({}).toArray();
+      return NextResponse.json({ success: true, message: 'Notice deleted across courses.', courses: allCourses });
+    }
 
     const course = await db.collection('courses').findOne({ _id: new ObjectId(id) });
     const currentNotice = (course?.notices || []).find(

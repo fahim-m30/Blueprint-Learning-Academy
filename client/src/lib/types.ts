@@ -20,6 +20,10 @@ export interface LiveClassItem {
   classDate: string;
   classTime: string;
   meetingLink: string;
+  googleMeetLink?: string;
+  youtubeLink?: string;
+  facebookLink?: string;
+  additionalLinks?: { label: string; url: string }[];
   platform: string;
   note?: string;
   isCompleted: boolean;
@@ -120,6 +124,8 @@ export interface SiteSettings {
   demoClassTitle?: string;
   demoClassSubtitle?: string;
   demoClassLink?: string;
+  demoClassYoutubeLink?: string;
+  demoClassFacebookLink?: string;
   demoClassBtnText?: string;
   demoClassDateText?: string;
   demoVideoUrl?: string;

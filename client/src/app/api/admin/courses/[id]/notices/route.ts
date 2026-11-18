@@ -18,7 +18,7 @@ export async function POST(
 
   try {
     const { id } = params;
-    if (!ObjectId.isValid(id)) {
+    if (id !== 'all' && !ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, message: 'Invalid course ID format.' }, { status: 400 });
     }
 
@@ -40,8 +40,23 @@ export async function POST(
       category: category || 'batch_start',
       date: date ? String(date).trim() : '',
       isPinned: isPinned !== false,
+      courseId: id === 'all' ? 'all' : id,
       createdAt: new Date(),
     };
+
+    if (id === 'all') {
+      await db.collection('courses').updateMany(
+        {},
+        { $push: { notices: { $each: [newNotice as any], $position: 0 } as any } as any }
+      );
+      const allCourses = await db.collection('courses').find({}).toArray();
+      return NextResponse.json({
+        success: true,
+        message: 'Notice published across all courses & Public Notice Board successfully.',
+        notice: newNotice,
+        courses: allCourses,
+      }, { status: 201 });
+    }
 
     await db.collection('courses').updateOne(
       { _id: new ObjectId(id) },
