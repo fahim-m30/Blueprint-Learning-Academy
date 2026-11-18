@@ -179,15 +179,15 @@ export default function HomePage() {
   };
 
   // Derive all active notices from public API or from course data
-  const allAvailableNotices: CourseNotice[] =
+  const rawNotices: CourseNotice[] =
     notices.length > 0
       ? notices
       : courses.flatMap((c) => {
           const list: CourseNotice[] = (c.notices || []).map((n) => ({
             ...n,
-            courseId: c._id,
-            courseTitle: c.title,
-            courseSlug: c.slug,
+            courseId: n.courseId === 'all' ? 'all' : c._id,
+            courseTitle: n.courseId === 'all' ? 'সকল কোর্স / গ্লোবাল নোটিশ' : c.title,
+            courseSlug: n.courseId === 'all' ? 'all' : c.slug,
           }));
           if (c.batchStartDate && !list.some((n) => n.category === 'batch_start')) {
             list.push({
@@ -206,9 +206,20 @@ export default function HomePage() {
           return list;
         });
 
+  // Deduplicate notices by ID / Title so global notices appear only once
+  const seenNoticeKeys = new Set<string>();
+  const allAvailableNotices: CourseNotice[] = [];
+  rawNotices.forEach((n) => {
+    const key = n._id ? String(n._id) : `${n.title}_${n.date || ''}_${n.content}`;
+    if (!seenNoticeKeys.has(key)) {
+      seenNoticeKeys.add(key);
+      allAvailableNotices.push(n);
+    }
+  });
+
   const filteredNotices = allAvailableNotices
     .filter((n) => noticeCategoryFilter === 'all' || n.category === noticeCategoryFilter)
-    .filter((n) => noticeCourseFilter === 'all' || n.courseId === noticeCourseFilter);
+    .filter((n) => noticeCourseFilter === 'all' || n.courseId === noticeCourseFilter || n.courseId === 'all');
 
   const phone = settings?.contactPhone || '01313893838';
   const whatsapp = (settings?.whatsappNumber || '8801313893838').replace(/\D/g, '');

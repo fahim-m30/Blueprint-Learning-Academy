@@ -26,31 +26,43 @@ export async function GET(req: NextRequest) {
       .toArray();
 
     const allNotices: any[] = [];
+    const seenNoticeIds = new Set<string>();
+
     courses.forEach((c) => {
       if (c.notices && Array.isArray(c.notices)) {
         c.notices.forEach((n: any) => {
-          allNotices.push({
-            ...n,
-            courseId: c._id,
-            courseTitle: c.title,
-            courseSlug: c.slug,
-          });
+          const key = n._id ? n._id.toString() : `${n.title}_${n.date || ''}_${n.content}`;
+          if (!seenNoticeIds.has(key)) {
+            seenNoticeIds.add(key);
+            const isGlobal = n.courseId === 'all';
+            allNotices.push({
+              ...n,
+              courseId: isGlobal ? 'all' : c._id,
+              courseTitle: isGlobal ? 'সকল কোর্স / গ্লোবাল নোটিশ' : c.title,
+              courseSlug: isGlobal ? 'all' : c.slug,
+              isGlobal,
+            });
+          }
         });
       }
 
       if (c.batchStartDate && (!c.notices || !c.notices.some((n: any) => n.category === 'batch_start'))) {
-        allNotices.push({
-          _id: `auto-batch-${c._id}`,
-          title: `New Batch Enrollment Open - Class Starts ${c.batchStartDate}`,
-          content: `Official live orientation and regular classes will start from ${c.batchStartDate}. Weekly schedule: ${c.batchSchedule || 'Fri & Sat 8:30 PM'}. Limited seats available per batch.`,
-          category: 'batch_start',
-          date: c.batchStartDate,
-          isPinned: true,
-          createdAt: c.createdAt || new Date(),
-          courseId: c._id,
-          courseTitle: c.title,
-          courseSlug: c.slug,
-        });
+        const autoKey = `auto-batch-${c._id}`;
+        if (!seenNoticeIds.has(autoKey)) {
+          seenNoticeIds.add(autoKey);
+          allNotices.push({
+            _id: autoKey,
+            title: `New Batch Enrollment Open - Class Starts ${c.batchStartDate}`,
+            content: `Official live orientation and regular classes will start from ${c.batchStartDate}. Weekly schedule: ${c.batchSchedule || 'Fri & Sat 8:30 PM'}. Limited seats available per batch.`,
+            category: 'batch_start',
+            date: c.batchStartDate,
+            isPinned: true,
+            createdAt: c.createdAt || new Date(),
+            courseId: c._id,
+            courseTitle: c.title,
+            courseSlug: c.slug,
+          });
+        }
       }
     });
 

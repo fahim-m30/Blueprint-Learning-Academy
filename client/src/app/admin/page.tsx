@@ -3759,65 +3759,73 @@ export default function AdminPortalPage() {
 
               {/* Right Column (7 cols): Active Published Notices List */}
               <div className="lg:col-span-7 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base sm:text-lg font-black text-slate-900">
-                      প্রকাশিত নোটিশসমূহ (Active Notices)
-                    </h3>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-900 font-black text-xs">
-                      {
-                        coursesList.flatMap((c) =>
-                          (c.notices || []).map((n: any) => ({ ...n, courseId: c._id }))
-                        ).filter((n: any) => selectedNoticeCourseId === 'all' || n.courseId === selectedNoticeCourseId).length
-                      }
-                    </span>
-                  </div>
-
-                  {selectedNoticeCourseId !== 'all' && (
-                    <button
-                      onClick={() => setSelectedNoticeCourseId('all')}
-                      className="text-xs font-bold text-blue-700 hover:underline"
-                    >
-                      Show All Courses
-                    </button>
-                  )}
-                </div>
-
                 {(() => {
-                  const noticesToDisplay = coursesList
-                    .flatMap((c) =>
-                      (c.notices || []).map((n: any) => ({
-                        ...n,
-                        courseId: c._id,
-                        courseTitle: c.title,
-                      }))
-                    )
-                    .filter((n: any) => selectedNoticeCourseId === 'all' || n.courseId === selectedNoticeCourseId);
+                  const seenNoticeIds = new Set<string>();
+                  const allUniqueNotices: any[] = [];
 
-                  if (noticesToDisplay.length === 0) {
-                    return (
-                      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-xs">
-                        <Bell className="w-10 h-10 text-slate-300 mx-auto" />
-                        <h4 className="text-sm font-bold text-slate-700">কোন নোটিশ পাওয়া যায়নি</h4>
-                        <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                          বামপাশের ফর্ম থেকে নতুন নোটিশ প্রকাশ করুন। এটি সরাসরি পাবলিক ল্যান্ডিং পেজের নোটিশ বোর্ডে চলে যাবে।
-                        </p>
-                      </div>
-                    );
-                  }
+                  coursesList.forEach((c) => {
+                    (c.notices || []).forEach((n: any) => {
+                      const key = n._id ? String(n._id) : `${n.title}_${n.date || ''}_${n.content}`;
+                      if (!seenNoticeIds.has(key)) {
+                        seenNoticeIds.add(key);
+                        const isGlobal = n.courseId === 'all';
+                        allUniqueNotices.push({
+                          ...n,
+                          courseId: isGlobal ? 'all' : c._id,
+                          courseTitle: isGlobal ? '🌐 All Courses / Global Landing Page' : c.title,
+                          isGlobal,
+                        });
+                      }
+                    });
+                  });
+
+                  const noticesToDisplay = allUniqueNotices.filter((n: any) => {
+                    if (selectedNoticeCourseId === 'all') return true;
+                    return n.courseId === selectedNoticeCourseId || n.courseId === 'all';
+                  });
 
                   return (
-                    <div className="space-y-3.5">
-                      {noticesToDisplay.map((item: any, idx: number) => {
-                        const isPinned = item.isPinned !== false;
-                        const catBadge =
-                          item.category === 'batch_start'
-                            ? { label: '🚀 ব্যাচ শিডিউল', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
-                            : item.category === 'vacation'
-                            ? { label: '🌴 ছুটি', bg: 'bg-rose-50 text-rose-800 border-rose-200' }
-                            : { label: '📢 নোটিশ', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-black text-slate-900">
+                            প্রকাশিত নোটিশসমূহ (Active Notices)
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-900 font-black text-xs">
+                            {noticesToDisplay.length}
+                          </span>
+                        </div>
 
-                        return (
+                        {selectedNoticeCourseId !== 'all' && (
+                          <button
+                            onClick={() => setSelectedNoticeCourseId('all')}
+                            className="text-xs font-bold text-blue-700 hover:underline"
+                          >
+                            Show All Courses
+                          </button>
+                        )}
+                      </div>
+
+                      {noticesToDisplay.length === 0 ? (
+                        <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-xs">
+                          <Bell className="w-10 h-10 text-slate-300 mx-auto" />
+                          <h4 className="text-sm font-bold text-slate-700">কোন নোটিশ পাওয়া যায়নি</h4>
+                          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                            বামপাশের ফর্ম থেকে নতুন নোটিশ প্রকাশ করুন। এটি সরাসরি পাবলিক ল্যান্ডিং পেজের নোটিশ বোর্ডে চলে যাবে।
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3.5">
+                          {noticesToDisplay.map((item: any, idx: number) => {
+                            const isPinned = item.isPinned !== false;
+                            const catBadge =
+                              item.category === 'batch_start'
+                                ? { label: '🚀 ব্যাচ শিডিউল', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+                                : item.category === 'vacation'
+                                ? { label: '🌴 ছুটি', bg: 'bg-rose-50 text-rose-800 border-rose-200' }
+                                : { label: '📢 নোটিশ', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+
+                            return (
                           <div
                             key={item._id || idx}
                             className={`p-5 rounded-3xl border transition shadow-xs space-y-3 ${
@@ -3882,12 +3890,14 @@ export default function AdminPortalPage() {
                         );
                       })}
                     </div>
-                  );
-                })()}
-              </div>
-            </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
-        )}
+        </div>
+      </div>
+    )}
 
         {/* ========================================================
             TAB: ONLINE LIVE CLASSES & VIDEO LECTURES HUB
