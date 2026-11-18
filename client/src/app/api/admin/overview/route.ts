@@ -37,7 +37,28 @@ export async function GET(req: NextRequest) {
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]).toArray(),
       db.collection('courses')
-        .find({}, { projection: { title: 1, slug: 1, price: 1, durationDays: 1, totalClasses: 1, isActive: 1, createdAt: 1 } })
+        .find(
+          {},
+          {
+            projection: {
+              title: 1,
+              slug: 1,
+              price: 1,
+              durationDays: 1,
+              totalClasses: 1,
+              isActive: 1,
+              createdAt: 1,
+              notices: 1,
+              liveClasses: 1,
+              videos: 1,
+              batchStartDate: 1,
+              batchSchedule: 1,
+              demoVideoUrl: 1,
+              demoVideoTitle: 1,
+              demoVideoDescription: 1,
+            },
+          }
+        )
         .toArray(),
     ]);
 
@@ -63,6 +84,14 @@ export async function GET(req: NextRequest) {
           durationDays: c.durationDays,
           totalClasses: c.totalClasses,
           isActive: c.isActive,
+          notices: Array.isArray(c.notices) ? c.notices : [],
+          liveClasses: Array.isArray(c.liveClasses) ? c.liveClasses : [],
+          videos: Array.isArray(c.videos) ? c.videos : [],
+          batchStartDate: c.batchStartDate || '',
+          batchSchedule: c.batchSchedule || '',
+          demoVideoUrl: c.demoVideoUrl || '',
+          demoVideoTitle: c.demoVideoTitle || '',
+          demoVideoDescription: c.demoVideoDescription || '',
           studentCount,
           pendingCount,
         };
