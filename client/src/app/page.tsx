@@ -518,27 +518,50 @@ export default function HomePage() {
                     </div>
 
                     {/* Bottom CTA / Action */}
-                    {targetCourse && (
-                      <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
+                      {targetCourse ? (
                         <button
                           type="button"
                           onClick={() => setSelectedCourseForDetails(targetCourse)}
                           className="text-xs font-bold text-slate-600 hover:text-blue-700 transition flex items-center gap-1"
                         >
-                          <span>Syllabus</span>
+                          <span>সিলেবাস</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
-
+                      ) : (
                         <button
                           type="button"
-                          onClick={() => setSelectedCourseForEnroll(targetCourse)}
-                          className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm hover:scale-105 transition"
+                          onClick={() => {
+                            const el = document.getElementById('courses');
+                            el?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="text-xs font-bold text-slate-600 hover:text-blue-700 transition flex items-center gap-1"
                         >
-                          <span>Enroll This Batch</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <span>কোর্সসমূহ</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
                         </button>
-                      </div>
-                    )}
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (targetCourse) {
+                            setSelectedDemoCourseId(targetCourse._id);
+                          }
+                          const el = document.getElementById('demo-class');
+                          if (el) {
+                            el.scrollIntoView({ behavior: 'smooth' });
+                          } else if (settings?.demoClassLink) {
+                            window.open(settings.demoClassLink, '_blank');
+                          }
+                        }}
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-sm hover:scale-105 transition"
+                      >
+                        <Radio className="w-3.5 h-3.5 text-slate-950 animate-pulse" />
+                        <span>ফ্রি ডেমো ক্লাস</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
